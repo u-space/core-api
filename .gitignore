@@ -1,0 +1,17 @@
+# We ignore everything
+*
+
+# We include only specific directories and files
+!src
+!src/**
+!.env.sample
+!.eslintignore
+!.eslintrc.cjs
+!.gitignore
+!.prettierignore
+!.prettierrc.json
+!ormconfig.sample.json
+!package-lock.json
+!package.json
+!swagger.json
+!tsconfig.json

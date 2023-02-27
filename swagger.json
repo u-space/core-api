@@ -1,0 +1,3812 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Cielum Easy API",
+    "description": "",
+    "license": {
+      "name": "",
+      "url": ""
+    }
+  },
+  "securityDefinitions": {
+    "accessToken": {
+      "type": "apiKey",
+      "name": "auth",
+      "in": "header"
+    }
+  },
+  "tags": [
+    {
+      "name": "Auth"
+    },
+    {
+      "name": "Coordinator"
+    },
+    {
+      "name": "Decrypt"
+    },
+    {
+      "name": "Endpoint"
+    },
+    {
+      "name": "Geographical Zone"
+    },
+    {
+      "name": "Mail"
+    },
+    {
+      "name": "Notam"
+    },
+    {
+      "name": "Operation"
+    },
+    {
+      "name": "Pilot Position"
+    },
+    {
+      "name": "Position"
+    },
+    {
+      "name": "Public Operations"
+    },
+    {
+      "name": "Regular Flight"
+    },
+    {
+      "name": "Restricted Flight Volume (RFV)"
+    },
+    {
+      "name": "Schemas"
+    },
+    {
+      "name": "UAS Volume"
+    },
+    {
+      "name": "User"
+    },
+    {
+      "name": "UTM Message"
+    },
+    {
+      "name": "Vehicle"
+    },
+    {
+      "name": "Version"
+    },
+    {
+      "name": "Vertiport"
+    }
+  ],
+  "paths": {
+    "/auth/clear": {
+      "post": {
+        "tags": ["Auth"],
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login to get an access token",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User Credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User_Credentials"
+            }
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        }
+      }
+    },
+    "/auth/relogin": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "When we use the POST /auth/login endpoint, the backend sent to the client two cookies (putm-username, putm-rtoken). This endpoint receives the value of those cookies, and use them to generate a new access token, and return it to the client.",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "putm-username",
+            "description": "This parameter will be obtained from the cookies"
+          },
+          {
+            "in": "cookie",
+            "name": "putm-rtoken",
+            "description": "This parameter will be obtained from the cookies"
+          },
+          {
+            "in": "body",
+            "name": "format",
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {}
+        }
+      }
+    },
+    "/decrypt": {
+      "post": {
+        "tags": ["Decrypt"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "500": {}
+        }
+      }
+    },
+    "/endpoint/{username}": {
+      "get": {
+        "tags": ["Endpoint"],
+        "summary": "Returns the endpoint of the instance where the user is registered. If there is more than one instance deployed with a user with the username received, this method returns the first one. It is used by Portable UTM Pilot, the first time a user tries to login, the app uses this method to discover which instance the user belongs.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "endpoint": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {},
+          "404": {},
+          "500": {}
+        }
+      }
+    },
+    "/endpoints": {
+      "get": {
+        "tags": ["Endpoint"],
+        "summary": "Returns the endpoints of all the deployed Portable UTM APIs. This method is used by Portable UTM Pilot (Android app). When a user tries to register, the app shows him a list with all the instances, so the user can choose in which instance he wants to register.",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Endpoint"
+              }
+            }
+          },
+          "500": {}
+        }
+      }
+    },
+    "/mail/pending": {
+      "post": {
+        "tags": ["Mail"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/mail/operation": {
+      "post": {
+        "tags": ["Mail"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/notam": {
+      "get": {
+        "tags": ["Notam"],
+        "summary": "This method returns all the notams (same behaivor for any user role)",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Notam"
+              }
+            }
+          },
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Notam"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/notam/{id}": {
+      "get": {
+        "tags": ["Notam"],
+        "summary": "This endpoint returns the notam with the id received by parameter (same behaivor for any user role).",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Notam"
+            }
+          },
+          "401": {},
+          "404": {
+            "description": "There is no notam with the id received by parameter."
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Notam"],
+        "summary": "[NOT IMPLEMENTED]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "401": {},
+          "501": {
+            "description": "NOT IMPLEMENTED"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/express": {
+      "post": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Express Operation",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "location": {
+                  "type": "object",
+                  "properties": {
+                    "latitude": {
+                      "type": "number"
+                    },
+                    "longitude": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "radius": {
+                  "type": "number"
+                },
+                "duration": {
+                  "type": "number"
+                },
+                "vehicleId": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "description": "Radius is in kilometers\nDuration is in hours"
+      }
+    },
+    "/operation/geo": {
+      "post": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "point",
+            "required": true,
+            "properties": {
+              "longitude": {
+                "type": "number"
+              },
+              "latitude": {
+                "type": "number"
+              },
+              "altitude": {
+                "type": "number"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/volume": {
+      "post": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "volume",
+            "required": true,
+            "properties": {
+              "effective_time_begin": {
+                "type": "string"
+              },
+              "effective_time_end": {
+                "type": "string"
+              },
+              "min_altitude": {
+                "type": "number"
+              },
+              "max_altitude": {
+                "type": "number"
+              },
+              "operation_geography": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "coordinates": {
+                    "type": "array",
+                    "items": {
+                      "type": "array"
+                    }
+                  }
+                }
+              }
+            },
+            "example": {
+              "effective_time_begin": "2021-11-25T17:56:45.860Z",
+              "effective_time_end": "2021-11-25T18:56:45.860Z",
+              "min_altitude": 0,
+              "max_altitude": 120,
+              "operation_geography": {
+                "type": "Polygon",
+                "coordinates": [
+                  [
+                    [-56.133259043, -34.880298247],
+                    [-56.130512416, -34.99625376],
+                    [-56.107166089, -35.017063348],
+                    [-56.107166089, -34.90676855],
+                    [-56.105792776, -34.881424817],
+                    [-56.133259043, -34.880298247]
+                  ]
+                ]
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/creator": {
+      "get": {
+        "tags": ["Operation"],
+        "summary": "Returns the operations where the logged user is the creator.",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "count": {
+                    "type": "integer"
+                  },
+                  "ops": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/owner": {
+      "get": {
+        "tags": ["Operation"],
+        "summary": "Returns the operations where the logged user is the owner.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "states",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "in": "query",
+            "name": "fromDate",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "in": "query",
+            "name": "toDate",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "count": {
+                    "type": "integer"
+                  },
+                  "ops": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/{id}/pendingtoaccept": {
+      "post": {
+        "tags": ["Operation"],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/{id}/updatestate": {
+      "post": {
+        "tags": ["Operation"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation": {
+      "get": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "states",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "in": "query",
+            "name": "fromDate",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "in": "query",
+            "name": "toDate",
+            "required": false,
+            "type": "string",
+            "description": ""
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "count": {
+                    "type": "integer"
+                  },
+                  "ops": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/definitions/Operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Operation",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Operation"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/{id}": {
+      "get": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Operation"
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {
+            "description": "There is at least one position reported to the operation with the id received",
+            "schema": {
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/{id}/close": {
+      "post": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "properties": {
+                "gufi": {
+                  "type": "string"
+                },
+                "state": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/operation/activatedByLocation": {
+      "post": {
+        "tags": ["Operation"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Location",
+            "required": true,
+            "schema": {
+              "properties": {
+                "altitude_gps": {
+                  "type": "number"
+                },
+                "location": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "coordinates": {
+                      "type": "array"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "altitude_gps": 35,
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-56.13910222528544, -34.99516625088092]
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/pilotPosition": {
+      "post": {
+        "tags": ["Pilot Position"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Pilot Position",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Pilot_Position"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/position/date": {
+      "get": {
+        "tags": ["Position"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "gufi",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "time_start",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "time_end",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/position/drone": {
+      "post": {
+        "tags": ["Position"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Position",
+            "required": true,
+            "description": "trackerId is optional but must be sent if RSSI want to be saved, both rssi and tarckerId are optional but must coexist (or not)",
+            "schema": {
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "altitude_gps": {
+                  "type": "number"
+                },
+                "location": {
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "coordinates": {
+                      "type": "array"
+                    }
+                  }
+                },
+                "time_sent": {
+                  "type": "string"
+                },
+                "heading": {
+                  "type": "integer"
+                },
+                "added_from_dat_file": {
+                  "type": "boolean"
+                },
+                "operationId": {
+                  "type": "string"
+                },
+                "trackerId": {
+                  "type": "string"
+                },
+                "rssi": {
+                  "type": "integer"
+                }
+              },
+              "example": {
+                "altitude_gps": 35,
+                "location": {
+                  "type": "Point",
+                  "coordinates": [-56.13910222528544, -34.99516625088092]
+                },
+                "heading": 101,
+                "time_sent": "2021-11-05T18:06:55.834Z",
+                "uvin": "0bfd5564-1b68-4a0f-b976-69404390aade",
+                "trackerId": "thisIsATrackerId",
+                "rssi": -55
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/position/tracker": {
+      "post": {
+        "tags": ["Position"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/position": {
+      "post": {
+        "tags": ["Position"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Position",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Position"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/position/{id}": {
+      "get": {
+        "tags": ["Position"],
+        "summary": "This endpoint returns the position with the id received by parameter (same behaivor for any user role).",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Position"
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["Position"],
+        "summary": "[NOT IMPLEMENTED]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "401": {},
+          "501": {
+            "description": "NOT IMPLEMENTED"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/trackers/rssi": {
+      "get": {
+        "tags": ["Tracker"],
+        "summary": "This endpoint returns the all rssi data of the tracker.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "trackerId",
+            "required": true,
+            "type": "string",
+            "description": "Tracker id to get RSSI data"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/publicOperations": {
+      "get": {
+        "tags": ["Public Operations"],
+        "responses": {
+          "200": {},
+          "400": {}
+        }
+      }
+    },
+    "/publicOperation/{id}": {
+      "get": {
+        "tags": ["Public Operations"],
+        "responses": {
+          "200": {},
+          "400": {}
+        }
+      }
+    },
+    "/regularFlights": {
+      "get": {
+        "summary": "GET Regular Flights",
+        "tags": ["Regular Flight"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "regularFlights": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/RegularFlight"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "POST Regular Flight",
+        "tags": ["Regular Flight"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Regular Flight",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegularFlight"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/regular-flight/operation": {
+      "post": {
+        "tags": ["Regular Flight"],
+        "summary": "POST Create Operation from Regular Flight",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/restrictedflightvolume": {
+      "get": {
+        "tags": ["Restricted Flight Volume (RFV)"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {}
+        }
+      },
+      "post": {
+        "tags": ["Restricted Flight Volume (RFV)"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User Credentials",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RestrictedFlightVolume"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/restrictedflightvolume/{id}": {
+      "get": {
+        "tags": ["Restricted Flight Volume (RFV)"],
+        "responses": {
+          "200": {},
+          "404": {}
+        }
+      },
+      "delete": {
+        "tags": ["Restricted Flight Volume (RFV)"],
+        "summary": "Deletes the RFV with the given id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": "Sucessfully deleted the RFV",
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/schemas": {
+      "get": {
+        "tags": ["Schemas"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        }
+      }
+    },
+    "/uasvolume": {
+      "get": {
+        "tags": ["UAS Volume"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {}
+        }
+      },
+      "post": {
+        "tags": ["UAS Volume"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "UAS Volume",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UAS_Volume"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/uasvolume/{id}": {
+      "get": {
+        "tags": ["UAS Volume"],
+        "responses": {
+          "200": {},
+          "404": {}
+        }
+      },
+      "delete": {
+        "tags": ["UAS Volume"],
+        "summary": "Delete the UAS Volume with the given id",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": "Sucessfully deleted the UAS Volume",
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+
+    "/user/updateStatus": {
+      "post": {
+        "tags": ["User"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "verified",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "token",
+            "in": "body",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/user/register": {
+      "post": {
+        "tags": ["User"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "firstName",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "lastName",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "email",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "extra_fields",
+            "in": "body",
+            "schema": { "$ref": "#/definitions/IUserExtraField" }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/user/password/{id}": {
+      "put": {
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "Password",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/user/exists/{username}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Return true if there is a user with the username received, or false if there isn't",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        }
+      }
+    },
+    "/user/restore/{username}": {
+      "get": {
+        "tags": ["User"],
+        "summary": "User admin can enable a disabled user",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "produces": ["application/json"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          },
+          {
+            "in": "query",
+            "name": "deleted",
+            "required": false,
+            "type": "boolean",
+            "description": "if set to true the query will include deleted users"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          "401": {},
+          "403": {
+            "description": "You need ADMIN or MONITOR role to use this endpoint"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add a new user",
+        "description": "Add a user pass on body. Default role is PILOT. Only admin user can add a admin user",
+        "tags": ["User"],
+        "consumes": ["application/json"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          },
+          {
+            "name": "password",
+            "in": "body",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update user with passed fields. ",
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "User",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/User"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/user/{id}": {
+      "get": {
+        "tags": ["User"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["User"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/user/{username}/document": {
+      "post": {
+        "tags": ["User", "Document"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "document",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          {
+            "in": "body",
+            "name": "extra_fields_str",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "This is done because multipart form does not allow sending objects. the value of this field must be convertible to a json, otherwise it returns an error"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "patch": {
+        "tags": ["User", "Document"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "body",
+            "name": "document",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Document"
+            }
+          },
+          {
+            "in": "body",
+            "name": "extra_fields_str",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "This is done because multipart form does not allow sending objects. the value of this field must be convertible to a json, otherwise it returns an error"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/user/{username}/document/{documentId}": {
+      "delete": {
+        "tags": ["User", "Document"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "username",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "in": "path",
+            "name": "documentId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+
+    "/utmmessage": {
+      "get": {
+        "tags": ["UTM Message"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["UTM Message"],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/utmmessage/{id}": {
+      "get": {
+        "tags": ["UTM Message"],
+        "responses": {
+          "200": {},
+          "401": {},
+          "404": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "delete": {
+        "tags": ["UTM Message"],
+        "summary": "[NOT IMPLEMENTED]",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "401": {},
+          "501": {
+            "description": "NOT IMPLEMENTED"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/vehicle/operator": {
+      "get": {
+        "tags": ["Vehicle"],
+        "summary": "If the endpoint is called by a PILOT user, it returns all the vehicles where the logged user appears as one of the operators for that vehicle. If the user is ADMIN or MONITOR, it returns the vehicles where the user with the username received in the path is operator for that vehicle.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "required": false,
+            "type": "string",
+            "description": "Operator username"
+          },
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "'count' is the number of vehicles matched before the pagination. For example, if there are 15 vehicles that matched the filter but we only take 5, this parameter will say 15, but the vehicles array will have 5 items.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "vehicles": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/Vehicle"
+                  }
+                }
+              }
+            }
+          },
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/vehicle/authorize": {
+      "post": {
+        "tags": ["Vehicle"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "status",
+            "required": true,
+            "properties": {
+              "uvin": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              }
+            },
+            "example": {
+              "uvin": "5f19e503-c351-4b1e-9292-7858cd4be933",
+              "status": "PENDING"
+            }
+          }
+        ],
+        "responses": {
+          "200": {},
+          "401": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/vehicle": {
+      "get": {
+        "tags": ["Vehicle"],
+        "summary": "For ADMIN and MONITOR users, this endpoint returns all the vehicles. For PILOT users, this endpoint returns the vehicles where the owner of the vehicle is the logged user.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Vehicle"
+              }
+            }
+          },
+          "401": {},
+          "500": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "tags": ["Vehicle"],
+        "consumes": ["multipart/form-data"],
+        "produces": ["application/json"],
+        "parameters": [
+          {
+            "name": "uvin",
+            "in": "formData",
+            "description": "In case we are using this endpoint to add a new vehicle, we do not have to pass this parameter. In case we are using the endpoint to update an existing vehicle, this is the id of the vehicle we want to update",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "owner_id",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "operators_str",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "nNumber",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "faaNumber",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "vehicleName",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "manufacturer",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "model",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "class",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "accessType",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "vehicleTypeId",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "org-uuid",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "trackerId",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "authorized",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "extra_fields_str",
+            "in": "formData",
+            "type": "string"
+          },
+          {
+            "name": "serial_number_file_path",
+            "in": "formData",
+            "type": "file"
+          },
+          {
+            "name": "remote_sensor_file_path",
+            "in": "formData",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {},
+          "400": {},
+          "401": {},
+          "500": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/vehicle/{id}": {
+      "get": {
+        "tags": ["Vehicle"],
+        "summary": "For ADMIN and MONITOR users, this endpoint returns the vehicle with the id received by parameter. For PILOT users, this endpoint only returns the vehicle, if the vehicles owner is the logged user.",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "$ref": "#/definitions/Vehicle"
+            }
+          },
+          "401": {},
+          "404": {
+            "description": "There is no vehicle with the id received by parameter (for that user)"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/version": {
+      "get": {
+        "tags": ["Version"],
+        "responses": {
+          "200": {}
+        }
+      }
+    },
+    "/vertiports": {
+      "get": {
+        "summary": "GET Vertiports",
+        "tags": ["Vertiport"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Vertiport"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "POST Vertiport",
+        "tags": ["Vertiport"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Vertiport",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Vertiport"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/geographicalzones": {
+      "get": {
+        "summary": "GET geographical zones",
+        "tags": ["Geographical Zone"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          },
+          {
+            "in": "query",
+            "name": "polygon",
+            "required": false,
+            "type": "string",
+            "description": "geojson polygon array (not geojson object)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/GeographicalZone"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "POST geographical zone",
+        "tags": ["Geographical Zone"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Geographical Zone",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/GeographicalZone"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/geographicalzones/{id}": {
+      "delete": {
+        "summary": "DELETE geographical zone",
+        "tags": ["Geographical Zone"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Geographical Zone Id",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "204": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/geographicalzones/{id}/deleteAction": {
+      "delete": {
+        "summary": "Delete action from geographical zone",
+        "tags": ["Geographical Zone"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "Geographical Zone Id",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          },
+          {
+            "in": "body",
+            "name": "Action",
+            "required": true,
+            "schema": {
+              "properties": {
+                "actionId": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {}
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/coordinator": {
+      "post": {
+        "summary": "Add or update a coordinator",
+        "description": "If id is passed, the coordinator will be updated. Otherwise, a new one will be created.",
+        "tags": ["Coordinator"],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "Coordinator",
+            "description": "Coordinator to add or update, Just add geographical zone id in the geographical zone field to attach it to the coordinator",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Coordinator"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "Get all coordinators",
+        "description": "gets all the coordinators",
+        "tags": ["Coordinator"],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "take",
+            "required": false,
+            "type": "integer",
+            "description": "Max number of items we want to receive in the response (default value is 10)"
+          },
+          {
+            "in": "query",
+            "name": "skip",
+            "required": false,
+            "type": "integer",
+            "description": "Number of items we want to skip from the begining of the list (default value is 0)"
+          },
+          {
+            "in": "query",
+            "name": "filterBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "required": false,
+            "type": "string",
+            "description": "If we use the filterBy option, we have to use this parameter to define the value we want to use to filter the results"
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "required": false,
+            "type": "string",
+            "description": "Name of the property we want to use to order the results"
+          },
+          {
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "type": "string",
+            "description": "'ASC' or 'DESC' depending on the kind of order we want"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/coordinator/{id}": {
+      "get": {
+        "summary": "Get a coordinator",
+        "description": "Get the coordinator with the given id",
+        "tags": ["Coordinator"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "type": "string",
+            "format": "uuid"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "accessToken": []
+          }
+        ]
+      }
+    },
+    "/document": {
+      "get": {
+        "description": "Get all system documents",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": ""
+            }
+          }
+        }
+      },
+      "post": {
+        "description": "Create a new document",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/document/{id}": {
+      "get": {
+        "description": "Get a document",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/document/types": {
+      "get": {
+        "description": "Get document types",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/document/schema/{type}/": {
+      "get": {
+        "description": "Get a document extra field schema from document type",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/document/{id}/schema/": {
+      "get": {
+        "description": "Get a document extra field schema from document id",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/document/{id}/validate": {
+      "patch": {
+        "description": "Validate de document with id id",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/document/{id}/invalidate": {
+      "patch": {
+        "description": "Invalidate de document with id id",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true
+          }
+        ]
+      }
+    },
+    "/document/{id}/observation": {
+      "post": {
+        "description": "Set an observation for a document. Send a email notification ",
+        "security": [
+          {
+            "accessToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "observation",
+            "required": true,
+            "schema": { "type": "string" }
+          },
+          {
+            "in": "body",
+            "name": "userToNotify",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Endpoint": {
+      "properties": {
+        "country": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "frontendEndpoint": {
+          "type": "string"
+        }
+      }
+    },
+    "Notam": {
+      "properties": {
+        "message_id": {
+          "type": "string"
+        },
+        "text": {
+          "type": "string"
+        },
+        "geography": {
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "coordinates": {
+              "type": "array"
+            },
+            "effective_time_begin": {
+              "type": "string"
+            },
+            "effective_time_end": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "example": {
+        "message_id": "f2308be3-80a5-4247-964a-b541a1634331",
+        "text": "Helicopters search for a strange treasure",
+        "geography": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-56.162195206, -34.901981999],
+              [-56.176958084, -34.914862817],
+              [-56.156702042, -34.926967535],
+              [-56.140136719, -34.911554821],
+              [-56.161336899, -34.915425866],
+              [-56.162195206, -34.901981999]
+            ]
+          ]
+        },
+        "effective_time_begin": "2020-04-10T14:00:00.000Z",
+        "effective_time_end": "2020-04-11T14:00:00.000Z"
+      }
+    },
+    "Operation": {
+      "properties": {
+        "gufi": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "contact": {
+          "type": "string"
+        },
+        "contact_phone": {
+          "type": "string"
+        },
+        "aircraft_comments": {
+          "type": "string"
+        },
+        "flight_comments": {
+          "type": "string"
+        },
+        "volumes_description": {
+          "type": "string"
+        },
+        "airspace_authorization": {
+          "type": "string"
+        },
+        "controller_location": {
+          "type": "string"
+        },
+        "gcs_location": {
+          "type": "string"
+        },
+        "faa_rule": {
+          "type": "string"
+        },
+        "state": {
+          "type": "string"
+        },
+        "uss_name": {
+          "type": "string"
+        },
+        "discovery_reference": {
+          "type": "string"
+        },
+        "submit_time": {
+          "type": "string"
+        },
+        "update_time": {
+          "type": "string"
+        },
+        "priority_elements": {
+          "properties": {
+            "priority_level": {
+              "type": "string"
+            },
+            "priority_status": {
+              "type": "string"
+            }
+          }
+        },
+        "operation_volumes": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "ordinal": {
+                "type": "integer"
+              },
+              "volume_type": {
+                "type": "string"
+              },
+              "near_structure": {
+                "type": "string"
+              },
+              "effective_time_begin": {
+                "type": "string"
+              },
+              "effective_time_end": {
+                "type": "string"
+              },
+              "actual_time_end": {
+                "type": "string"
+              },
+              "min_altitude": {
+                "type": "string"
+              },
+              "max_altitude": {
+                "type": "string"
+              },
+              "operation_geography": {
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "coordinates": {
+                    "type": "array"
+                  }
+                }
+              },
+              "beyond_visual_line_of_sight": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "uas_registrations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "contingency_plans": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "contingency_id": {
+                "type": "integer"
+              },
+              "contingency_cause": {
+                "type": "array"
+              },
+              "contingency_response": {
+                "type": "string"
+              },
+              "contingency_polygon": {
+                "properties": {
+                  "type": {
+                    "type": "string"
+                  },
+                  "coordinates": {
+                    "type": "array"
+                  }
+                }
+              },
+              "loiter_altitude": {
+                "type": "number"
+              },
+              "relative_preference": {
+                "type": "number"
+              },
+              "contingency_location_description": {
+                "type": "string"
+              },
+              "relevant_operation_volumes": {
+                "type": "array"
+              },
+              "valid_time_begin": {
+                "type": "string"
+              },
+              "valid_time_end": {
+                "type": "string"
+              },
+              "free_text": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "negotiation_agreements": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "message_id": {
+                "type": "string"
+              },
+              "negotiation_id": {
+                "type": "string"
+              },
+              "uss_name": {
+                "type": "string"
+              },
+              "uss_name_of_originator": {
+                "type": "string"
+              },
+              "uss_name_of_receiver": {
+                "type": "string"
+              },
+              "free_text": {
+                "type": "string"
+              },
+              "discovery_reference": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "example": {
+        "name": "FacultadVeterinaria",
+        "owner": "admin",
+        "contact": "Admin Admin (admin)",
+        "contact_phone": "09999999",
+        "aircraft_comments": null,
+        "flight_comments": "Comentarios",
+        "volumes_description": "v0.1",
+        "airspace_authorization": null,
+        "controller_location": {
+          "type": "Point",
+          "coordinates": [-56.15970075130463, -34.9119507320875]
+        },
+        "gcs_location": null,
+        "faa_rule": null,
+        "operation_volumes": [
+          {
+            "ordinal": 0,
+            "volume_type": null,
+            "near_structure": false,
+            "effective_time_begin": "2021-11-05T16:56:55.834Z",
+            "effective_time_end": "2021-11-05T17:56:55.834Z",
+            "actual_time_end": null,
+            "min_altitude": 0,
+            "max_altitude": 120,
+            "operation_geography": {
+              "coordinates": [
+                [
+                  [-56.14174596592659, -34.89633280669065],
+                  [-56.141102225285444, -34.899166250880924],
+                  [-56.13756165175926, -34.89847989759436],
+                  [-56.13773331593024, -34.89483684952743],
+                  [-56.14174596592659, -34.89633280669065]
+                ]
+              ],
+              "type": "Polygon"
+            },
+            "beyond_visual_line_of_sight": false
+          }
+        ],
+        "uas_registrations": ["0bfd5564-1b68-4a0f-b976-69404390aade"],
+        "priority_elements": {
+          "priority_level": 1,
+          "priority_status": "EMERGENCY_AIR_AND_GROUND_IMPACT"
+        },
+        "contingency_plans": [
+          {
+            "contingency_cause": ["ENVIRONMENTAL", "LOST_NAV"],
+            "contingency_location_description": "OPERATOR_UPDATED",
+            "contingency_polygon": {
+              "type": "Polygon",
+              "coordinates": [
+                [
+                  [-56.15438461303711, -34.905501548851106],
+                  [-56.15138053894043, -34.90873940129964],
+                  [-56.14889144897461, -34.907437236859494],
+                  [-56.15112304687499, -34.9059942737644],
+                  [-56.15438461303711, -34.905501548851106]
+                ]
+              ]
+            },
+            "contingency_response": "LANDING",
+            "free_text": "Texto libre DE prueba",
+            "loiter_altitude": 30,
+            "relative_preference": 30,
+            "relevant_operation_volumes": [1, 0],
+            "valid_time_begin": "2019-12-11T19:59:10Z",
+            "valid_time_end": "2019-12-11T20:59:10Z"
+          }
+        ],
+        "negotiation_agreements": [],
+        "submit_time": "2021-11-05T16:57:18.544Z"
+      }
+    },
+    "Pilot_Position": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "altitude_gps": {
+          "type": "number"
+        },
+        "location": {
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "coordinates": {
+              "type": "array"
+            }
+          }
+        },
+        "time_sent": {
+          "type": "string"
+        },
+        "operationId": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "id": 100,
+        "altitude_gps": 30.355318,
+        "location": {
+          "type": "Point",
+          "coordinates": [-56.1987911, -34.8481499]
+        },
+        "time_sent": "2020-05-16T13:18:27.000Z",
+        "gufi": "a20ef8d5-506d-4f54-a981-874f6c8bd4de"
+      }
+    },
+    "Position": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        },
+        "altitude_gps": {
+          "type": "number"
+        },
+        "location": {
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "coordinates": {
+              "type": "array"
+            }
+          }
+        },
+        "time_sent": {
+          "type": "string"
+        },
+        "heading": {
+          "type": "integer"
+        },
+        "added_from_dat_file": {
+          "type": "boolean"
+        }
+      },
+      "example": {
+        "altitude_gps": 35,
+        "location": {
+          "type": "Point",
+          "coordinates": [-56.13910222528544, -34.99516625088092]
+        },
+        "heading": 101,
+        "time_sent": "2021-11-05T18:06:55.834Z",
+        "gufi": "d069960a-3902-4755-bd3b-cc6ea6c38226",
+        "uvin": "0bfd5564-1b68-4a0f-b976-69404390aade"
+      }
+    },
+    "RestrictedFlightVolume": {
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "geography": {
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "coordinates": {
+              "type": "array"
+            }
+          }
+        },
+        "min_altitude": {
+          "type": "integer"
+        },
+        "max_altitude": {
+          "type": "integer"
+        },
+        "comments": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "id": "b9e18d55-1a9f-4134-a3c1-0ded910de158",
+        "geography": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [85.324609378, 27.702255771],
+              [85.323553447, 27.702157506],
+              [85.322543671, 27.701867004],
+              [85.322227487, 27.700931936],
+              [85.322034376, 27.699906022],
+              [85.321712515, 27.698861099],
+              [85.3215194, 27.698310136],
+              [85.321304823, 27.697303196],
+              [85.321133159, 27.696581233],
+              [85.320950756, 27.695859265],
+              [85.320864925, 27.69522279],
+              [85.320835389, 27.694750305],
+              [85.321624385, 27.69412131],
+              [85.322543826, 27.693651304],
+              [85.323553532, 27.693360825],
+              [85.324609378, 27.693262568],
+              [85.325665224, 27.693360825],
+              [85.32667493, 27.693651304],
+              [85.327594371, 27.69412131],
+              [85.328383367, 27.694750305],
+              [85.329007435, 27.695510799],
+              [85.329439298, 27.696369559],
+              [85.329660079, 27.697289055],
+              [85.329660122, 27.698229101],
+              [85.329439421, 27.699148612],
+              [85.329007616, 27.700007401],
+              [85.328383575, 27.700767932],
+              [85.32759457, 27.701396965],
+              [85.326675085, 27.701867004],
+              [85.325665309, 27.702157506],
+              [85.324609378, 27.702255771],
+              [85.324609378, 27.702255771]
+            ]
+          ]
+        },
+        "min_altitude": 0,
+        "max_altitude": 120,
+        "comments": ""
+      }
+    },
+    "UAS_Volume": {
+      "properties": {
+        "message_id": {
+          "type": "string"
+        },
+        "uss_name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "permitted_uas": {
+          "type": "array"
+        },
+        "required_support": {
+          "type": "array"
+        },
+        "cause": {
+          "type": "string"
+        },
+        "geography": {
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "coordinates": {
+              "type": "array"
+            }
+          }
+        },
+        "effective_time_begin": {
+          "type": "string"
+        },
+        "effective_time_end": {
+          "type": "string"
+        },
+        "actual_time_end": {
+          "type": "string"
+        },
+        "min_altitude": {
+          "type": "string"
+        },
+        "max_altitude": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "message_id": "57b0dadd-0d28-46ae-b4d3-29bc539304cb",
+        "uss_name": null,
+        "type": "DYNAMIC_RESTRICTION",
+        "permitted_uas": [],
+        "required_support": ["ENHANCED_SAFE_LANDING"],
+        "cause": "SECURITY",
+        "geography": {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-56.207717657, -34.89811912],
+              [-56.20906949, -34.898497496],
+              [-56.209691763, -34.899817401],
+              [-56.20916605, -34.901040494],
+              [-56.206923723, -34.902457147],
+              [-56.204681396, -34.902597931],
+              [-56.203222275, -34.902149181],
+              [-56.202836037, -34.899641415]
+            ]
+          ]
+        },
+        "effective_time_begin": "2022-01-18T12:24:00.725Z",
+        "effective_time_end": "2023-01-18T12:22:40.293Z",
+        "actual_time_end": null,
+        "min_altitude": "0",
+        "max_altitude": "50",
+        "reason": "Terminal portuaria"
+      }
+    },
+    "User": {
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "required": ["false"]
+        },
+        "settings": {
+          "properties": {
+            "langauge": {
+              "type": "string"
+            }
+          }
+        },
+        "extra_fields": {
+          "type": "object",
+          "$ref": "#/definitions/IUserExtraField"
+        }
+      }
+    },
+    "IUserExtraField": {
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "Document": { "type": "object", "$ref": "#/definitions/Document" }
+      }
+    },
+    "User_Credentials": {
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "Vehicle": {
+      "properties": {
+        "uvin": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "nNumber": {
+          "type": "string"
+        },
+        "faaNumber": {
+          "type": "string"
+        },
+        "vehicleName": {
+          "type": "string"
+        },
+        "manufacturer": {
+          "type": "string"
+        },
+        "model": {
+          "type": "string"
+        },
+        "class": {
+          "type": "string"
+        },
+        "accessType": {
+          "type": "string"
+        },
+        "vehicleTypeId": {
+          "type": "string"
+        },
+        "org-uuid": {
+          "type": "string"
+        },
+        "trackerId": {
+          "type": "string"
+        },
+        "authorized": {
+          "type": "string"
+        },
+        "registeredBy": {
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            },
+            "VolumesOfInterest": {
+              "type": "array"
+            },
+            "settings": {
+              "properties": {
+                "langauge": {
+                  "type": "string"
+                }
+              }
+            },
+            "extra_fields": {
+              "type": "object"
+            }
+          }
+        },
+        "owner": {
+          "properties": {
+            "username": {
+              "type": "string"
+            },
+            "firstName": {
+              "type": "string"
+            },
+            "lastName": {
+              "type": "string"
+            },
+            "email": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string"
+            },
+            "VolumesOfInterest": {
+              "type": "array"
+            },
+            "settings": {
+              "properties": {
+                "langauge": {
+                  "type": "string"
+                }
+              }
+            },
+            "extra_fields": {
+              "type": "object"
+            }
+          }
+        },
+        "operators": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "username": {
+                "type": "string"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "VolumesOfInterest": {
+                "type": "array"
+              },
+              "settings": {
+                "properties": {
+                  "langauge": {
+                    "type": "string"
+                  }
+                }
+              },
+              "extra_fields": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "extra_fields": {
+          "type": "object"
+        }
+      },
+      "example": {
+        "date": "2021-10-05T16:32:00.000Z",
+        "nNumber": "",
+        "faaNumber": "00112233",
+        "vehicleName": "example vehicle",
+        "manufacturer": "DJI",
+        "model": "Mavic",
+        "class": "OTHER",
+        "owner": {
+          "username": "admin"
+        }
+      }
+    },
+    "RegularFlight": {
+      "title": "RegularFlight",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Automatically generated"
+        },
+        "startingPort": {
+          "$ref": "#/definitions/Vertiport"
+        },
+        "endingPort": {
+          "$ref": "#/definitions/Vertiport"
+        },
+        "path": {
+          "type": "array",
+          "description": "The starting point must be within the buffer of the starting_port, the ending point must be within the buffer of the ending_port",
+          "items": {
+            "$ref": "#/definitions/RegularFlightSegment"
+          }
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": ["startingPort", "endingPort", "path", "name"]
+    },
+    "RegularFlightSegment": {
+      "title": "RegularFlightSegment",
+      "type": "object",
+      "description": "",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "start": {
+          "description": "GeoJSON 3D Point",
+          "type": "object"
+        },
+        "end": {
+          "description": "GeoJSON 3D Point",
+          "type": "object"
+        },
+        "horizontal_buffer": {
+          "type": "number",
+          "description": "in meters"
+        },
+        "vertical_buffer": {
+          "type": "number",
+          "description": "in meters"
+        },
+        "ground_speed": {
+          "type": "number",
+          "description": "in m/s"
+        },
+        "time_buffer": {
+          "type": "number",
+          "description": "Max. acceptable delay of execution of this segment by the operator"
+        }
+      },
+      "required": [
+        "id",
+        "start",
+        "end",
+        "horizontal_buffer",
+        "vertical_buffer",
+        "ground_speed",
+        "time_buffer"
+      ]
+    },
+    "Vertiport": {
+      "title": "Vertiport",
+      "type": "object",
+      "x-examples": {
+        "KAGA Airport Vertiport": {
+          "id": "497f6eca-6276-4993-bfeb-53cbbbba6f08",
+          "name": "KAGA Airport Vertiport",
+          "point": {},
+          "buffer": 50,
+          "operating_hours": [],
+          "timeBetweenFlights": 600
+        }
+      },
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "point": {
+          "type": "object",
+          "description": "GeoJSON 3D Point"
+        },
+        "buffer": {
+          "type": "number",
+          "description": "in meters\n",
+          "minimum": 0,
+          "exclusiveMinimum": true
+        },
+        "closedHours": {
+          "type": "array",
+          "description": "If not supplied, the vertiport is always open. Closed hours are supplied as strings with a specific format",
+          "items": {
+            "type": "string",
+            "example": "25/12/22, Monday, 25/12"
+          }
+        },
+        "timeBetweenFlights": {
+          "type": "number",
+          "description": "In seconds. \n\nMax amount of time that an operator has to take off and vacate the vertiports' buffer OR max time the operator has to land and switch off engines\n\nIn other words, an operator that reserved the vertiport can use it in the time range [Route Starting Vertiport Time + Time Between Flights, Route Ending Vertiport Time + Time Between Flights]"
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "point",
+        "buffer",
+        "closedHours",
+        "timeBetweenFlights"
+      ]
+    },
+    "GeographicalZone": {
+      "title": "Geographical Zone",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "geography": {
+          "type": "object",
+          "description": "GeoJSON Polygon"
+        },
+        "layer_id": {
+          "type": "string",
+          "description": "ID of the layer that this zone belongs to from Enaire services"
+        },
+        "object_id": {
+          "type": "string",
+          "description": "ID of the object that this zone belongs to from Enaire services"
+        },
+        "last_update": {
+          "type": "string",
+          "description": "Last update of the entity in Enaire services"
+        }
+      }
+    },
+    "Action": {
+      "title": "Action",
+      "type": "object",
+      "x-examples": {
+        "Action": {
+          "id": "0dd1a5ce-bb63-4389-aa2f-8312e4535bb2",
+          "action_name": "SEND_EMAIL",
+          "args": ["test@testmail.com"],
+          "on": "ON_PROPOSED"
+        }
+      },
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "action_name": {
+          "type": "string"
+        },
+        "args": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "on": {
+          "type": "string"
+        }
+      },
+      "required": ["action_name", "args", "on"]
+    },
+    "Coordinator": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "liaison": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "telephone": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "minimum_coordination_days": {
+          "type": "number"
+        },
+        "price": {
+          "type": "number"
+        },
+        "discount_Multiple_Dates": {
+          "type": "number"
+        },
+        "geographical_zone": {
+          "$ref": "#/definitions/GeographicalZone"
+        },
+        "manual_coordinator_procedure": {
+          "type": "object",
+          "properties": {
+            "text_description": {
+              "type": "string"
+            },
+            "procedure_url": {
+              "type": "string"
+            },
+            "template_url": {
+              "type": "string"
+            }
+          }
+        },
+        "automatic_coordinator_procedure": {
+          "type": "object",
+          "properties": {
+            "email": {
+              "type": "string"
+            },
+            "template_html": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "Document": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "upload_time": {
+          "type": "string",
+          "format": "date"
+        },
+        "valid_until": {
+          "type": "string",
+          "format": "date"
+        },
+        "tag": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "extra_fields": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

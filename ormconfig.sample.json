@@ -1,0 +1,23 @@
+[
+  {
+    "name": "",
+    "type": "",
+    "host": "",
+    "port": 0,
+    "username": "",
+    "password": "",
+    "database": "",
+    "synchronize": false,
+    "dropSchema": false,
+    "logging": false,
+    "ssl": false,
+    "entities": [],
+    "migrations": [],
+    "subscribers": [],
+    "cli": {
+      "entitiesDir": "",
+      "migrationsDir": "",
+      "subscribersDir": ""
+    }
+  }
+]

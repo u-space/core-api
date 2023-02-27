@@ -1,0 +1,96 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ */
+
+import {
+  Column,
+  DeleteDateColumn,
+  Entity,
+  PrimaryColumn,
+  Unique,
+} from "typeorm";
+import { Polygon } from "geojson";
+import IEntityWithExtraFields from "./ientity-with-extra-fields";
+
+export enum Role {
+  ADMIN = "ADMIN",
+  PILOT = "PILOT",
+  MONITOR = "MONITOR",
+}
+
+export function roleValueOf(strRole: string) {
+  if (strRole.toUpperCase() === "ADMIN") {
+    return Role.ADMIN;
+  } else if (strRole.toUpperCase() === "PILOT") {
+    return Role.PILOT;
+  } else if (strRole.toUpperCase() === "MONITOR") {
+    return Role.MONITOR;
+  }
+  return undefined;
+}
+
+@Entity()
+@Unique(["email"])
+export class User implements IEntityWithExtraFields {
+  @PrimaryColumn({ type: "varchar" })
+  username: string;
+
+  @Column({ type: "varchar" })
+  firstName: string;
+
+  @Column({ type: "varchar" })
+  lastName: string;
+
+  @Column({ type: "varchar" })
+  email: string;
+
+  @Column({ type: "enum", enum: Role, default: Role.PILOT })
+  role: Role;
+
+  @Column("geometry", { nullable: true })
+  VolumesOfInterest?: Polygon;
+
+  @Column({ type: "varchar", name: "settingsLangauge" })
+  settings?: string;
+
+  extra_fields?: any;
+
+  @DeleteDateColumn()
+  deletedAt?: Date;
+
+  @Column({ type: "varchar", nullable: true })
+  strExtraFields?: string;
+
+  verification_token?: string;
+  verified?: boolean;
+
+  constructor(
+    username: string,
+    firstName: string,
+    lastName: string,
+    email: string,
+    role: Role,
+    strExtraFields: string,
+    VolumesOfInterest?: Polygon,
+    settings?: string,
+    extra_fields?: unknown,
+    deletedAt?: Date,
+    verification_token?: string,
+    verified?: boolean
+  ) {
+    this.username = username;
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.email = email;
+    this.verification_token = verification_token;
+    this.verified = verified;
+    this.role = role;
+    this.strExtraFields = strExtraFields;
+    this.VolumesOfInterest = VolumesOfInterest;
+    this.settings = settings;
+    this.extra_fields = extra_fields;
+    this.deletedAt = deletedAt;
+  }
+}
