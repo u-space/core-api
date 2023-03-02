@@ -13,5 +13,6 @@
 !ormconfig.sample.json
 !package-lock.json
 !package.json
+!README.md
 !swagger.json
 !tsconfig.json
