@@ -248,16 +248,7 @@ const auth = [
     route: "/auth/login",
     controller: AuthController,
     action: "login",
-    middlewares: [
-      // input request validations
-      body("username").isString().trim().not().isEmpty(),
-      body("password").isString().trim().not().isEmpty(),
-      body("format")
-        .optional()
-        .trim()
-        .toLowerCase()
-        .matches(/^json$/),
-    ],
+    middlewares: [],
   },
   {
     method: "post",

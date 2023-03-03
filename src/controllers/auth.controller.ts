@@ -18,7 +18,6 @@ import {
   SMTP_USERNAME,
 } from "../utils/config.utils";
 import { logInfo } from "../services/winston-logger.service";
-import { validationResult } from "express-validator";
 import { TokenDao } from "../daos/token.dao";
 import {
   getErrorMessageFromExpressValidatorErrors,
@@ -37,6 +36,7 @@ import { parseErrorAndRespond } from "../utils/auth.utils";
 import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
 import { NotFoundError } from "../daos/db-errors";
+import Joi from "joi";
 
 export class AuthController {
   private dao = new UserDao();
@@ -69,15 +69,16 @@ export class AuthController {
    * @param  {Response} response
    */
   async login(request: Request, response: Response) {
-    console.log(request.body);
-    const errors = validationResult(request);
-    if (!errors.isEmpty()) {
-      return logAndRespond400(
-        response,
-        400,
-        getErrorMessageFromExpressValidatorErrors(errors)
-      );
-    }
+    // validate request body
+    const reqBodySchema = Joi.object({
+      username: Joi.string().alphanum().min(3).max(100).required(),
+      password: Joi.string().alphanum().min(3).max(100).required(),
+      format: "json",
+    });
+    const validationResult = reqBodySchema.validate(request.body);
+    if (validationResult.error !== undefined)
+      logAndRespond400(response, 400, validationResult.error.message);
+
     const username: string = request.body.username;
     const password: string = request.body.password;
     const format: string = request.body.format;
