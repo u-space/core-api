@@ -58,7 +58,6 @@ export const USER_EXTRA_FIELDS_SCHEMA = process.env.USER_EXTRA_FIELDS_SCHEMA;
 export const VEHICLE_EXTRA_FIELDS_SCHEMA =
   process.env.VEHICLE_EXTRA_FIELDS_SCHEMA;
 
-export const FLY_SAFE_SERVICE_EMAIL = process.env.FLY_SAFE_SERVICE_EMAIL;
 export const COMPANY_NAME = process.env.COMPANY_NAME;
 export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL;
 
