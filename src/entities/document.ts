@@ -11,6 +11,10 @@ import {
   ObjectLiteral,
   CreateDateColumn,
 } from "typeorm";
+import {
+  USER_DOCUMENT_EXTRA_FIELDS_SCHEMA,
+  VEHICLE_DOCUMENT_EXTRA_FIELDS_SCHEMA,
+} from "../utils/config.utils";
 
 // const uploadPath = uploadFolder;
 // const path = `${backendUrl}`;
@@ -81,43 +85,14 @@ export class Document {
     return Document.getExtraFieldSchema(tag);
   }
 
-  static extraFieldsSchemas: any = {
-    InsuranceDocument: {
-      insurance_carrier: { type: "varchar", required: true },
-      insurance_date_begin: { type: "Date", required: true },
-      insurance_limit: { type: "varchar", required: true },
-    },
-    OperatorRegisterDocument: {},
-    TheoricalUasDocument: {
-      school: { type: "varchar", required: true },
-      pilotCometence: { type: "varchar", required: true },
-    },
-    PracticalUasDocument: {
-      school: { type: "varchar", required: true },
-      pilotCometence: { type: "varchar", required: true },
-    },
-    LiabilityInsuranceDocument: {
-      insurance_carrier: { type: "varchar", required: true },
-      insurance_date_begin: { type: "Date", required: true },
-      insurance_limit: { type: "Number", required: true },
-    },
-    Sts01Docuemnt: {
-      school: { type: "varchar", required: true },
-      pilotCometence: { type: "varchar", required: true },
-    },
-    Sts02Docuemnt: {
-      school: { type: "varchar", required: true },
-      pilotCometence: { type: "varchar", required: true },
-    },
-    RadiofonistDocument: {
-      school: { type: "varchar", required: true },
-      pilotCometence: { type: "varchar", required: true },
-    },
-    Other: {},
-  };
+  static userDocumentExtraFieldsSchemas: any = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
+  static vehicleDocumentExtraFieldsSchemas: any = require(VEHICLE_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
 
   static getExtraFieldSchema(tag: string): ObjectLiteral {
-    return Document.extraFieldsSchemas[tag];
+    if (Object.keys(Document.userDocumentExtraFieldsSchemas).includes(tag)) {
+      return Document.userDocumentExtraFieldsSchemas[tag];
+    }
+    return Document.vehicleDocumentExtraFieldsSchemas[tag];
   }
 }
 

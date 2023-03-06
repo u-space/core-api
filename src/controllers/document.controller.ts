@@ -151,18 +151,6 @@ export class DocumentRestController {
     return logAndRespond200(response, document, []);
   }
 
-  // async getDocumentTypeExtraFieldSchema(request: Request, response: Response) {
-  // 	try {
-  // 		return logAndRespond200(
-  // 			response,
-  // 			Document.getExtraFieldSchema(request.params.type),
-  // 			[]
-  // 		);
-  // 	} catch (error) {
-  // 		return logAndRespond400(response, 404, null);
-  // 	}
-  // }
-
   async getDocumentExtraFieldSchema(request: Request, response: Response) {
     try {
       const document = await this.dao.one(request.params.id);
@@ -178,15 +166,6 @@ export class DocumentRestController {
       return logAndRespond400(response, 404, null);
     }
   }
-
-  // async getDocumentTypes(request: Request, response: Response) {
-  // 	try {
-  // 		const document = await this.dao.one(request.params.id);
-  // 		return logAndRespond200(response, document.getExtraFieldSchema(), []);
-  // 	} catch (error) {
-  // 		return logAndRespond400(response, 404, null);
-  // 	}
-  // }
 
   async removeOrphanFiles(request: Request, response: Response) {
     try {
