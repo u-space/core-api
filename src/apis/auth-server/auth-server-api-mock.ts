@@ -17,25 +17,49 @@ interface IAuthServerUser {
 }
 
 export default class AuthServerAPIMock implements IAuthServerAPI {
-  users: IAuthServerUser[] = [
-    {
-      username: "admin",
-      firstName: "Administrador",
-      lastName: "Del Sistema",
-      password: "adminadmin",
-      email: "admin@dronfies.com",
-      verified: true,
-    },
-  ];
+  users: IAuthServerUser[] = [];
 
-  async externalAuthUpdateUser(_userToUpdate: any): Promise<void> {
-    throw new Error("Method not implemented.");
+  async externalAuthUpdateUser(userToUpdate: any): Promise<void> {
+    const newUsers = [];
+    let userFound = false;
+    for (let i = 0; i < this.users.length; i++) {
+      const currentUser = this.users[i];
+      if (currentUser.username === userToUpdate) {
+        newUsers.push({
+          username: userToUpdate.username,
+          firstName: userToUpdate.firstName,
+          lastName: userToUpdate.lastName,
+          password: userToUpdate.password,
+          email: userToUpdate.email,
+          verified: userToUpdate.verified,
+        });
+        userFound = true;
+      } else {
+        newUsers.push(currentUser);
+      }
+    }
+    if (!userFound)
+      throw new Error(
+        `There is no user with the username received (username=${userToUpdate.username})`
+      );
+    this.users = newUsers;
   }
   async externalAuthUpdatePassword(
-    _username: string,
-    _password: any
+    username: string,
+    password: any
   ): Promise<void> {
-    throw new Error("Method not implemented.");
+    let userFound = false;
+    for (let i = 0; i < this.users.length; i++) {
+      const currentUser = this.users[i];
+      if (currentUser.username === username) {
+        currentUser.password = password;
+        userFound = true;
+      }
+    }
+    if (!userFound)
+      throw new Error(
+        `There is no user with the username received (username=${username})`
+      );
   }
   async externalAuthUsersByUsername(dbUsers: unknown[]): Promise<unknown> {
     const usernamesReceived = dbUsers.map((user: any) => user["username"]);
