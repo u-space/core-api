@@ -17,6 +17,7 @@ import {
   MQTT_ENABLED,
   NODE_ENV,
   PORT,
+  uploadFolder,
 } from "./utils/config.utils";
 import express, { NextFunction, Request, Response } from "express";
 import * as path from "path";
@@ -165,10 +166,8 @@ class App {
       next();
     });
 
-    console.log(
-      `Path to save upload files::${path.join(__dirname, "uploads")}`
-    );
-    this.app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+    console.log(`Path to save upload files::${uploadFolder}`);
+    this.app.use("/uploads", express.static(uploadFolder));
 
     // this.app.use(morgan('dev'))
 
