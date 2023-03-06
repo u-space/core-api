@@ -39,14 +39,18 @@ import ConnectionError from "../apis/auth-server/errors/connection-error";
 import { isNullOrUndefined, isObject, isString } from "util";
 import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
 import { DocumentDao } from "../daos/document.dao";
-import { USER_EXTRA_FIELDS_SCHEMA } from "../utils/config.utils";
+import {
+  MOCK_AUTH_SERVER_API,
+  USER_DOCUMENT_EXTRA_FIELDS_SCHEMA,
+  USER_EXTRA_FIELDS_SCHEMA,
+} from "../utils/config.utils";
 import GeneralUtils from "../utils/general.utils";
 import Joi from "joi";
 
 export class UserController {
   private dao = new UserDao();
   private authServer = AuthServerAPIFactory.getAuthServerAPI(
-    process.env.MOCK_AUTH_SERVER_API === "true"
+    MOCK_AUTH_SERVER_API === "true"
   );
 
   private userControllerExtension: IUserControllerExtension =
@@ -852,8 +856,7 @@ export class UserController {
   async getDocumentTags(request: Request, response: Response) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const documentSchemas = require(process.env
-        .USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
+      const documentSchemas = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
       const documentTags = Object.keys(documentSchemas);
       return logAndRespond200(response, documentTags, []);
     } catch (error) {
@@ -864,8 +867,7 @@ export class UserController {
   async getDocumentExtraFieldSchemas(request: Request, response: Response) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const documentSchemas = require(process.env
-        .USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
+      const documentSchemas = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
       return logAndRespond200(response, documentSchemas, []);
     } catch (error) {
       return logAndRespond400(response, 400, null);
@@ -875,8 +877,7 @@ export class UserController {
   async getDocumentExtraFieldSchemaByTag(request: Request, response: Response) {
     try {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const documentSchemas = require(process.env
-        .USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
+      const documentSchemas = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
       const deocumentTag = request.params.tag;
       const documentSchema = documentSchemas[deocumentTag];
       if (documentSchema) {

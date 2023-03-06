@@ -5,6 +5,7 @@
  */
 
 import * as mqtt from "mqtt";
+import { MQTT_ENDPOINT, MQTT_PASS, MQTT_USER } from "../../utils/config.utils";
 import { MQTTOperationController } from "./controllers/operation.controller";
 import { MQTTPositionController } from "./controllers/position.controller";
 
@@ -17,9 +18,9 @@ export class MQTT {
   private operationController: MQTTOperationController;
 
   constructor() {
-    this.mqttClient = mqtt.connect(process.env.MQTT_ENDPOINT!, {
-      username: process.env.MQTT_USER,
-      password: process.env.MQTT_PASS,
+    this.mqttClient = mqtt.connect(MQTT_ENDPOINT!, {
+      username: MQTT_USER,
+      password: MQTT_PASS,
       rejectUnauthorized: false,
     });
 

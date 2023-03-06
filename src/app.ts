@@ -5,9 +5,19 @@
  */
 
 import "reflect-metadata";
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-require("dotenv").config();
-import { cert, INSTANCE, key } from "./utils/config.utils";
+import {
+  cert,
+  CRONJOB_ENABLED,
+  HTTP_PORT,
+  INSTANCE,
+  key,
+  MODULES_CENTRAL,
+  MODULES_SURVEILLANCE,
+  MODULES_TRACKERS,
+  MQTT_ENABLED,
+  NODE_ENV,
+  PORT,
+} from "./utils/config.utils";
 import express, { NextFunction, Request, Response } from "express";
 import * as path from "path";
 import cookieParser from "cookie-parser";
@@ -55,26 +65,23 @@ class App {
   privateIo?: Io.Namespace;
 
   constructor() {
-    // process.env.TZ = 'Etc/GMT';
     this.app = express();
 
-    if (process.env.PORT == undefined || INSTANCE == undefined) {
+    if (PORT == undefined || INSTANCE == undefined) {
       throw "You must define PORT and INSTANCE on .env file";
     }
 
-    this.port = Number.parseInt(process.env.PORT); //|| port;
-    this.httpPort = Number.parseInt(
-      process.env.HTTP_PORT ? process.env.HTTP_PORT : "2999"
-    ); //|| port;
+    this.port = Number.parseInt(PORT); //|| port;
+    this.httpPort = Number.parseInt(HTTP_PORT ? HTTP_PORT : "2999"); //|| port;
     this.connectionName = INSTANCE; //|| connName;
-    if (process.env.NODE_ENV === "test") {
+    if (NODE_ENV === "test") {
       this.connectionName = "Test";
     }
 
     const enabledModules = new Map();
-    enabledModules.set("trackers", process.env.MODULES_TRACKERS);
-    enabledModules.set("central", process.env.MODULES_CENTRAL);
-    enabledModules.set("surveillance", process.env.MODULES_SURVEILLANCE);
+    enabledModules.set("trackers", MODULES_TRACKERS);
+    enabledModules.set("central", MODULES_CENTRAL);
+    enabledModules.set("surveillance", MODULES_SURVEILLANCE);
     this.enabledModules = enabledModules;
     console.log("enabled modules: ", enabledModules);
 
@@ -84,9 +91,7 @@ class App {
 
     this.initializeMiddlewares();
     this.initializeModels().then(() => {
-      const mqttEnabled: string = process.env.MQTT_ENABLED
-        ? process.env.MQTT_ENABLED
-        : "false";
+      const mqttEnabled: string = MQTT_ENABLED ? MQTT_ENABLED : "false";
       if (mqttEnabled === "true") {
         console.log(`MQTT Enabled (MQTT_ENABLED=${mqttEnabled})`);
         new MQTT();
@@ -104,7 +109,7 @@ class App {
     } // In case the connection failed, the app stops.
 
     this.connection = connection; // Store the connection object in the class instance.
-    if (process.env.CRONJOB_ENABLED !== "false") {
+    if (CRONJOB_ENABLED !== "false") {
       console.log("CRONJOB ENABLED");
       try {
         this.cronService = new CronService();

@@ -39,6 +39,7 @@ import { getDocumentById } from "./document.controller";
 import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
 import {
   COMPANY_NAME,
+  MOCK_AUTH_SERVER_API,
   MOCK_MAIL_API,
   SMTP_PASSWORD,
   SMTP_PORT,
@@ -60,7 +61,7 @@ export class VehicleController {
   private vehicleControllerExtension: IVehicleControllerExtension =
     GetVehicleControllerExtension();
   private authServer = AuthServerAPIFactory.getAuthServerAPI(
-    process.env.MOCK_AUTH_SERVER_API === "true"
+    MOCK_AUTH_SERVER_API === "true"
   );
   private mailAPI: IMailAPI = MailAPIFactory.getMailAPI(
     MOCK_MAIL_API,

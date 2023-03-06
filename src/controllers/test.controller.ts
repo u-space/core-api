@@ -52,7 +52,7 @@ export default class TestController {
     }
 
     // add rfvs
-    const geography: { type: "Polygon"; coordinates: any[] } = {
+    /*const geography: { type: "Polygon"; coordinates: any[] } = {
       type: "Polygon",
       coordinates: [
         [
@@ -91,7 +91,7 @@ export default class TestController {
     );
 
     // add uvrs
-    await this.addUVR();
+    await this.addUVR();*/
 
     // respond
     return res.sendStatus(200);

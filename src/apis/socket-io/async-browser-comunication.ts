@@ -18,13 +18,6 @@ type PublicUvr = {
 type PublicObject = Gufi | PublicUvr;
 
 function send(topic: any, object: any) {
-  // console.log(`Sending ${JSON.stringify(object)} to ${topic}`)
-  // if(process.env.NODE_ENV != "test"){
-  //     app.io.emit(topic, object)
-  // } else {
-  //     return [topic, object]
-  // }
-
   if (app.privateIo != undefined) {
     app.privateIo.emit(topic, object);
   } else {

@@ -11,6 +11,7 @@ import {
   COMPANY_NAME,
   MICROUTM_AUTH_URL,
   MOCK_MAIL_API,
+  NODE_ENV,
   SMTP_PASSWORD,
   SMTP_PORT,
   SMTP_SECURE,
@@ -187,15 +188,15 @@ export class AuthController {
       if (typeof decoded !== "string")
         expireDate = new Date(decoded.exp * 1000);
       response.cookie("putm-rtoken", refreshToken, {
-        secure: process.env.NODE_ENV !== "dev",
+        secure: NODE_ENV !== "dev",
         httpOnly: true,
-        sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
+        sameSite: NODE_ENV !== "dev" ? "none" : "lax",
         expires: expireDate,
       });
       response.cookie("putm-username", username, {
-        secure: process.env.NODE_ENV !== "dev",
+        secure: NODE_ENV !== "dev",
         httpOnly: true,
-        sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
+        sameSite: NODE_ENV !== "dev" ? "none" : "lax",
         expires: expireDate,
       });
     } catch (error) {
@@ -264,15 +265,15 @@ export class AuthController {
     const refreshToken: string | undefined = request.cookies["putm-rtoken"];
 
     response.cookie("putm-rtoken", refreshToken, {
-      secure: process.env.NODE_ENV !== "dev",
+      secure: NODE_ENV !== "dev",
       httpOnly: true,
-      sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
+      sameSite: NODE_ENV !== "dev" ? "none" : "lax",
       maxAge: -1,
     });
     response.cookie("putm-username", username, {
-      secure: process.env.NODE_ENV !== "dev",
+      secure: NODE_ENV !== "dev",
       httpOnly: true,
-      sameSite: process.env.NODE_ENV !== "dev" ? "none" : "lax",
+      sameSite: NODE_ENV !== "dev" ? "none" : "lax",
       maxAge: -1,
     });
 

@@ -9,6 +9,7 @@ import { readFileSync } from "fs";
 import { verify } from "jsonwebtoken";
 import { UserDao } from "../daos/user.dao";
 import { Role } from "../entities/user";
+import { NODE_ENV } from "../utils/config.utils";
 
 const ALGORITHM = "RS256";
 
@@ -30,7 +31,7 @@ export const checkJwt = async (
     if (
       compliantToken === undefined &&
       bypass &&
-      (process.env.NODE_ENV == "dev" || process.env.NODE_ENV == "test")
+      (NODE_ENV == "dev" || NODE_ENV == "test")
     ) {
       jwtPayload = {
         username: "admin",

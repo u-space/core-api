@@ -5,6 +5,7 @@
  */
 
 import { Client } from "@googlemaps/google-maps-services-js";
+import { GOOGLE_API } from "../utils/config.utils";
 
 const client = new Client({});
 
@@ -35,7 +36,7 @@ export const getElevation = async (locs: any) => {
   const r = await client.elevation({
     params: {
       locations: locs,
-      key: process.env.GOOGLE_API!,
+      key: GOOGLE_API!,
     },
     timeout: 1000, // milliseconds
   });

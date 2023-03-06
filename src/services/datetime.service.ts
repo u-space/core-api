@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { NODE_ENV } from "../utils/config.utils";
+
 let fakeDate = new Date("2019-12-11T13:59:10.000Z");
 
 // export function getNow() {
@@ -17,7 +19,7 @@ export function fakeTime(newDate: string): Date {
 
 export let getNow: any;
 
-if (process.env.NODE_ENV != "test") {
+if (NODE_ENV != "test") {
   getNow = function () {
     return new Date();
   };

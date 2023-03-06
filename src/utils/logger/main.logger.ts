@@ -8,14 +8,15 @@ import { devLogger } from "./dev.logger";
 import { prodLogger } from "./prod.logger";
 import { dummyLogger } from "./dummy.logger";
 import winston from "winston";
+import { LOGS_ENABLED, NODE_ENV } from "../config.utils";
 
 let logger1: winston.Logger = dummyLogger();
-if (process.env.NODE_ENV === "dev") {
+if (NODE_ENV === "dev") {
   // development
-  if (process.env.LOGS_ENABLED === "true") {
+  if (LOGS_ENABLED) {
     logger1 = devLogger;
   }
-} else if (process.env.NODE_ENV === "test") {
+} else if (NODE_ENV === "test") {
   // test
 } else {
   // production

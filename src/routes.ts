@@ -29,6 +29,7 @@ import { VertiportController } from "./controllers/vertiport.controller";
 import { AircraftTypeController } from "./controllers/aircraft-type.controller";
 import { DocumentRestController } from "./controllers/document.controller";
 import TestController from "./controllers/test.controller";
+import { NODE_ENV } from "./utils/config.utils";
 
 interface CustomRoute {
   method: string;
@@ -755,7 +756,7 @@ const r: CustomRoute[] = [
   ...schemas,
   ...aircraftTypeRoutes,
 ];
-if (process.env.NODE_ENV === "test") {
+if (NODE_ENV === "test") {
   r.push(...test);
 }
 
