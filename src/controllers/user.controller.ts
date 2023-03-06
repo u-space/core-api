@@ -41,6 +41,7 @@ import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
 import { DocumentDao } from "../daos/document.dao";
 import { USER_EXTRA_FIELDS_SCHEMA } from "../utils/config.utils";
 import GeneralUtils from "../utils/general.utils";
+import Joi from "joi";
 
 export class UserController {
   private dao = new UserDao();
@@ -291,15 +292,18 @@ export class UserController {
     const origin = request.headers.origin;
     const userParams = request.body;
 
-    if (
-      !isString(userParams.username) ||
-      !isString(userParams.email) ||
-      !isString(userParams.password) ||
-      !isString(userParams.firstName) ||
-      !isString(userParams.lastName)
-    ) {
-      return logAndRespond400(response, 400, "Invalid request body");
-    }
+    const reqBodySchema = Joi.object({
+      username: Joi.string().alphanum().min(3).max(100).required(),
+      email: Joi.string().email().required(),
+      password: Joi.string().alphanum().min(8).max(100).required(),
+      firstName: Joi.string().alphanum().min(3).max(100).required(),
+      lastName: Joi.string().alphanum().min(3).max(100).required(),
+      extra_fields: Joi.object().optional(),
+    });
+    const validationResult = reqBodySchema.validate(request.body);
+    if (validationResult.error !== undefined)
+      logAndRespond400(response, 400, validationResult.error.message);
+
     try {
       this.validateExtraFields(userParams.extra_fields);
     } catch (error) {
