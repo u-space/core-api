@@ -89,6 +89,8 @@ export class Document {
   static vehicleDocumentExtraFieldsSchemas: any = require(VEHICLE_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
 
   static getExtraFieldSchema(tag: string): ObjectLiteral {
+    // TODO: Could be an error if user and vehicle document schemas have same tag with different schema
+    // To fix this, we have to return user document schema if the document belongs to a user, and vehicle document schema if document belongs to a vehicle
     if (Object.keys(Document.userDocumentExtraFieldsSchemas).includes(tag)) {
       return Document.userDocumentExtraFieldsSchemas[tag];
     }
