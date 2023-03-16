@@ -93,3 +93,6 @@ export const USER_DOCUMENT_EXTRA_FIELDS_SCHEMA =
   process.env.USER_DOCUMENT_EXTRA_FIELDS_SCHEMA;
 
 export const LOGS_ENABLED = process.env.LOGS_ENABLED === "true";
+
+export const PUBLIC_KEY = process.env.PUBLIC_KEY;
+export const PRIVATE_KEY = process.env.PRIVATE_KEY;

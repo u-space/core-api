@@ -12,6 +12,8 @@ import { UASVolumeReservation } from "../entities/uas-volume-reservation";
 import { Operation, OperationState } from "../entities/operation";
 import { RestrictedFlightVolume } from "../entities/restricted-flight-volume";
 import { Polygon } from "geojson";
+import { MOCK_AUTH_SERVER_API } from "../utils/config.utils";
+import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
 
 export default class TestController {
   tablesName = [
@@ -51,6 +53,36 @@ export default class TestController {
       await manager.query(`DELETE FROM "${this.tablesName[i]}"`);
     }
 
+    // check MOCK_AUTH_SERVER_API === true
+    if (MOCK_AUTH_SERVER_API !== "true") {
+      return res.status(500).send({
+        message: `MOCK_AUTH_SERVER_API must be true (MOCK_AUTH_SERVER_API=${MOCK_AUTH_SERVER_API})`,
+      });
+    }
+
+    // get IAuthServerAPI
+    const authServerAPI = AuthServerAPIFactory.getAuthServerAPI(true);
+
+    // add admin user
+    const adminUser = new User(
+      "adminuser",
+      "Admin",
+      "User",
+      "admin@user.com",
+      Role.ADMIN,
+      ""
+    );
+    adminUser.verified = true;
+    await authServerAPI.signUp(
+      adminUser.username,
+      "adminadmin",
+      adminUser.email,
+      adminUser.firstName,
+      adminUser.lastName,
+      adminUser.verified
+    );
+    await getRepository(User).save(adminUser);
+
     // add rfvs
     /*const geography: { type: "Polygon"; coordinates: any[] } = {
       type: "Polygon",
@@ -64,17 +96,6 @@ export default class TestController {
       ],
     };
     await this.addRFV("RFV 1", 0, 120, geography);
-
-    // add admin user
-    let userArmandoMcdonalid = new User(
-      "a-mcdonalid",
-      "Armando",
-      "Mcdonalid",
-      "armando@email.com",
-      Role.ADMIN,
-      ""
-    );
-    userArmandoMcdonalid = await getRepository(User).save(userArmandoMcdonalid);
 
     // add vehicles
     await this.addVehicle(

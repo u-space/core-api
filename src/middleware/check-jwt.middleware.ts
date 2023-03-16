@@ -9,7 +9,7 @@ import { readFileSync } from "fs";
 import { verify } from "jsonwebtoken";
 import { UserDao } from "../daos/user.dao";
 import { Role } from "../entities/user";
-import { NODE_ENV } from "../utils/config.utils";
+import { NODE_ENV, PUBLIC_KEY } from "../utils/config.utils";
 
 const ALGORITHM = "RS256";
 
@@ -42,7 +42,7 @@ export const checkJwt = async (
       // console.log(`Using bypass: this only for dev or test. ${JSON.stringify(jwtPayload)}`)
       // console.log(" ********* ******** ******* ")
     } else {
-      const publicKey = readFileSync("./public.key", "utf8");
+      const publicKey = readFileSync(PUBLIC_KEY!, "utf8");
       jwtPayload = verify(compliantToken, publicKey, {
         algorithms: [ALGORITHM],
       });

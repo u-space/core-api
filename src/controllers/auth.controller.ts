@@ -10,6 +10,7 @@ import { UserDao } from "../daos/user.dao";
 import {
   COMPANY_NAME,
   MICROUTM_AUTH_URL,
+  MOCK_AUTH_SERVER_API,
   MOCK_MAIL_API,
   NODE_ENV,
   SMTP_PASSWORD,
@@ -38,6 +39,8 @@ import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
 import { NotFoundError } from "../daos/db-errors";
 import Joi from "joi";
+import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
+import { NoDataError } from "../apis/auth-server/types";
 
 export class AuthController {
   private dao = new UserDao();
@@ -49,6 +52,9 @@ export class AuthController {
     SMTP_SECURE,
     SMTP_USERNAME!,
     SMTP_PASSWORD!
+  );
+  private authServer = AuthServerAPIFactory.getAuthServerAPI(
+    MOCK_AUTH_SERVER_API === "true"
   );
 
   private axiosInstance = axios.create({
@@ -97,58 +103,58 @@ export class AuthController {
       return logAndRespond500(response, 500, error);
     }
 
-    const axiosInstance = this.axiosInstance;
     let res;
     try {
-      const authLoginBody: any = {
+      const extraData = new Map<string, string>([["role", userFromDB.role]]);
+
+      res = await this.authServer.loginWithPassword(
         username,
         password,
-        extraData: { role: userFromDB.role },
-      };
-      console.log(`POST auth/login body=${authLoginBody}`);
-      res = await this.axiosInstance.post("auth/login", authLoginBody);
+        extraData
+      );
     } catch (error: any) {
-      const message =
-        error &&
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-          ? error.response.data.message
-          : error;
+      let message = error.message;
+      if (message === undefined) {
+        message =
+          error &&
+          error.response &&
+          error.response.data &&
+          error.response.data.message
+            ? error.response.data.message
+            : error;
+      }
       if (message === "Username is incorrect") {
         try {
           const user = await this.dao.one(username);
           if (user) {
-            // This db user exists, not in auth. This might be a user pre-microservices
-            // Create new user with magic link to set password
             try {
-              axiosInstance
-                .post("auth/signup_magic", {
+              // This db user exists, not in auth. This might be a user pre-microservices
+              // Create new user with magic link to set password
+              let accessToken;
+              try {
+                res = await this.authServer.signUpMagic(
                   username,
-                  email: user.email,
-                  firstName: user.firstName,
-                  lastName: user.lastName,
-                  role: user.role,
-                })
-                .then((res) => {
-                  const { accessToken } = res.data.data;
-                  this.mailAPI.sendMail(
-                    COMPANY_NAME!,
-                    [user.email],
-                    "URGENTE: Cambia tu contraseña para ingresar al sistema",
-                    buildMagicSignUpText(
-                      username,
-                      buildMagicSignupLink(username, accessToken)
-                    ),
-                    buildMagicSignUpHtml(
-                      username,
-                      buildMagicSignupLink(username, accessToken)
-                    )
-                  );
-                })
-                .catch((error) => {
-                  parseErrorAndRespond(response, error);
-                });
+                  user.email,
+                  user.firstName,
+                  user.lastName,
+                  new Map<string, string>([["role", user.role]])
+                );
+              } catch (errorSignUpMagic) {
+                parseErrorAndRespond(response, errorSignUpMagic);
+              }
+              this.mailAPI.sendMail(
+                COMPANY_NAME!,
+                [user.email],
+                "URGENTE: Cambia tu contraseña para ingresar al sistema",
+                buildMagicSignUpText(
+                  username,
+                  buildMagicSignupLink(username, accessToken)
+                ),
+                buildMagicSignUpHtml(
+                  username,
+                  buildMagicSignupLink(username, accessToken)
+                )
+              );
               return logAndRespond(
                 response,
                 409,
@@ -165,9 +171,9 @@ export class AuthController {
           }
         } catch (error) {
           // The return of this catch already handles this case
+          console.error(error);
         }
       }
-
       return logAndRespond(
         response,
         error.response && error.response.status ? error.response.status : 500,
@@ -179,7 +185,7 @@ export class AuthController {
       );
     }
 
-    const { accessToken, refreshToken } = res.data.data;
+    const { accessToken, refreshToken } = res;
     logInfo(`User logged in [username=${username}]`);
 
     try {
@@ -235,29 +241,24 @@ export class AuthController {
         "User and/or password are incorrect"
       );
     }
-    this.axiosInstance
-      .post("auth/login_session", {
+
+    try {
+      const accessToken = await this.authServer.loginWithRefreshToken(
         username,
         refresh_token,
-        extraData: { role: userFromDB.role },
-      })
-      .then(async (res) => {
-        const { accessToken } = res.data.data;
-        logInfo(`User logged in [username=${username}]`);
-        if (errorDB) {
-          return logAndRespond500(
-            response,
-            500,
-            `User [username=${username}] exists in auth server, but not in db`
-          );
-        }
-        if (format) {
-          return logAndRespond200(response, { token: accessToken }, ["token"]);
-        } else {
-          return response.send(accessToken);
-        }
-      })
-      .catch((error) => parseErrorAndRespond(response, error));
+        new Map<string, string>([["role", userFromDB.role]])
+      );
+      if (format) {
+        return logAndRespond200(response, { token: accessToken }, ["token"]);
+      } else {
+        return response.send(accessToken);
+      }
+    } catch (error) {
+      if (error instanceof NoDataError) {
+        return logAndRespond400(response, 404, (error as NoDataError).message);
+      }
+      return parseErrorAndRespond(response, error);
+    }
   }
 
   async clearCookies(request: Request, response: Response) {

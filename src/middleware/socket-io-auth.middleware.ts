@@ -6,7 +6,7 @@
 
 import { verify } from "jsonwebtoken";
 import { readFileSync } from "fs";
-import { NODE_ENV } from "../utils/config.utils";
+import { NODE_ENV, PUBLIC_KEY } from "../utils/config.utils";
 
 export const authMiddleware = (socket: any, next: any) => {
   const token = socket.handshake.query.token;
@@ -26,7 +26,7 @@ export const authMiddleware = (socket: any, next: any) => {
       };
       console.log(`Bypass:::->${JSON.stringify(jwtPayload)}`);
     } else {
-      const publicKey = readFileSync("./public.key", "utf8");
+      const publicKey = readFileSync(PUBLIC_KEY!, "utf8");
       jwtPayload = verify(token, publicKey, {
         algorithms: ["RS256"],
       });

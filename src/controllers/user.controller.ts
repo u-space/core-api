@@ -99,8 +99,8 @@ export class UserController {
       const { count, users: dbUsers } = queryResult;
       let usersResponse: any;
       try {
-        usersResponse = await this.authServer.externalAuthUsersByUsername(
-          dbUsers
+        usersResponse = await this.authServer.getUsersByUsernames(
+          dbUsers.map((dbUser) => dbUser.username)
         );
       } catch (error) {
         if (error instanceof ConnectionError) {
@@ -108,7 +108,7 @@ export class UserController {
         }
         return logAndRespond500(response, 500, error);
       }
-      const authUsers = usersResponse["data"] ? usersResponse["data"].data : [];
+      const authUsers = usersResponse;
       let users = dbUsers.map((user) => {
         const authUser = _.find(authUsers, {
           username: user.username,
@@ -249,9 +249,12 @@ export class UserController {
             }
           }
           const insertedDetails = await dao.save(user);
-          await this.authServer.createUserExternalAuth(
-            insertedDetails,
+          await this.authServer.signUp(
+            insertedDetails.username,
             password,
+            insertedDetails.email,
+            insertedDetails.firstName,
+            insertedDetails.lastName,
             true
           );
           return logAndRespond200(response, user, []);
@@ -361,9 +364,12 @@ export class UserController {
         const insertedDetails = await dao.save(user);
         // console.log(JSON.stringify(user));
         userControllerExtension.postProcessRegisterUser(user, origin);
-        await this.authServer.createUserExternalAuth(
-          insertedDetails,
+        await this.authServer.signUp(
+          insertedDetails.username,
           password,
+          insertedDetails.email,
+          insertedDetails.firstName,
+          insertedDetails.lastName,
           false
         );
         return logAndRespond200(response, user, []);
@@ -539,7 +545,7 @@ export class UserController {
         const { password } = request.body;
         const username = request.params.id;
 
-        await this.authServer.externalAuthUpdatePassword(username, password);
+        await this.authServer.updatePassword(username, password);
         return logAndRespond200(response, { message: "Password updated" }, []);
       } else {
         return logAndRespond400(response, 401, null);
@@ -581,10 +587,7 @@ export class UserController {
           return logAndRespond400(response, 401, "The token is invalid");
         }
       try {
-        await this.authServer.externalAuthUpdateUser({
-          username: user.username,
-          verified: verified,
-        });
+        await this.authServer.updateUser(user.username, verified);
 
         logInfo(`User ${user.username} change status to ${verified}`);
         return logAndRespond200(response, { message: "Status updated" }, []);
@@ -645,10 +648,7 @@ export class UserController {
       try {
         await this.dao.disable(usernameToRemove);
 
-        await this.authServer.externalAuthUpdateUser({
-          username: usernameToRemove,
-          disabled: true,
-        });
+        await this.authServer.updateUser(usernameToRemove, undefined, true);
         // await this.axiosInstance.put('auth/update',);
         return logAndRespond200(response, { removed: true }, []);
       } catch (error) {
@@ -672,10 +672,7 @@ export class UserController {
     if (role == Role.ADMIN || username == usernameToEnable) {
       try {
         await this.dao.enable(usernameToEnable);
-        await this.authServer.externalAuthUpdateUser({
-          username: usernameToEnable,
-          disabled: false,
-        });
+        await this.authServer.updateUser(usernameToEnable, undefined, false);
 
         return logAndRespond200(response, { enabled: true }, []);
       } catch (error) {
