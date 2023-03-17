@@ -10,12 +10,13 @@
 !.gitignore
 !.prettierignore
 !.prettierrc.json
+!first-issues-and-roadmap.md
+!images
+!images/**
 !ormconfig.sample.json
 !package-lock.json
 !package.json
+!project-charter.md
 !README.md
 !swagger.json
 !tsconfig.json
-!project-charter.md
-!images
-!images/**
