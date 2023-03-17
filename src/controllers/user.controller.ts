@@ -172,6 +172,21 @@ export class UserController {
   }
 
   async save(request: Request, response: Response) {
+    // validate request body received
+    const reqBodySchema = Joi.object({
+      username: Joi.string().alphanum().min(3).max(100).required(),
+      password: Joi.string().alphanum().min(8).max(100).required(),
+      email: Joi.string().email().required(),
+      firstName: Joi.string().alphanum().min(0).max(100).optional(),
+      lastName: Joi.string().alphanum().min(0).max(100).optional(),
+      role: Joi.string().valid("ADMIN", "PILOT").required(),
+      extra_fields: Joi.object().optional(),
+    });
+
+    const validationResult = reqBodySchema.validate(request.body);
+    if (validationResult.error !== undefined)
+      logAndRespond400(response, 400, validationResult.error.message);
+
     const { role } = getPayloadFromResponse(response);
     const dao = this.dao;
     const userParams = request.body;
