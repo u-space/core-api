@@ -267,6 +267,21 @@ export default class AuthServerAPIMock implements IAuthServerAPI {
       usernames.includes(user.username)
     );
   }
+  async removeUser(username: string): Promise<void> {
+    const filteredUsers = AuthServerAPIMock.users.filter(
+      (user) => user.username !== username
+    );
+    if (filteredUsers.length === AuthServerAPIMock.users.length) {
+      throw new NoDataError(
+        `There is no user with the username received (username=${username})`
+      );
+    } else if (AuthServerAPIMock.users.length - filteredUsers.length > 1) {
+      throw new CorruptedDataError(
+        `There are more than one user with the username received (username=${username})`
+      );
+    }
+    AuthServerAPIMock.users = filteredUsers;
+  }
 
   // ----------------------------------------------------------------
   // ----------------------- PRIVATE METHODS  -----------------------

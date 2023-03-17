@@ -113,6 +113,9 @@ export default class AuthServerAPIImp implements IAuthServerAPI {
       throw error;
     }
   }
+  async removeUser(username: string): Promise<void> {
+    throw new Error("Not implemented");
+  }
 
   // ----------------------------------------------------------------
   // ----------------------- PRIVATE METHODS  -----------------------
