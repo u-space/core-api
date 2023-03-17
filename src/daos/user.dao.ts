@@ -137,7 +137,6 @@ export class UserDao {
   }
 
   async save(user: User) {
-    console.log(user);
     if (
       user.extra_fields !== null &&
       user.extra_fields !== undefined &&
