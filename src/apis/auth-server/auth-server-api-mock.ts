@@ -282,6 +282,9 @@ export default class AuthServerAPIMock implements IAuthServerAPI {
     }
     AuthServerAPIMock.users = filteredUsers;
   }
+  async removeAllUsers(): Promise<void> {
+    AuthServerAPIMock.users = [];
+  }
 
   // ----------------------------------------------------------------
   // ----------------------- PRIVATE METHODS  -----------------------

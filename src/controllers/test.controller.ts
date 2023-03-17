@@ -63,12 +63,8 @@ export default class TestController {
     // get IAuthServerAPI
     const authServerAPI = AuthServerAPIFactory.getAuthServerAPI(true);
 
-    // if admin user already exists in auth server, remove it
-    try {
-      await authServerAPI.removeUser("adminuser");
-    } catch (error) {
-      /* empty */
-    }
+    // remove all users from auth server
+    await authServerAPI.removeAllUsers();
 
     // add admin user
     const adminUser = new User(

@@ -41,4 +41,5 @@ export default interface IAuthServerAPI {
   getUserByUsername(username: string): Promise<any>;
   getUsersByUsernames(usernames: string[]): Promise<AuthServerUser[]>;
   removeUser(username: string): Promise<void>;
+  removeAllUsers(): Promise<void>;
 }
