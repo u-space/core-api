@@ -113,6 +113,9 @@ export class AuthController {
         extraData
       );
     } catch (error: any) {
+      if (error instanceof NoDataError) {
+        return logAndRespond400(response, 404, "Invalid user");
+      }
       let message = error.message;
       if (message === undefined) {
         message =
