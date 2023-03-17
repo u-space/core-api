@@ -20,19 +20,7 @@ import {
 } from "./types";
 
 export default class AuthServerAPIMock implements IAuthServerAPI {
-  static users: AuthServerUser[] = [
-    {
-      id: "2a8f68d6-c53d-43f2-9006-15d75a7eff34",
-      username: "adminuser",
-      firstName: "Admin",
-      lastName: "User",
-      password: "adminadmin",
-      email: "admin@user.com",
-      verified: true,
-      disabled: false,
-      sessions: [],
-    },
-  ];
+  static users: AuthServerUser[] = [];
   static sessions: AuthServerSession[] = [];
 
   // ----------------------------------------------------------------
