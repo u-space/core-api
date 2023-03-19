@@ -112,11 +112,11 @@ export enum AAANegotiationAgreementType {
 }
 
 export type AAANotams = {
-  messageId?: string;
+  message_id?: string;
   text?: string;
   geography?: GeoJSON.Polygon;
-  effectiveTimeBegin?: string;
-  effectiveTimeEnd?: string;
+  effective_time_begin?: string;
+  effective_time_end?: string;
 };
 
 export type AAAOperationVolume = {

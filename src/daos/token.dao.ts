@@ -11,7 +11,7 @@ export class TokenDao {
   private tokenRepository = getRepository(Token);
 
   async one(username: string) {
-    return this.tokenRepository.findOneOrFail(username);
+    return this.tokenRepository.findOneOrFail({ where: { username } });
   }
 
   async save(token: Token) {
@@ -19,7 +19,9 @@ export class TokenDao {
   }
 
   async remove(username: string) {
-    const tokenToRemove: any = await this.tokenRepository.findOne(username);
+    const tokenToRemove: any = await this.tokenRepository.findOne({
+      where: { username },
+    });
     await this.tokenRepository.remove(tokenToRemove);
   }
 }

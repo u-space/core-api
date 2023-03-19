@@ -25,7 +25,7 @@ export class DocumentDao {
 
   async one(id: string) {
     try {
-      return await this.repository.findOneOrFail(id);
+      return await this.repository.findOneOrFail({ where: { id } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -72,7 +72,7 @@ export class DocumentDao {
   }
 
   async remove(id: string) {
-    const userToRemove: any = await this.repository.findOne(id);
+    const userToRemove: any = await this.repository.findOne({ where: { id } });
     await this.repository.remove(userToRemove);
   }
 }

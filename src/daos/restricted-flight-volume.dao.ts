@@ -87,7 +87,7 @@ export class RestrictedFlightVolumeDao {
 
   async one(id: string) {
     try {
-      return await this.repository.findOneOrFail(id);
+      return await this.repository.findOneOrFail({ where: { id } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||

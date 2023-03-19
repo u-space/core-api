@@ -19,7 +19,7 @@ export class TrackersDao {
     filterBy?: string,
     filter?: string
   ) {
-    const filterObj: FindManyOptions = {};
+    const filterObj: any = {};
 
     filterObj.take = take || 10;
     filterObj.skip = skip || 0;
@@ -39,14 +39,16 @@ export class TrackersDao {
   async one(id: string, isCentral: boolean) {
     const baseWhere = isCentral
       ? {
+          id,
           vehicle: IsNull(),
           directory: Not(IsNull()),
         }
       : {
+          id,
           vehicle: Not(IsNull()),
           directory: IsNull(),
         };
-    const res = await this.repository.findOne(id, {
+    const res = await this.repository.findOne({
       where: baseWhere,
     });
     // I have to do this beacuse ORM returns undefined when not found :(
@@ -57,7 +59,9 @@ export class TrackersDao {
   }
 
   async getRSSIData(trackerId: string) {
-    return await this.RSSIrepository.find({ where: { tracker: trackerId } });
+    return await this.RSSIrepository.find({
+      where: { tracker: { hardware_id: trackerId } },
+    });
   }
 
   async saveRSSIData(entity: any) {

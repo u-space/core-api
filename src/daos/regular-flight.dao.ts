@@ -27,7 +27,7 @@ export class RegularFlightDao {
   async one(id: string): Promise<RegularFlight> {
     try {
       const regularFlightEntity: RegularFlightEntity =
-        await this.repository.findOneOrFail(id);
+        await this.repository.findOneOrFail({ where: { id } });
       return this.convertToRegularFlight(regularFlightEntity);
     } catch (error: any) {
       if (error.name === TypeOrmErrorType.EntityNotFound) {

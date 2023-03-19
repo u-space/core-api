@@ -24,9 +24,9 @@ export class PositionDao {
     }
   }
 
-  async one(id: string) {
+  async one(id: number) {
     try {
-      return this.repository.findOneOrFail(id);
+      return this.repository.findOneOrFail({ where: { id } });
     } catch (error: any) {
       if (error.name === TypeOrmErrorType.EntityNotFound) {
         throw new NotFoundError(

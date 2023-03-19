@@ -26,7 +26,7 @@ export class ApprovalDao {
 
   async one(id: string) {
     try {
-      return this.repository.findOneOrFail(id);
+      return this.repository.findOneOrFail({ where: { id } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||

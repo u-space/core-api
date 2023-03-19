@@ -25,7 +25,7 @@ export class UTMMessageDao {
 
   async one(message_id: string) {
     try {
-      return await this.repository.findOneOrFail(message_id);
+      return await this.repository.findOneOrFail({ where: { message_id } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -57,7 +57,9 @@ export class UTMMessageDao {
   }
 
   async remove(id: string) {
-    const userToRemove: any = await this.repository.findOne(id);
+    const userToRemove: any = await this.repository.findOne({
+      where: { message_id: id },
+    });
     await this.repository.remove(userToRemove);
   }
 }

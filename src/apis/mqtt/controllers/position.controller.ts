@@ -82,7 +82,7 @@ export class MQTTPositionController {
         if (pilotPosition === undefined) {
           sendPositionToMonitor(positionSaved, operation.controller_location);
         } else {
-          sendPositionToMonitor(positionSaved, pilotPosition.location);
+          sendPositionToMonitor(positionSaved, pilotPosition!.location);
         }
 
         return;

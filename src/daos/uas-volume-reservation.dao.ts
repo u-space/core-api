@@ -84,7 +84,7 @@ export class UASVolumeReservationDao {
 
   async one(message_id: string) {
     try {
-      return await this.repository.findOneOrFail(message_id);
+      return await this.repository.findOneOrFail({ where: { message_id } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||

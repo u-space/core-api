@@ -26,7 +26,7 @@ export class NotamDao {
 
   async one(message_id: string) {
     try {
-      return this.repository.findOneOrFail(message_id);
+      return this.repository.findOneOrFail({ where: { message_id } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -46,7 +46,7 @@ export class NotamDao {
     }
   }
 
-  async save(notam: Notams) {
+  async save(notam: Notams): Promise<any> {
     try {
       return this.repository.insert(notam);
     } catch (error: any) {
@@ -58,7 +58,9 @@ export class NotamDao {
   }
 
   async remove(id: string) {
-    const userToRemove: any = await this.repository.findOne(id);
+    const userToRemove: any = await this.repository.findOne({
+      where: { message_id: id },
+    });
     await this.repository.remove(userToRemove);
   }
 

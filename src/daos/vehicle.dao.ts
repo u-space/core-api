@@ -184,7 +184,7 @@ export class VehicleDao {
   async one(uvin: string) {
     let result: VehicleReg;
     try {
-      result = await this.repository.findOneOrFail(uvin);
+      result = await this.repository.findOneOrFail({ where: { uvin } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -216,9 +216,10 @@ export class VehicleDao {
 
   async oneByUser(uvin: string, username: string) {
     try {
-      const v = await this.repository.findOneOrFail(uvin, {
+      const v = await this.repository.findOneOrFail({
         where: {
-          owner: username,
+          uvin,
+          owner: { username },
         },
       });
       GeneralUtils.setExtraFields(v);

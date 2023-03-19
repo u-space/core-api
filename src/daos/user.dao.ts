@@ -4,13 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import {
-  EntityColumnNotFound,
-  getManager,
-  getRepository,
-  ILike,
-  QueryFailedError,
-} from "typeorm";
+import { getManager, getRepository, ILike, QueryFailedError } from "typeorm";
 import { isArray, isNullOrUndefined, isObject, isString } from "util";
 import { OperationState } from "../entities/operation";
 import { roleValueOf, User } from "../entities/user";
@@ -70,12 +64,7 @@ export class UserDao {
     try {
       dbResult = await this.userRepository.findAndCount(filter);
     } catch (error: any) {
-      if (error instanceof EntityColumnNotFound) {
-        throw new InvalidDataError(
-          `filterProp is not valid (filterProp=${filterProp})`,
-          error
-        );
-      } else if (error instanceof QueryFailedError) {
+      if (error instanceof QueryFailedError) {
         if (
           (error as QueryFailedError).message.startsWith(
             "operator does not exist"
@@ -107,7 +96,7 @@ export class UserDao {
   async one(username: string): Promise<User> {
     let user: User;
     try {
-      user = await this.userRepository.findOneOrFail(username);
+      user = await this.userRepository.findOneOrFail({ where: { username } });
     } catch (error: any) {
       if (error.name === TypeOrmErrorType.EntityNotFound) {
         throw new NotFoundError(
@@ -192,7 +181,7 @@ export class UserDao {
       try {
         // we have to unauthorize all user vehicles
         // and close all user operations
-        await this.userRepository.findOneOrFail(username);
+        await this.userRepository.findOneOrFail({ where: { username } });
         const vehicleDao = new VehicleDao();
         const operationDao = new OperationDao();
 
@@ -238,7 +227,7 @@ export class UserDao {
 
   async exists(username: string) {
     try {
-      await this.userRepository.findOneOrFail(username);
+      await this.userRepository.findOneOrFail({ where: { username } });
       return true;
     } catch (error: any) {
       if (error.name === TypeOrmErrorType.EntityNotFound) {
@@ -254,7 +243,7 @@ export class UserDao {
 
   async existsMail(mail: string) {
     try {
-      await this.userRepository.findOneOrFail({ email: mail });
+      await this.userRepository.findOneOrFail({ where: { email: mail } });
       return true;
     } catch (error: any) {
       if (error.name === TypeOrmErrorType.EntityNotFound) {

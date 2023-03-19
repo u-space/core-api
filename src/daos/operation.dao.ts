@@ -367,7 +367,7 @@ export class OperationDao {
 
   async one(gufi: string) {
     try {
-      return await this.repository.findOneOrFail(gufi);
+      return await this.repository.findOneOrFail({ where: { gufi } });
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -389,9 +389,10 @@ export class OperationDao {
 
   async oneByCreator(gufi: string, username: string) {
     try {
-      return await this.repository.findOneOrFail(gufi, {
+      return await this.repository.findOneOrFail({
         where: {
-          creator: username,
+          gufi,
+          creator: { username },
         },
       });
     } catch (error: any) {
@@ -415,9 +416,10 @@ export class OperationDao {
 
   async oneByOwner(gufi: string, username: string) {
     try {
-      return await this.repository.findOneOrFail(gufi, {
+      return await this.repository.findOneOrFail({
         where: {
-          owner: username,
+          gufi,
+          owner: { username },
         },
       });
     } catch (error: any) {
@@ -476,10 +478,10 @@ export class OperationDao {
     return res;
   }
 
-  async remove(id: number) {
-    const userToRemove: any = await this.repository.findOne(id);
+  /*async remove(id: number) {
+    const userToRemove: any = await this.repository.findOne({where:{gufi: id}});
     await this.repository.remove(userToRemove);
-  }
+  }*/
   async removeOperation(entity: Operation) {
     return await this.repository.remove(entity);
   }

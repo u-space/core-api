@@ -6,9 +6,13 @@
 
 import { Request, Response } from "express";
 import { NotamDao } from "../daos/notam.dao";
+import NotamService from "../services/notam.service";
+import { AAANotams } from "../types";
 import { logAndRespond200, logAndRespond400 } from "./utils";
+import { convertAnyToNotam } from "./utils/notam.utils";
 
 export class NotamController {
+  private notamService = new NotamService();
   private dao = new NotamDao();
 
   /**
@@ -78,16 +82,19 @@ export class NotamController {
      * @param next
      */
   async save(request: Request, response: Response) {
+    // parse request body
+    let notam: AAANotams;
     try {
-      const notam = request.body;
-      const one = await this.dao.save(notam);
-      const id = one.identifiers[0];
-      notam.message_id = id.message_id;
-      // console.log(JSON.stringify(one, null, 2))
-      return logAndRespond200(response, notam, []);
+      notam = convertAnyToNotam(request.body);
     } catch (error) {
-      return logAndRespond400(response, 400, null);
+      return logAndRespond400(response, 400, "Invalid request body");
     }
+
+    // call service
+    const savedNotam = await this.notamService.saveNotam(notam);
+
+    // respond
+    return logAndRespond200(response, savedNotam, []);
   }
 
   /**

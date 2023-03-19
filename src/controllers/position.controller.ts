@@ -45,11 +45,8 @@ export class PositionController {
   }
 
   async one(request: Request, response: Response) {
-    return logAndRespond200(
-      response,
-      await this.dao.one(request.params.id),
-      []
-    );
+    const id = Number(request.params.id);
+    return logAndRespond200(response, await this.dao.one(id), []);
   }
 
   async oneByGufiWithDates(request: Request, response: Response) {
@@ -163,7 +160,7 @@ export class PositionController {
         if (pilotPosition === undefined) {
           sendPositionToMonitor(position, operation.controller_location);
         } else {
-          sendPositionToMonitor(position, pilotPosition.location);
+          sendPositionToMonitor(position, pilotPosition!.location);
         }
 
         return logAndRespond200(response, position, []);
@@ -461,7 +458,7 @@ export class PositionController {
         if (pilotPosition === undefined) {
           sendPositionToMonitor(positionSaved, operation.controller_location);
         } else {
-          sendPositionToMonitor(positionSaved, pilotPosition.location);
+          sendPositionToMonitor(positionSaved, pilotPosition!.location);
         }
 
         return;

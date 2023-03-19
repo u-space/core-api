@@ -25,7 +25,7 @@ export class PilotPositionDao {
   async findLastPosition(gufi: string) {
     return await this.repository.findOne({
       where: {
-        gufi: gufi,
+        gufi: { gufi },
       },
       order: {
         time_sent: "DESC",
