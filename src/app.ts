@@ -37,7 +37,7 @@ import { createTypeormConn } from "./utils/database-config.utils";
 
 import { authMiddleware } from "./middleware/socket-io-auth.middleware";
 
-import { CronService } from "./services/cron.service";
+import { CronService } from "./utils/services/cron.service";
 
 import { logger } from "./utils/logger/main.logger";
 import { logAndRespond400 } from "./controllers/utils";

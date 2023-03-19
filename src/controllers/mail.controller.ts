@@ -18,7 +18,7 @@ import {
 import { UASVolumeReservationDao } from "../daos/uas-volume-reservation.dao";
 import { RestrictedFlightVolumeDao } from "../daos/restricted-flight-volume.dao";
 import { Operation } from "../entities/operation";
-import { logInfo } from "../services/winston-logger.service";
+import { logInfo } from "../utils/services/winston-logger.service";
 import { logAndRespond200, logAndRespond400 } from "./utils";
 import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";

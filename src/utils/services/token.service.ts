@@ -5,7 +5,7 @@
  */
 
 import * as jwt from "jsonwebtoken";
-import { jwtSecret, jwtExpTime } from "../utils/config.utils";
+import { jwtSecret, jwtExpTime } from "../config.utils";
 
 export function getToken(email: any, username: any, role: any) {
   const newToken = jwt.sign({ email, username, role }, jwtSecret, {

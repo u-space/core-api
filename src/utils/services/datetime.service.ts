@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { NODE_ENV } from "../utils/config.utils";
+import { NODE_ENV } from "../config.utils";
 
 let fakeDate = new Date("2019-12-11T13:59:10.000Z");
 

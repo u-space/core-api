@@ -41,7 +41,7 @@ import { operationMailHtml } from "../utils/mail-content.utils";
 import { VehicleReg } from "../entities/vehicle-reg";
 import * as _ from "underscore";
 import { PositionDao } from "../daos/position.dao";
-import { generateFeatureFromExpress } from "../services/express-operation.service";
+import { generateFeatureFromExpress } from "../utils/services/express-operation.service";
 import { Geometry, Point, Polygon } from "geojson";
 import { Severity } from "../entities/severety";
 import { PriorityStatus } from "../entities/priority-elements";

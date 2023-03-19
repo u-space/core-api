@@ -19,7 +19,7 @@ import {
   SMTP_URL,
   SMTP_USERNAME,
 } from "../utils/config.utils";
-import { logInfo } from "../services/winston-logger.service";
+import { logInfo } from "../utils/services/winston-logger.service";
 import { TokenDao } from "../daos/token.dao";
 import {
   getErrorMessageFromExpressValidatorErrors,

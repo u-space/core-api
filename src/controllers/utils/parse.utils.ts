@@ -13,7 +13,7 @@ import {
 import { isArray, isNumber, isObject } from "util";
 
 export default class ParseUtils {
-  static parseAnyToPolygon(obj: any): Polygon {
+  static parseAnyToPolygon(obj: any): any {
     validateObjectKeys(
       obj,
       [
@@ -24,7 +24,7 @@ export default class ParseUtils {
     );
     if (obj.type !== "Polygon")
       throw new Error("geography type must be 'Polygon'");
-    const coordinates = obj.coordinates;
+    const coordinates: any = obj.coordinates;
     if (!isArray(coordinates)) throw new Error("coordinates must be an array");
     if (coordinates.length === 0)
       throw new Error("coordinates can not be empty");

@@ -20,7 +20,7 @@ import { Operation, OperationState } from "../entities/operation";
 
 import { validationResult } from "express-validator";
 
-import { logInfo, logError } from "../services/winston-logger.service";
+import { logInfo, logError } from "../utils/services/winston-logger.service";
 import { stringify } from "querystring";
 
 import {

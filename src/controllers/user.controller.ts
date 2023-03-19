@@ -16,9 +16,9 @@ import {
   ObjectKeyType,
   validateObjectKeys,
 } from "../utils/validation.utils";
-import { multipleFiles } from "../services/upload-file.service";
+import { multipleFiles } from "../utils/services/upload-file.service";
 import { GetUserControllerExtension } from "./extensions/extension-implementation-factory";
-import { logInfo } from "../services/winston-logger.service";
+import { logInfo } from "../utils/services/winston-logger.service";
 import { IUserControllerExtension } from "./extensions/extensions-interfaces";
 
 import {

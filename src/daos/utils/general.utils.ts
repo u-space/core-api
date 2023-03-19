@@ -46,7 +46,7 @@ export default class GeneralUtils {
     if (!isArray(documents)) return;
     const documentIds: string[] = [];
     for (let i = 0; i < documents.length; i++) {
-      const document = documents[i];
+      const document: any = documents[i];
       if (isNullOrUndefined(document)) continue;
       if (!isString(document.id)) continue;
       documentIds.push(document.id);

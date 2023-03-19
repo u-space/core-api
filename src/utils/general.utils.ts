@@ -5,7 +5,7 @@
  */
 
 import { fileServerUrl } from "./config.utils";
-import { getUrl } from "../services/upload-file.service";
+import { getUrl } from "./services/upload-file.service";
 
 export default class GeneralUtils {
   static getDownloadFileUrl(documentFileName: string): string {

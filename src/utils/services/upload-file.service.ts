@@ -6,7 +6,7 @@
 
 // import * as multer from 'multer'
 import multer from "multer";
-import { uploadFolder } from "../utils/config.utils";
+import { uploadFolder } from "../config.utils";
 
 const uploadPath = uploadFolder;
 

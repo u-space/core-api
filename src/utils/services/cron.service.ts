@@ -5,7 +5,7 @@
  */
 
 import { schedule } from "node-cron";
-import { DroneTagServices } from "../apis/drone-tag/dronetag-services";
+import { DroneTagServices } from "../../apis/drone-tag/dronetag-services";
 import { processOperations } from "./operation-cronjobs.service";
 
 const DRONETATG_INTEGRATION = true;

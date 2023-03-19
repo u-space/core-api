@@ -4,16 +4,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { OperationDao } from "../daos/operation.dao";
-import { Operation, OperationState } from "../entities/operation";
+import { OperationDao } from "../../daos/operation.dao";
+import { Operation, OperationState } from "../../entities/operation";
 import { getNow } from "./datetime.service";
-import { OperationVolume } from "../entities/operation-volume";
-import { UASVolumeReservationDao } from "../daos/uas-volume-reservation.dao";
-import { RestrictedFlightVolumeDao } from "../daos/restricted-flight-volume.dao";
+import { OperationVolume } from "../../entities/operation-volume";
+import { UASVolumeReservationDao } from "../../daos/uas-volume-reservation.dao";
+import { RestrictedFlightVolumeDao } from "../../daos/restricted-flight-volume.dao";
 import {
   sendOperationStateChange,
   sendUpdateOperation,
-} from "../apis/socket-io/async-browser-comunication";
+} from "../../apis/socket-io/async-browser-comunication";
 import {
   adminEmail,
   COMPANY_NAME,
@@ -23,17 +23,17 @@ import {
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
-} from "../utils/config.utils";
+} from "../config.utils";
 import { logError } from "./winston-logger.service";
 
 // import { OperationIntersections } from "../entities/OperationIntersection";
-import { Role } from "../entities/user";
+import { Role } from "../../entities/user";
 
-import { doSendMailForPendingOperation } from "../controllers/mail.controller";
-import { operationMailHtml } from "../utils/mail-content.utils";
-import { logStateChange } from "../controllers/utils";
-import MailAPIFactory from "../apis/mail/mail-api-factory";
-import IMailAPI from "../apis/mail/imail-api";
+import { doSendMailForPendingOperation } from "../../controllers/mail.controller";
+import { operationMailHtml } from "../mail-content.utils";
+import { logStateChange } from "../../controllers/utils";
+import MailAPIFactory from "../../apis/mail/mail-api-factory";
+import IMailAPI from "../../apis/mail/imail-api";
 
 let operationDao: OperationDao;
 let uvrDao: UASVolumeReservationDao;

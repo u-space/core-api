@@ -20,7 +20,7 @@ import {
   generateAuthorizeVehicleMailHTML,
   generateAuthorizeVehicleMailText,
 } from "../utils/mail-content.utils";
-import { multipleFiles } from "../services/upload-file.service";
+import { multipleFiles } from "../utils/services/upload-file.service";
 
 import { IVehicleControllerExtension } from "./extensions/extensions-interfaces";
 import { GetVehicleControllerExtension } from "./extensions/extension-implementation-factory";
@@ -691,7 +691,9 @@ export class VehicleController {
         return logAndRespond400(response, 404, "vehicle has no documents");
       }
       const vehicleDocuments = vehicleExtraFields["documents"];
-      if (!vehicleDocuments.find((document) => document.id === documentId)) {
+      if (
+        !vehicleDocuments.find((document: any) => document.id === documentId)
+      ) {
         return logAndRespond400(
           response,
           404,
@@ -699,7 +701,7 @@ export class VehicleController {
         );
       }
       vehicle.extra_fields["documents"] = vehicleDocuments.filter(
-        (document) => document.id !== documentId
+        (document: any) => document.id !== documentId
       );
       await this.dao.updateOnlyReceivedProperties(vehicle);
       return logAndRespond200(response, vehicle, []);
