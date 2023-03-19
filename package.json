@@ -2,6 +2,7 @@
   "name": "cielum-easy-core",
   "version": "1.0.0",
   "description": "Core API of the Cielum Easy solution",
+  "type": "module",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
     "@turf/turf": "^6.5.0",
