@@ -75,6 +75,10 @@ People *love* thorough bug reports. I'm not even kidding.
 ## References
 This section of the document was adapted from the open-source contribution guidelines for [Facebook's Draft](https://github.com/facebook/draft-js/blob/a9316a723f9e918afde44dea68b5f9f39b7d9b00/CONTRIBUTING.md)
 
+# Test Coverage
+
+<img src="./images/test-coverage.png"/>
+
 # License
 
 Cielum Easy - Core API is [MPL 2.0 lincensed](https://www.mozilla.org/en-US/MPL/2.0/)
