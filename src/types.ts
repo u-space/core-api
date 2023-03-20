@@ -115,8 +115,8 @@ export type AAANotams = {
   message_id?: string;
   text?: string;
   geography?: GeoJSON.Polygon;
-  effective_time_begin?: string;
-  effective_time_end?: string;
+  effective_time_begin: Date;
+  effective_time_end: Date;
 };
 
 export type AAAOperationVolume = {

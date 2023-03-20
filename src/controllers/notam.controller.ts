@@ -5,7 +5,7 @@
  */
 
 import { Request, Response } from "express";
-import { NotamDao } from "../daos/notam.dao";
+import { NotamDaoTypeOrmImp } from "../daos/typeorm-imp/notam.dao";
 import NotamService from "../services/notam.service";
 import { AAANotams } from "../types";
 import { logAndRespond200, logAndRespond400 } from "./utils";
@@ -13,7 +13,7 @@ import { convertAnyToNotam } from "./utils/notam.utils";
 
 export class NotamController {
   private notamService = new NotamService();
-  private dao = new NotamDao();
+  private dao = new NotamDaoTypeOrmImp();
 
   /**
    * Return all notams
