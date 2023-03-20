@@ -44,6 +44,10 @@ import { logAndRespond400 } from "./controllers/utils";
 import { MQTT } from "./apis/mqtt/mqtt";
 
 import swaggerUi from "swagger-ui-express";
+import {
+  getNotamService,
+  initializeServices,
+} from "./controllers/utils/services-factory.utils";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const swaggerDocument = require("../swagger.json");
 
@@ -71,6 +75,11 @@ class App {
     if (PORT == undefined || INSTANCE == undefined) {
       throw "You must define PORT and INSTANCE on .env file";
     }
+
+    // initialize services used by controllers
+    initializeServices().then(() => {
+      console.log("Services initialized");
+    });
 
     this.port = Number.parseInt(PORT); //|| port;
     this.httpPort = Number.parseInt(HTTP_PORT ? HTTP_PORT : "2999"); //|| port;

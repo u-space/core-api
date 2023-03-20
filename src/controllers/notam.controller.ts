@@ -5,16 +5,12 @@
  */
 
 import { Request, Response } from "express";
-import { NotamDaoTypeOrmImp } from "../daos/typeorm-imp/notam.dao";
-import NotamService from "../services/notam.service";
 import { AAANotams } from "../types";
 import { logAndRespond200, logAndRespond400 } from "./utils";
 import { convertAnyToNotam } from "./utils/notam.utils";
+import { getNotamService } from "./utils/services-factory.utils";
 
 export class NotamController {
-  private notamService = new NotamService();
-  private dao = new NotamDaoTypeOrmImp();
-
   /**
    * Return all notams
    * If have query parameters date or polygon filter the notams:
@@ -39,10 +35,10 @@ export class NotamController {
       let list;
       if (date || polygon) {
         if (typeof date === "string") {
-          list = await this.dao.getNotamByDateAndArea(date, polygon);
+          list = await getNotamService().getNotamByDateAndArea(date, polygon);
         }
       } else {
-        list = await this.dao.all();
+        list = await getNotamService().getNotams();
       }
       return logAndRespond200(response, list, []);
     } catch (error) {
@@ -62,7 +58,7 @@ export class NotamController {
    */
   async one(request: Request, response: Response) {
     try {
-      const one = await this.dao.one(request.params.id);
+      const one = await getNotamService().getNotam(request.params.id);
       return logAndRespond200(response, one, []);
     } catch (error) {
       return logAndRespond400(response, 404, null);
@@ -91,7 +87,7 @@ export class NotamController {
     }
 
     // call service
-    const savedNotam = await this.notamService.saveNotam(notam);
+    const savedNotam = await getNotamService().saveNotam(notam);
 
     // respond
     return logAndRespond200(response, savedNotam, []);

@@ -1,16 +1,14 @@
-import { DataBaseError, NotFoundError } from "../daos/db-errors";
+import { Polygon } from "geojson";
+import { NotFoundError } from "../daos/db-errors";
 import INotamDao from "../daos/notam.dao";
-import { NotamDaoTypeOrmImp } from "../daos/typeorm-imp/notam.dao";
 import { AAANotams } from "../types";
 import { InvalidDataError, NoDataError, UnexpectedError } from "./types";
 
 export default class NotamService {
-  private notamDao: INotamDao = new NotamDaoTypeOrmImp();
+  private notamDao: INotamDao;
 
-  constructor(notamDao?: INotamDao) {
-    if (notamDao !== undefined) {
-      this.notamDao = notamDao;
-    }
+  constructor(notamDao: INotamDao) {
+    this.notamDao = notamDao;
   }
 
   async saveNotam(notam: AAANotams): Promise<AAANotams> {
@@ -58,5 +56,9 @@ export default class NotamService {
       }
       throw new UnexpectedError((error as Error).message);
     }
+  }
+
+  async getNotamByDateAndArea(date: string, polygon: Polygon): Promise<any> {
+    return await this.notamDao.getNotamByDateAndArea(date, polygon);
   }
 }

@@ -97,6 +97,12 @@ export const LOGS_ENABLED = process.env.LOGS_ENABLED === "true";
 export const PUBLIC_KEY = process.env.PUBLIC_KEY;
 export const PRIVATE_KEY = process.env.PRIVATE_KEY;
 
+export const DB_HOST = process.env.DB_HOST;
+export const DB_PORT = process.env.DB_PORT;
+export const DB_USERNAME = process.env.DB_USERNAME;
+export const DB_PASSWORD = process.env.DB_PASSWORD;
+export const DB_DATABASE = process.env.DB_DATABASE;
+
 export const TESTS_DB_HOST = process.env.TESTS_DB_HOST;
 export const TESTS_DB_PORT = process.env.TESTS_DB_PORT;
 export const TESTS_DB_USERNAME = process.env.TESTS_DB_USERNAME;

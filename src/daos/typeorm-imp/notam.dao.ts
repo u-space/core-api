@@ -17,38 +17,15 @@ import {
 import INotamDao from "../notam.dao";
 
 export class NotamDaoTypeOrmImp implements INotamDao {
-  private dataSource = new DataSource({
-    type: "postgres",
-    host: "localhost",
-    port: 5432,
-    username: "jjcetraro",
-    password: "tribus1234",
-    database: "test_core",
-    synchronize: false,
-    dropSchema: false,
-    logging: false,
-    ssl: false,
-    entities: [
-      "/Users/jjcetraro/workspace/dronfies/core2/src/entities/**/*.ts",
-    ],
-    migrations: [
-      "/Users/jjcetraro/workspace/dronfies/core2/src/migration/**/*.ts",
-    ],
-    subscribers: [
-      "/Users/jjcetraro/workspace/dronfies/core2/src/subscriber/**/*.ts",
-    ],
-  });
+  private dataSourceInitialized: DataSource;
 
-  constructor(dataSource?: DataSource) {
-    if (dataSource !== undefined) {
-      this.dataSource = dataSource;
-    }
+  constructor(dataSourceInitialized: DataSource) {
+    this.dataSourceInitialized = dataSourceInitialized;
   }
 
   async all(): Promise<AAANotams[]> {
-    await this.initializeDataSource();
     try {
-      const dbNotams = await this.dataSource.manager.find(Notams);
+      const dbNotams = await this.dataSourceInitialized.manager.find(Notams);
       return dbNotams.map((dbNotam) => convertNotamsToAAANotams(dbNotam));
     } catch (error: any) {
       throw new DataBaseError(
@@ -59,11 +36,13 @@ export class NotamDaoTypeOrmImp implements INotamDao {
   }
 
   async one(message_id: string): Promise<AAANotams> {
-    await this.initializeDataSource();
     try {
-      const dbResult = await this.dataSource.manager.findOneOrFail(Notams, {
-        where: { message_id },
-      });
+      const dbResult = await this.dataSourceInitialized.manager.findOneOrFail(
+        Notams,
+        {
+          where: { message_id },
+        }
+      );
       return convertNotamsToAAANotams(dbResult);
     } catch (error: any) {
       if (
@@ -85,9 +64,8 @@ export class NotamDaoTypeOrmImp implements INotamDao {
   }
 
   async save(notam: AAANotams): Promise<AAANotams> {
-    await this.initializeDataSource();
     try {
-      const notamEntity = await this.dataSource.manager.save(
+      const notamEntity = await this.dataSourceInitialized.manager.save(
         Notams,
         convertAAANotamsToNotams(notam)
       );
@@ -101,11 +79,13 @@ export class NotamDaoTypeOrmImp implements INotamDao {
   }
 
   async remove(id: string) {
-    await this.initializeDataSource();
-    const userToRemove: any = await this.dataSource.manager.findOne(Notams, {
-      where: { message_id: id },
-    });
-    await this.dataSource.manager.remove(Notams, userToRemove);
+    const userToRemove: any = await this.dataSourceInitialized.manager.findOne(
+      Notams,
+      {
+        where: { message_id: id },
+      }
+    );
+    await this.dataSourceInitialized.manager.remove(Notams, userToRemove);
   }
 
   // async getNotamByVolume(volume : OperationVolume){
@@ -122,7 +102,6 @@ export class NotamDaoTypeOrmImp implements INotamDao {
   // }
 
   async getNotamByDateAndArea(date: string, polygon: Polygon) {
-    await this.initializeDataSource();
     const params: any = {};
     const conditions = [];
     if (date) {
@@ -139,16 +118,10 @@ export class NotamDaoTypeOrmImp implements INotamDao {
       params["geom"] = JSON.stringify(polygon);
     }
 
-    return await this.dataSource.manager
+    return await this.dataSourceInitialized.manager
       .createQueryBuilder(Notams, "notams")
       .where(conditions.join(" AND "))
       .setParameters(params)
       .getMany();
-  }
-
-  private async initializeDataSource() {
-    if (!this.dataSource.isInitialized) {
-      this.dataSource = await this.dataSource.initialize();
-    }
   }
 }
