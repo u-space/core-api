@@ -6,23 +6,23 @@
 
 import { getManager, getRepository, ILike, QueryFailedError } from "typeorm";
 import { isArray, isNullOrUndefined, isObject, isString } from "util";
-import { OperationState } from "../entities/operation";
-import { roleValueOf, User } from "../entities/user";
-import { VehicleAuthorizeStatus, VehicleReg } from "../entities/vehicle-reg";
+import { OperationState } from "../../entities/operation";
+import { roleValueOf, User } from "../../entities/user";
+import { VehicleAuthorizeStatus, VehicleReg } from "../../entities/vehicle-reg";
 import {
   CorruptedDataBaseError,
   DataBaseError,
   InvalidDataError,
   NotFoundError,
-} from "./db-errors";
-import { OperationDao } from "./operation.dao";
-import { TypeOrmErrorType } from "./type-orm-error-type";
-import GeneralUtils from "./utils/general.utils";
-import { VehicleDao } from "./vehicle.dao";
-import { Document } from "../entities/document";
-import { DocumentDao } from "./document.dao";
+} from "../db-errors";
+import { OperationDao } from "../operation.dao";
+import { TypeOrmErrorType } from "../type-orm-error-type";
+import GeneralUtils from "../utils/general.utils";
+import { VehicleDao } from "../vehicle.dao";
+import { Document } from "../../entities/document";
+import { DocumentDao } from "../document.dao";
 
-export class UserDao {
+export class UserDaoTypeORMImp {
   private userRepository = getRepository(User);
 
   async all(

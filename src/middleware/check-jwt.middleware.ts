@@ -7,7 +7,7 @@
 import { NextFunction, Request, Response } from "express";
 import { readFileSync } from "fs";
 import { verify } from "jsonwebtoken";
-import { UserDao } from "../daos/user.dao";
+import { UserDaoTypeORMImp } from "../daos/typeorm-imp/user.dao";
 import { Role } from "../entities/user";
 import { NODE_ENV, PUBLIC_KEY } from "../utils/config.utils";
 
@@ -47,7 +47,7 @@ export const checkJwt = async (
         algorithms: [ALGORITHM],
       });
       if (!jwtPayload.role) {
-        const userdao = new UserDao();
+        const userdao = new UserDaoTypeORMImp();
         const user = await userdao.one(jwtPayload.username);
         jwtPayload.role = user.role;
       }

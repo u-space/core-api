@@ -11,7 +11,7 @@ import { Document } from "../entities/document";
 import { logAndRespond200, logAndRespond400, logAndRespond500 } from "./utils";
 import { getPayloadFromResponse } from "../utils/auth.utils";
 import { Role, User } from "../entities/user";
-import { UserDao } from "../daos/user.dao";
+import { UserDaoTypeORMImp } from "../daos/typeorm-imp/user.dao";
 import { buildNewObservationMail } from "../utils/mail-content.utils";
 import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
@@ -107,7 +107,7 @@ export class DocumentRestController {
 
     let userToSendMail: User;
     try {
-      userToSendMail = await new UserDao().one(usernameToSendMail);
+      userToSendMail = await new UserDaoTypeORMImp().one(usernameToSendMail);
     } catch (error) {
       if (error instanceof NotFoundError) {
         return logAndRespond400(

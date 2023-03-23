@@ -6,7 +6,7 @@
 
 import { Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
-import { UserDao } from "../daos/user.dao";
+import { UserDaoTypeORMImp } from "../daos/typeorm-imp/user.dao";
 import {
   COMPANY_NAME,
   MICROUTM_AUTH_URL,
@@ -43,7 +43,7 @@ import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
 import { NoDataError } from "../apis/auth-server/types";
 
 export class AuthController {
-  private dao = new UserDao();
+  private dao = new UserDaoTypeORMImp();
   private tokenDao = new TokenDao();
   private mailAPI: IMailAPI = MailAPIFactory.getMailAPI(
     MOCK_MAIL_API,

@@ -8,7 +8,7 @@ import { DataBaseError, InvalidDataError, NotFoundError } from "./db-errors";
 import { ILike } from "typeorm";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 import { VehicleDao } from "./vehicle.dao";
-import { UserDao } from "./user.dao";
+import { UserDaoTypeORMImp } from "./typeorm-imp/user.dao";
 import { GeoPoint } from "../entities/geo-point";
 import { Point } from "geojson";
 import { Geo3DPoint } from "../entities/geo3d-point";
@@ -238,7 +238,7 @@ export const getUserAndIfItDoesntExistThrowInvalidDataError = async (
   username: string
 ) => {
   try {
-    return await new UserDao().one(username);
+    return await new UserDaoTypeORMImp().one(username);
   } catch (error) {
     if (error instanceof NotFoundError) {
       throw new InvalidDataError(

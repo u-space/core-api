@@ -6,7 +6,7 @@
 
 import { Request, Response } from "express";
 import { Role, User } from "../entities/user";
-import { UserDao } from "../daos/user.dao";
+import { UserDaoTypeORMImp } from "../daos/typeorm-imp/user.dao";
 import {
   getPayloadFromResponse,
   parseErrorAndRespond,
@@ -48,7 +48,7 @@ import GeneralUtils from "../utils/general.utils";
 import Joi from "joi";
 
 export class UserController {
-  private dao = new UserDao();
+  private dao = new UserDaoTypeORMImp();
   private authServer = AuthServerAPIFactory.getAuthServerAPI(
     MOCK_AUTH_SERVER_API === "true"
   );

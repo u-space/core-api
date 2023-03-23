@@ -18,7 +18,7 @@ import {
   dateTimeStringFormat,
   validateStringDateIso,
 } from "../utils/validation.utils";
-import { UserDao } from "../daos/user.dao";
+import { UserDaoTypeORMImp } from "../daos/typeorm-imp/user.dao";
 import { ApprovalDao } from "../daos/approval.dao";
 
 import {
@@ -78,7 +78,7 @@ export class OperationController {
   private dao = new OperationDao();
   private daoVehiculo = new VehicleDao();
   private daoPosition = new PositionDao();
-  private daoUser = new UserDao();
+  private daoUser = new UserDaoTypeORMImp();
   private daoRegularFlight = new RegularFlightDao();
   private mailAPI: IMailAPI = MailAPIFactory.getMailAPI(
     MOCK_MAIL_API,
@@ -345,7 +345,7 @@ export class OperationController {
 
     // validate that the usernameOwner exists
     try {
-      await new UserDao().one(usernameOwner);
+      await new UserDaoTypeORMImp().one(usernameOwner);
     } catch (err) {
       errors.push(`There is no user with the username '${usernameOwner}'.`);
     }
@@ -458,12 +458,12 @@ export class OperationController {
       let creator: any;
       // validate that the usernameOwner exists
       try {
-        ownerUser = await new UserDao().one(owner);
+        ownerUser = await new UserDaoTypeORMImp().one(owner);
       } catch (err) {
         errors.push(`There is no user with the username '${owner}'.`);
       }
       try {
-        creator = await new UserDao().one(username);
+        creator = await new UserDaoTypeORMImp().one(username);
       } catch (err) {
         errors.push(`There is no user with the username '${username}'.`);
       }

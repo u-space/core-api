@@ -8,7 +8,7 @@ import { getRepository } from "typeorm";
 import { VehicleReg } from "../entities/vehicle-reg";
 import { Role, User } from "../entities/user";
 import { TypeOrmErrorType } from "./type-orm-error-type";
-import { UserDao } from "./user.dao";
+import { UserDaoTypeORMImp } from "./typeorm-imp/user.dao";
 import {
   CorruptedDataBaseError,
   DataBaseError,
@@ -78,7 +78,7 @@ export class VehicleDao {
 
   async allByUser(username: any) {
     try {
-      if (!(await new UserDao().exists(username))) {
+      if (!(await new UserDaoTypeORMImp().exists(username))) {
         throw new NotFoundError(
           `There is no user with the username received (username="${username}")`,
           null
@@ -123,7 +123,7 @@ export class VehicleDao {
     validatePaginationParams(pageTake, pageSkip, filterProp, filterValue);
 
     // we verify that the user exists
-    if (!(await new UserDao().exists(username))) {
+    if (!(await new UserDaoTypeORMImp().exists(username))) {
       throw new NotFoundError(
         `There is no user with the username received (username=${username})`,
         null
