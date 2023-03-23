@@ -21,8 +21,9 @@ import GeneralUtils from "../utils/general.utils";
 import { VehicleDao } from "../vehicle.dao";
 import { Document } from "../../entities/document";
 import { DocumentDao } from "../document.dao";
+import IUserDao from "../user.dao";
 
-export class UserDaoTypeORMImp {
+export class UserDaoTypeORMImp implements IUserDao {
   private userRepository = getRepository(User);
 
   async all(
@@ -143,7 +144,7 @@ export class UserDaoTypeORMImp {
     return u;
   }
 
-  async update(user: User) {
+  async update(user: User): Promise<void> {
     try {
       // let ef = user.extra_fields;
       if (user.extra_fields) {
@@ -157,8 +158,6 @@ export class UserDaoTypeORMImp {
         user.strExtraFields = JSON.stringify(user.extra_fields);
       }
       const u = await this.userRepository.save(user);
-      // u.extra_fields = ef;
-      return u;
     } catch (error: any) {
       throw new Error(`An error has ocurred: ${error}`);
     }
@@ -176,7 +175,7 @@ export class UserDaoTypeORMImp {
     }
   }
 
-  async disable(username: string) {
+  async disable(username: string): Promise<void> {
     if (username) {
       try {
         // we have to unauthorize all user vehicles
@@ -206,7 +205,7 @@ export class UserDaoTypeORMImp {
         });
 
         //after all vehicles went unauthorized and all operations are closed proceed to soft delete user
-        return await this.userRepository.softDelete(username);
+        await this.userRepository.softDelete(username);
       } catch (error: any) {
         if (error.name === TypeOrmErrorType.EntityNotFound) {
           throw new NotFoundError(
@@ -221,8 +220,8 @@ export class UserDaoTypeORMImp {
     }
   }
 
-  async enable(username: string) {
-    return await this.userRepository.restore(username);
+  async enable(username: string): Promise<void> {
+    await this.userRepository.restore(username);
   }
 
   async exists(username: string) {
