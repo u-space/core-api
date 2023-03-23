@@ -17,7 +17,7 @@ export const logger = winston.createLogger({
   transports: [
     new winston.transports.Console(),
     new winston.transports.File({
-      filename: `${__dirname}/../../logs/logs.log`,
+      filename: `${__dirname}/../../../logs/logs.log`,
       maxsize: 104857600, // 100 MB
       maxFiles: 5,
     }) /*,
