@@ -1,5 +1,7 @@
 import { DataSource } from "typeorm";
+import { AircraftTypeDaoTypeOrmImp } from "../../daos/typeorm-imp/aircraft-type.dao";
 import { NotamDaoTypeOrmImp } from "../../daos/typeorm-imp/notam.dao";
+import AircraftTypeService from "../../services/aircraft-type.service";
 import NotamService from "../../services/notam.service";
 import {
   DB_HOST,
@@ -9,6 +11,7 @@ import {
   DB_DATABASE,
 } from "../../utils/config.utils";
 
+let aircraftTypeService: AircraftTypeService;
 let notamService: NotamService;
 
 export async function initializeServices(): Promise<void> {
@@ -31,7 +34,14 @@ export async function initializeServices(): Promise<void> {
   await dataSource.initialize();
 
   // create services
+  aircraftTypeService = new AircraftTypeService(
+    new AircraftTypeDaoTypeOrmImp(dataSource)
+  );
   notamService = new NotamService(new NotamDaoTypeOrmImp(dataSource));
+}
+
+export function getAircraftTypeService(): AircraftTypeService {
+  return aircraftTypeService;
 }
 
 export function getNotamService(): NotamService {

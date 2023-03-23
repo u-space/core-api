@@ -4,20 +4,19 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { AircraftTypeDao } from "../daos/aircraft-type.dao";
+import { AircraftTypeDaoTypeOrmImp } from "../daos/typeorm-imp/aircraft-type.dao";
 import { AircraftType } from "../entities/aircraft-type";
+import { AAAAircratType } from "../types";
+import { getAircraftTypeService } from "./utils/services-factory.utils";
 
 export const getAircraftTypes = async () => {
-  const dao = new AircraftTypeDao();
-  return await dao.all();
+  return await getAircraftTypeService().getAircraftTypes();
 };
 
 export const getAircraftType = async (id: any) => {
-  const dao = new AircraftTypeDao();
-  return await dao.one(id);
+  return await getAircraftTypeService().getAircraftType(id);
 };
 
-export const saveAircraftType = async (aircraftType: AircraftType) => {
-  const dao = new AircraftTypeDao();
-  return await dao.save(aircraftType);
+export const saveAircraftType = async (aircraftType: AAAAircratType) => {
+  return await getAircraftTypeService().saveAircraftType(aircraftType);
 };

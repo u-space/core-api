@@ -1,17 +1,17 @@
 export type AAAAircratType = {
-  id: number;
+  id?: number;
   manufacturer: string;
   model: string;
   class: AAAVehicleType;
   mtom: string;
-  timeAutonomy: number;
+  time_autonomy: number;
   pilot: string;
   band: string;
   color: string;
   lights: string;
-  loadWeight: number;
+  load_weight: number;
   vhf: boolean;
-  visualFrontSensor: string;
+  visual_front_sensor: string;
   dimension: string;
   energy: string;
 };
