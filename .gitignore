@@ -11,6 +11,7 @@
 !.prettierignore
 !.prettierrc.json
 !first-issues-and-roadmap.md
+!governance.md
 !images
 !images/**
 !ormconfig.sample.json
