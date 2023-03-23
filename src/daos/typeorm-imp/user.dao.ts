@@ -163,18 +163,6 @@ export class UserDaoTypeORMImp implements IUserDao {
     }
   }
 
-  async updatePassword(username: string, password: string) {
-    try {
-      const manager = getManager();
-      await manager.query(
-        'UPDATE "user" SET password = $1 WHERE username = $2',
-        [password, username]
-      );
-    } catch (error: any) {
-      throw new Error(`An error has ocurred: ${error}`);
-    }
-  }
-
   async disable(username: string): Promise<void> {
     if (username) {
       try {

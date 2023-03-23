@@ -20,7 +20,6 @@ export default interface IUserDao {
   one(username: string): Promise<User>;
   save(user: User): Promise<User>;
   update(user: User): Promise<void>;
-  updatePassword(username: string, password: string): Promise<void>;
   disable(username: string): Promise<void>;
   enable(username: string): Promise<void>;
   exists(username: string): Promise<boolean>;
