@@ -78,7 +78,7 @@ export class AuthController {
     });
     const validationResult = reqBodySchema.validate(request.body);
     if (validationResult.error !== undefined)
-      logAndRespond400(response, 400, validationResult.error.message);
+      return logAndRespond400(response, 400, validationResult.error.message);
 
     const username: string = request.body.username;
     const password: string = request.body.password;
