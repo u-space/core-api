@@ -6,10 +6,10 @@
 
 import { Request, Response } from "express";
 import {
+  USER_DOCUMENT_EXTRA_FIELDS_SCHEMA,
   USER_EXTRA_FIELDS_SCHEMA,
   VEHICLE_EXTRA_FIELDS_SCHEMA,
 } from "../utils/config.utils";
-import { Document } from "../entities/document";
 
 import { logAndRespond200 } from "./utils";
 export class SchemasController {
@@ -20,7 +20,9 @@ export class SchemasController {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const vehicleExtraFieldsSchema = require(VEHICLE_EXTRA_FIELDS_SCHEMA!);
 
-    const docSchemas = Document.extraFieldsSchemas;
+    // TODO: We are returning user document extra fields, but why dont return vehicle document extra fields?
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const docSchemas = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
 
     const responseJson = {
       userExtraFields: userExtraFieldsSchema,
