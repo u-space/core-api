@@ -10,7 +10,6 @@ import {
   USER_EXTRA_FIELDS_SCHEMA,
   VEHICLE_EXTRA_FIELDS_SCHEMA,
 } from "../utils/config.utils";
-import { Document } from "../entities/document";
 
 import { logAndRespond200 } from "./utils";
 export class SchemasController {

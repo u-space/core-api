@@ -315,11 +315,11 @@ export class UserController {
     const userParams = request.body;
 
     const reqBodySchema = Joi.object({
-      username: Joi.string().alphanum().min(3).max(100).required(),
+      username: Joi.string().min(3).max(100).required(),
       email: Joi.string().email().required(),
-      password: Joi.string().alphanum().min(8).max(100).required(),
-      firstName: Joi.string().alphanum().min(3).max(100).required(),
-      lastName: Joi.string().alphanum().min(3).max(100).required(),
+      password: Joi.string().min(8).max(100).required(),
+      firstName: Joi.string().min(3).max(100).required(),
+      lastName: Joi.string().min(3).max(100).required(),
       extra_fields: Joi.object().optional(),
     });
     const validationResult = reqBodySchema.validate(request.body);
