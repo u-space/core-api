@@ -72,8 +72,8 @@ export class AuthController {
   async login(request: Request, response: Response) {
     // validate request body
     const reqBodySchema = Joi.object({
-      username: Joi.string().alphanum().min(3).max(100).required(),
-      password: Joi.string().alphanum().min(3).max(100).required(),
+      username: Joi.string().min(3).max(100).required(),
+      password: Joi.string().min(3).max(100).required(),
       format: "json",
     });
     const validationResult = reqBodySchema.validate(request.body);
