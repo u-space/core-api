@@ -74,6 +74,8 @@ export class AuthController {
     const reqBodySchema = Joi.object({
       username: Joi.string().min(3).max(100).required(),
       password: Joi.string().min(3).max(100).required(),
+      // clientid is passed by mqtt server so I have to accept it
+      clientid: Joi.string().min(1).max(100).optional(),
       format: "json",
     });
     const validationResult = reqBodySchema.validate(request.body);
