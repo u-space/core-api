@@ -1282,7 +1282,7 @@ function validateVolumesOrdinals(volumes: any[]) {
   for (let i = 0; i < volumes.length; i++) {
     const volume = volumes[i];
     const ordinal = volume["ordinal"];
-    if (ordinal === undefined && someVolumeHasOrdinal) {
+    if (ordinal === undefined) {
       if (someVolumeHasOrdinal) {
         throw new Error("You can't pass ordinal only for some volumes");
       }
