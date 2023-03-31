@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { point } from "turf";
+import { point } from "@turf/turf";
 
 export class GeoPoint {
   private longitude: number;

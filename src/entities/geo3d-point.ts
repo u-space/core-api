@@ -5,7 +5,7 @@
  */
 
 import { GeoPoint } from "./geo-point";
-import { point } from "turf";
+import { point } from "@turf/turf";
 
 export class Geo3DPoint {
   private longitude: number;

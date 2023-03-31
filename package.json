@@ -4,7 +4,6 @@
   "description": "Core API of the Cielum Easy solution",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
-    "@turf/turf": "^6.5.0",
     "@types/bcryptjs": "^2.4.2",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.6",
@@ -32,6 +31,7 @@
   },
   "dependencies": {
     "@googlemaps/google-maps-services-js": "^3.3.27",
+    "@turf/turf": "^6.5.0",
     "axios": "^0.21.1",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",
@@ -59,7 +59,6 @@
     "swagger-ui-express": "^4.1.6",
     "ts-node": "3.3.0",
     "ts-node-dev": "^1.0.0-pre.44",
-    "turf": "^3.0.14",
     "typeorm": "^0.2.24",
     "underscore": "^1.13.1",
     "uuid-validate": "0.0.3",
