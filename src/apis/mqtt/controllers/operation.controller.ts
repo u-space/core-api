@@ -28,7 +28,7 @@ export class MQTTOperationController {
   ) {
     const responseTopic =
       "getGufi" + "/" + username + "/" + trackerId + "/" + "response";
-    const { location, altitude } = position;
+    const { location, altitude_gps } = position;
     const alt = await getElevation([
       {
         lat: location?.coordinates[1],
@@ -42,7 +42,7 @@ export class MQTTOperationController {
     try {
       const operation = await this.dao.getActivatedOperationByPosition(
         location,
-        altitude
+        altitude_gps
       );
       // if the user is PILOT, we have to check that he es one of the operators of the operation
       if (
@@ -57,7 +57,7 @@ export class MQTTOperationController {
           status: "error",
           message: `There is no operation ACTIVATED in the location received (location=${JSON.stringify(
             location
-          )}, altitude_gps=${altitude})`,
+          )}, altitude_gps=${altitude_gps})`,
         };
       }
       const gufi = operation.gufi;
@@ -78,7 +78,7 @@ export class MQTTOperationController {
           status: "error",
           message: `There is no operation ACTIVATED in the location received (location=${JSON.stringify(
             location
-          )}, altitude_gps=${altitude})`,
+          )}, altitude_gps=${altitude_gps})`,
         };
       } else {
         response = {
