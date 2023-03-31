@@ -963,8 +963,7 @@ export class OperationController {
 
     const ownerFromUsername: User = await this.daoUser.one(username);
 
-    const operation: Operation = {
-      gufi: "",
+    const operation: any = {
       name: "Express Operation",
       owner: ownerFromUsername,
       flight_comments: "",
