@@ -325,17 +325,17 @@ export class OperationController {
     const { role, username } = response.locals.jwtPayload;
     const usernameFromRequest = username;
 
-    // if the user is PILOT, we check that the owner parameter was not received
-    if (role == Role.PILOT) {
-      if (Object.keys(request.body).includes("owner")) {
-        return logAndRespond400(
-          response,
-          400,
-          'Pilot users can not set the "owner" of the operation (remove the "owner" key from the request body)'
-        );
-      } else {
-        request.body.owner = username;
-      }
+    // if the user is PILOT and the owner parameter was received, we check that owner is the logged user
+    if (
+      role === Role.PILOT &&
+      Object.keys(request.body).includes("owner") &&
+      request.body.owner !== username
+    ) {
+      return logAndRespond400(
+        response,
+        400,
+        "Pilot users must be the owners of the operations they create. Set you as the owner of the operation or remove the owner key from the operation object."
+      );
     }
 
     request.body.owner = request.body.owner || usernameFromRequest;
