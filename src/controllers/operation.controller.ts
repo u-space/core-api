@@ -49,7 +49,7 @@ import {
   CustomError,
   getPaginationParametersFromRequestQuery,
   logAndRespond200,
-  logAndRespond400,
+  logAndRespond400 as res400,
   logAndRespond500,
   logStateChange,
   removeNullProperties,
@@ -108,7 +108,7 @@ export class OperationController {
               ).length > 0
           ).length === 0
         ) {
-          return logAndRespond400(
+          return res400(
             response,
             404,
             `There is no operation ACTIVATED in the location received (location=${location}, altitude_gps=${altitude_gps})`
@@ -126,9 +126,9 @@ export class OperationController {
       }
     } catch (error) {
       if (error instanceof InvalidDataError) {
-        return logAndRespond400(response, 400, error.message);
+        return res400(response, 400, error.message);
       } else if (error instanceof NotFoundError) {
-        return logAndRespond400(
+        return res400(
           response,
           404,
           `There is no operation ACTIVATED in the location received (location=${location}, altitude_gps=${altitude_gps})`
@@ -204,7 +204,7 @@ export class OperationController {
       return logAndRespond200(response, { count: ops.length, ops }, []);
     } catch (error) {
       console.error(` -_-_-_-_-_-_-_-> ${JSON.stringify(error)}`);
-      return logAndRespond400(response, 400, null);
+      return res400(response, 400, null);
     }
   }
 
@@ -226,7 +226,7 @@ export class OperationController {
       return logAndRespond200(response, sensibleOp, []);
     } catch (error) {
       console.error(` -_-_-_-_-_-_-_-> ${JSON.stringify(error)}`);
-      return logAndRespond400(response, 400, null);
+      return res400(response, 400, null);
     }
   }
 
@@ -252,7 +252,7 @@ export class OperationController {
         return logAndRespond200(response, v, []);
       }
     } catch (error) {
-      return logAndRespond400(response, 404, null);
+      return res400(response, 404, null);
     }
   }
 
@@ -318,11 +318,11 @@ export class OperationController {
    *   ]
    * }
    * @param request
-   * @param response
+   * @param res
    * @param next
    */
-  async save(request: Request, response: Response) {
-    const { role, username } = response.locals.jwtPayload;
+  async save(request: Request, res: Response) {
+    const { role, username } = res.locals.jwtPayload;
     const usernameFromRequest = username;
 
     // if the user is PILOT and the owner parameter was received, we check that owner is the logged user
@@ -331,8 +331,8 @@ export class OperationController {
       Object.keys(request.body).includes("owner") &&
       request.body.owner !== username
     ) {
-      return logAndRespond400(
-        response,
+      return res400(
+        res,
         400,
         "Pilot users must be the owners of the operations they create. Set you as the owner of the operation or remove the owner key from the operation object."
       );
@@ -340,7 +340,26 @@ export class OperationController {
 
     request.body.owner = request.body.owner || usernameFromRequest;
     const isCreating = request.body.gufi == undefined;
-    const errors = validateOperation(request.body, !isCreating);
+    const operationReceived = request.body;
+    // we check operation received has at least one operation volume
+    const volumes = operationReceived["operation_volumes"];
+    if (!Array.isArray(volumes) || volumes.length === 0) {
+      return res400(res, 400, "operation_volumes must be a non empty array");
+    }
+    // check ordinals were not receive, or if they were received, they are valid
+    try {
+      validateVolumesOrdinals(volumes);
+    } catch (error) {
+      return res400(res, 400, (error as Error).message);
+    }
+    // before validating the operation received, we check if the operation volumes specifies 'ordinal' and 'near_structure'
+    // if they don't, we set the index in the array as the ordinal, and 'false' to near_structure key
+    operationReceived.operation_volumes.forEach((vol: any, index: number) => {
+      if (vol["near_structure"] === undefined) vol["near_structure"] = false;
+      if (vol["ordinal"] === undefined) vol["ordinal"] = index;
+    });
+
+    const errors = validateOperation(operationReceived, !isCreating);
     const usernameOwner = request.body.owner;
 
     // validate that the usernameOwner exists
@@ -431,13 +450,13 @@ export class OperationController {
             previousState: previousState,
           });
         }
-        return logAndRespond200(response, operation, []);
+        return logAndRespond200(res, operation, []);
       } catch (error) {
         console.log(error);
-        return logAndRespond400(response, 400, null);
+        return res400(res, 400, null);
       }
     } else {
-      return logAndRespond400(response, 400, errors.join(". "));
+      return res400(res, 400, errors.join(". "));
     }
   }
 
@@ -491,7 +510,7 @@ export class OperationController {
         regularFlight = await this.daoRegularFlight.one(regular_flight_id);
       } catch (error) {
         if (error instanceof NotFoundError) {
-          return logAndRespond400(response, 404, error.message);
+          return res400(response, 404, error.message);
         } else {
           return logAndRespond500(response, 500, error);
         }
@@ -522,11 +541,7 @@ export class OperationController {
       );
       return logAndRespond200(response, operation, []);
     } catch (error) {
-      return logAndRespond400(
-        response,
-        400,
-        GeneralUtils.getErrorMessage(error)
-      );
+      return res400(response, 400, GeneralUtils.getErrorMessage(error));
     }
   }
 
@@ -587,20 +602,20 @@ export class OperationController {
           );
           return logAndRespond200(response, approval, []);
         } else {
-          return logAndRespond400(response, 404, null);
+          return res400(response, 404, null);
         }
       } else {
-        return logAndRespond400(response, 401, null);
+        return res400(response, 401, null);
       }
     } catch (error) {
-      return logAndRespond400(response, 404, null);
+      return res400(response, 404, null);
     }
   }
 
   async updateState(request: Request, response: Response) {
     const gufi = request.params.id;
     if (!request.body || !request.body.state) {
-      return logAndRespond400(
+      return res400(
         response,
         400,
         'Invalid request (expected: {"state": "..."})'
@@ -610,17 +625,13 @@ export class OperationController {
     try {
       strNewState = request.body.state.toUpperCase().trim();
     } catch (err) {
-      return logAndRespond400(response, 400, null);
+      return res400(response, 400, null);
     }
     let newState: OperationState;
     try {
       newState = parseOperationState(strNewState);
     } catch (error) {
-      return logAndRespond400(
-        response,
-        400,
-        GeneralUtils.getErrorMessage(error)
-      );
+      return res400(response, 400, GeneralUtils.getErrorMessage(error));
     }
 
     console.log(`Gufi::${gufi}, ->${JSON.stringify(request.body)}`);
@@ -668,10 +679,10 @@ export class OperationController {
         }
         return logAndRespond200(response, result, []);
       } else {
-        return logAndRespond400(response, 401, null);
+        return res400(response, 401, null);
       }
     } catch (error) {
-      return logAndRespond400(response, 404, null);
+      return res400(response, 404, null);
     }
   }
 
@@ -683,14 +694,10 @@ export class OperationController {
       const { username } = getPayloadFromResponse(response);
       const operation = await this.dao.one(gufi);
       if (operation.owner === null || operation.owner === undefined) {
-        return logAndRespond400(response, 400, "The operation has no owner");
+        return res400(response, 400, "The operation has no owner");
       }
       if (operation.state === OperationState.CLOSED) {
-        return logAndRespond400(
-          response,
-          400,
-          "The operation is already closed"
-        );
+        return res400(response, 400, "The operation is already closed");
       }
       if (operation.owner.username === username) {
         // let result = await this.dao.updateStateWhereState(gufi, OperationState.PENDING, OperationState.ACCEPTED);
@@ -731,10 +738,10 @@ export class OperationController {
         }
         return logAndRespond200(response, operationInfo, []);
       } else {
-        return logAndRespond400(response, 401, "The operation is not yours");
+        return res400(response, 401, "The operation is not yours");
       }
     } catch (error) {
-      return logAndRespond400(response, 404, null);
+      return res400(response, 404, null);
     }
   }
 
@@ -783,7 +790,7 @@ export class OperationController {
       return logAndRespond200(response, operation, []);
     } catch (error) {
       if (error instanceof CustomError || error instanceof InvalidDataError) {
-        return logAndRespond400(response, 400, error.message);
+        return res400(response, 400, error.message);
       } else {
         return logAndRespond500(response, 500, error);
       }
@@ -803,7 +810,7 @@ export class OperationController {
       return logAndRespond200(response, operations, []);
     } catch (error) {
       if (error instanceof CustomError || error instanceof InvalidDataError) {
-        return logAndRespond400(response, 400, error.message);
+        return res400(response, 400, error.message);
       } else {
         console.log(error);
         return logAndRespond500(response, 500, error);
@@ -881,7 +888,7 @@ export class OperationController {
       }
 
       if (await this.daoPosition.existsPositionForOperation(operationGufi)) {
-        return logAndRespond400(
+        return res400(
           response,
           400,
           `The operation can't be removed, because there is at least one position report associated to it [gufi=${operationGufi}]`
@@ -894,7 +901,7 @@ export class OperationController {
       return logAndRespond200(response, removedOperation, []);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        return logAndRespond400(response, 404, error.message);
+        return res400(response, 404, error.message);
       } else {
         return logAndRespond500(response, 500, error);
       }
@@ -1012,10 +1019,10 @@ export class OperationController {
         });
         return logAndRespond200(response, operation, []);
       } catch (error) {
-        return logAndRespond400(response, 400, null);
+        return res400(response, 400, null);
       }
     } else {
-      return logAndRespond400(response, 400, null);
+      return res400(response, 400, null);
     }
   }
 
@@ -1172,7 +1179,7 @@ export class OperationController {
 
         // TODO It would be nice to let the user to pass only one of this two parameters
         if ((fromDate && !toDate) || (toDate && !fromDate)) {
-          return logAndRespond400(
+          return res400(
             response,
             400,
             `If you pass "fromDate" you have to pass "toDate" and vice versa (fromDate=${fromDate}, toDate=${toDate})`
@@ -1180,14 +1187,14 @@ export class OperationController {
         }
         if (fromDate != undefined && toDate != undefined) {
           if (!validateStringDateIso(fromDate as string)) {
-            return logAndRespond400(
+            return res400(
               response,
               400,
               `Invalid date format (toDate=${fromDate})`
             );
           }
           if (!validateStringDateIso(toDate as string)) {
-            return logAndRespond400(
+            return res400(
               response,
               400,
               `Invalid date format (toDate=${toDate})`
@@ -1216,13 +1223,13 @@ export class OperationController {
         return logAndRespond200(response, { count, ops }, []);
       } catch (error) {
         if (error instanceof InvalidDataError || error instanceof CustomError) {
-          return logAndRespond400(response, 400, error.message);
+          return res400(response, 400, error.message);
         } else {
           return logAndRespond500(response, 500, error);
         }
       }
     } else {
-      return logAndRespond400(response, 403, null);
+      return res400(response, 403, null);
     }
   };
   async activatedOperationByLocationForMQTT(username: any, position: any) {
@@ -1266,6 +1273,34 @@ export class OperationController {
         };
       }
     }
+  }
+}
+
+function validateVolumesOrdinals(volumes: any[]) {
+  const ordinals: number[] = [];
+  let someVolumeHasOrdinal = false;
+  for (let i = 0; i < volumes.length; i++) {
+    const volume = volumes[i];
+    const ordinal = volume["ordinal"];
+    if (ordinal === undefined && someVolumeHasOrdinal) {
+      if (someVolumeHasOrdinal) {
+        throw new Error("You can't pass ordinal only for some volumes");
+      }
+      continue;
+    }
+    const ordinalNumber = new Number(ordinal);
+    if (
+      Number.isNaN(ordinalNumber) ||
+      !Number.isInteger(ordinalNumber) ||
+      ordinalNumber < 0
+    ) {
+      throw new Error("Ordinal must be a natural number");
+    }
+    if (ordinals.includes(ordinalNumber.valueOf())) {
+      throw new Error("There are two volumes with the same ordinal");
+    }
+    someVolumeHasOrdinal = true;
+    ordinals.push(ordinalNumber.valueOf());
   }
 }
 
