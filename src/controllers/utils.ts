@@ -248,7 +248,12 @@ export const validateOperationVolume = (
     "effective_time_begin"
   );
   validateDatetime(operationVolume["effective_time_end"], "effective_time_end");
-  validateNumber(operationVolume["min_altitude"], "min_altitude", 0, 99999);
+  validateNumber(
+    operationVolume["min_altitude"],
+    "min_altitude",
+    -99999,
+    99999
+  );
   validateNumber(operationVolume["max_altitude"], "max_altitude", 0, 99999);
   validateOperationGeography(operationVolume["operation_geography"]);
 };
