@@ -4,17 +4,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { Feature } from "geojson";
+import { circle, point } from "turf";
+
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function generateFeatureFromExpress(_center: unknown, _radius: number) {
-  throw new Error("Not implemented");
-  /*if (!(center.longitude && center.latitude)) {
-		throw new Error('{lng:int, lat:int} must be defined');
-	}
-	try {
-		const lngLat = point([center.longitude, center.latitude]);
-		const polygon: Feature = circle(lngLat, radius, 10, 'kilometers');
-		return polygon.geometry;
-	} catch (error) {
-		throw new Error(error);
-	}*/
+export function generateFeatureFromExpress(center: any, radius: number) {
+  if (!(center.longitude && center.latitude)) {
+    throw new Error("{lng:int, lat:int} must be defined");
+  }
+  const lngLat = point([center.longitude, center.latitude]);
+  const polygon: Feature = circle(lngLat, radius, 10, "kilometers");
+  return polygon.geometry;
 }
