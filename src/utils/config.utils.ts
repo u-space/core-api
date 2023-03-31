@@ -4,6 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { OperationState } from "../entities/operation";
+
 export const NODE_ENV = process.env.NODE_ENV;
 
 if (NODE_ENV === "test") {
@@ -93,3 +95,8 @@ export const USER_DOCUMENT_EXTRA_FIELDS_SCHEMA =
   process.env.USER_DOCUMENT_EXTRA_FIELDS_SCHEMA;
 
 export const LOGS_ENABLED = process.env.LOGS_ENABLED === "true";
+
+export const OPERATION_DEFAULT_STATE =
+  process.env.OPERATION_DEFAULT_STATE === "ACCEPTED"
+    ? OperationState.ACCEPTED
+    : OperationState.PENDING;

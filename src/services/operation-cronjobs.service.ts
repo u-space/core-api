@@ -18,6 +18,7 @@ import {
   adminEmail,
   COMPANY_NAME,
   MOCK_MAIL_API,
+  OPERATION_DEFAULT_STATE,
   SMTP_PASSWORD,
   SMTP_PORT,
   SMTP_SECURE,
@@ -203,7 +204,11 @@ async function processProposed(operation: Operation) {
     // 	// changeState(operation, OperationState.ACCEPTED);
     // 	changeState(operation, OperationState.PENDING);
     // }
-    changeState(operation, OperationState.PENDING, "pending by cronjob");
+    if (OPERATION_DEFAULT_STATE === OperationState.ACCEPTED) {
+      changeState(operation, OperationState.ACCEPTED, "accepted by cronjob");
+    } else {
+      changeState(operation, OperationState.PENDING, "pending by cronjob");
+    }
   } catch (error) {
     // console.log(`Error::${JSON.stringify(error)}`)
     // console.log(`Error::${JSON.stringify(operation)}`)
