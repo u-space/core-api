@@ -927,19 +927,15 @@ export class OperationController {
 
     //validate all body parameters
     if (!center) {
-      errors.push("location is required");
-    }
-    if (!radius) {
-      errors.push("radius is required");
-    }
-    if (!duration) {
-      errors.push("duration is required");
-    }
-    if (!vehicleId) {
-      errors.push("vehicleId is required");
-    }
-    if (!phone) {
-      errors.push("phone is required");
+      return res400(response, 400, "location is required");
+    } else if (!radius) {
+      return res400(response, 400, "radius is required");
+    } else if (!duration) {
+      return res400(response, 400, "duration is required");
+    } else if (!vehicleId) {
+      return res400(response, 400, "vehicleId is required");
+    } else if (!phone) {
+      return res400(response, 400, "phone is required");
     }
 
     // * CHECK FOR VEHICLE VALIDITY //
