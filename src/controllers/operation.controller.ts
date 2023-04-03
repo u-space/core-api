@@ -1283,7 +1283,7 @@ function validateVolumesOrdinals(volumes: any[]) {
       }
       continue;
     }
-    const ordinalNumber = new Number(ordinal);
+    const ordinalNumber = new Number(ordinal).valueOf();
     if (
       Number.isNaN(ordinalNumber) ||
       !Number.isInteger(ordinalNumber) ||
