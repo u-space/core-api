@@ -12,8 +12,6 @@ import {
   operationMailHtml,
   makeBodyForPendingOpeartionMailText,
   makeBodyForPendingOperationMailHtml,
-  makeNotAcceptedMailText,
-  makeNotAcceptedMailHtml,
 } from "../utils/mail-content.utils";
 import { UASVolumeReservationDao } from "../daos/uas-volume-reservation.dao";
 import { RestrictedFlightVolumeDao } from "../daos/restricted-flight-volume.dao";
@@ -164,56 +162,4 @@ export const doSendMailForOperation = async (
   /*} else {
     return true
   }*/
-};
-
-export const doSendMailForNotAcceptedOperation = async (
-  dao: any,
-  mailAPI: IMailAPI,
-  { receiverMail, gufi, bodyMail }: any,
-  { role }: any
-) => {
-  if (role == Role.ADMIN) {
-    const operation = <Operation>await dao.one(gufi);
-    const uvrDao = new UASVolumeReservationDao();
-
-    let uvrs: any = [];
-    let operations: any = [];
-    for (let index = 0; index < operation.operation_volumes.length; index++) {
-      const operationVolume = operation.operation_volumes[index];
-      operations = operations.concat(
-        await dao.getOperationVolumeByVolumeCountExcludingOneOperation(
-          operation.gufi,
-          operationVolume
-        )
-      ); //FIXME it can get only the operation
-      uvrs = uvrs.concat(await uvrDao.getUvrIntersections(operationVolume));
-    }
-
-    logInfo(
-      `Operation ${operation.gufi} intersect with operations: ${JSON.stringify(
-        operations.map((op: any) => op.gufi)
-      )} and with UVRs: ${JSON.stringify(
-        uvrs.map((uvr: any) => uvr.message_id)
-      )} `
-    );
-
-    const subject =
-      "Información sobre operación de dron que entro en estado no aceptado";
-    const body = makeNotAcceptedMailText(bodyMail, operation, operations, uvrs);
-    const htmlBody = makeNotAcceptedMailHtml(
-      bodyMail,
-      operation,
-      operations,
-      uvrs
-    );
-
-    mailAPI
-      .sendMail(COMPANY_NAME!, receiverMail, subject, body, htmlBody)
-      .catch(() => {
-        console.error("Email was not send");
-      });
-    return false;
-  } else {
-    return true;
-  }
 };

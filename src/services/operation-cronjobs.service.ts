@@ -53,43 +53,22 @@ export async function processOperations() {
     SMTP_USERNAME!,
     SMTP_PASSWORD!
   );
-  // let op : Operation
 
   const operations = await operationDao.getOperationsForCron();
   for (let index = 0; index < operations.length; index++) {
     const operation: Operation = operations[index];
-    // console.log(`Operation: ${operation.gufi}, ${operation.state}`)
 
     try {
-      // try {
       switch (operation.state) {
         case OperationState.PROPOSED:
           processProposed(operation);
-          /* if (operation.owner && operation.owner.email) {
-						sendMail(
-							[operation.owner.email],
-							'Tu operación ' +
-								operation.name +
-								' ha sido creada y será procesada a la brevedad',
-							operationMailHtml(operation),
-							operationMailHtml(operation)
-						).catch(() => {
-							console.error('Email was not send');
-						});
-					} */
           break;
-        // case OperationState.NOT_ACCEPTED:
-        //     processNotAccepted(operation)
-        //     break;
         case OperationState.ACCEPTED:
           processAccepted(operation);
           break;
         case OperationState.ACTIVATED:
           processActivated(operation);
           break;
-        // case OperationState.NONCONFORMING:
-        //     processNonconforming(operation)
-        //     break;
         case OperationState.ROGUE:
           processRouge(operation);
           break;
@@ -105,10 +84,6 @@ export async function processOperations() {
         "processOperations: " + JSON.stringify(error)
       );
     }
-    // } catch (error) {
-    //     console.error(`Error when processing operation: ${operation.gufi}\n${error}`)
-    // }
-    // console.log("******* ******* ******* ******* ******* ******* ******* ")
   }
 }
 
@@ -122,14 +97,9 @@ async function processProposed(operation: Operation) {
       const operationVolume = operation.operation_volumes[index];
 
       const intersect = await checkIntersection(operation, operationVolume);
-      if (intersect && operation.flight_comments) {
-        // console.log(`------------------------------>>>`)
-        // const result = await operationDao.save(operation);
-      }
 
-      // console.log(`-=-=-=-=-\n${operation.name} ${JSON.stringify(operation.owner)}`)
       if (intersect) {
-        const newState = changeState(
+        const newState = await changeState(
           operation,
           OperationState.PENDING,
           "pending because of intersection with other operation"
@@ -145,73 +115,52 @@ async function processProposed(operation: Operation) {
           { role: Role.ADMIN }
         );
         return newState;
-      } else {
-        let changeToPending = false;
-        let reason = "";
-        if (
-          await intersectsWithRestrictedFlightVolume(operation, operationVolume)
-        ) {
-          changeToPending = true;
-          reason = `Intersect with a RFV. ${reason}`;
-        }
-        // --------------------------------------------------gt
+      }
+      let changeToPending = false;
+      let reason = "";
+      if (
+        await intersectsWithRestrictedFlightVolume(operation, operationVolume)
+      ) {
+        changeToPending = true;
+        reason = `Intersect with a RFV. ${reason}`;
+      }
 
-        // let op: Operation = new Operation();
-        //  op.owner.email
-        // console.log(`********\n${JSON.stringify(operation, null, 2)}\n********`)
-
-        if (changeToPending) {
-          operation.flight_comments = `${reason}\n${operation.flight_comments}`;
-          // const result = await operationDao.save(operation);
-          operationDao = new OperationDao();
-          const newState = changeState(
-            operation,
-            OperationState.PENDING,
-            reason
-          );
-          await doSendMailForPendingOperation(
-            operationDao,
-            mailAPI,
-            {
-              receiverMail: operation.owner
-                ? operation.owner.email
-                : adminEmail,
-              gufi: operation.gufi,
-              bodyMail: `La operación ${operation.gufi} está pendiente de aprobación.`,
-            },
-            { role: Role.ADMIN }
-          );
-          return newState;
-        }
+      if (changeToPending) {
+        operation.flight_comments = `${reason}\n${operation.flight_comments}`;
+        operationDao = new OperationDao();
+        const newState = await changeState(
+          operation,
+          OperationState.PENDING,
+          reason
+        );
+        doSendMailForPendingOperation(
+          operationDao,
+          mailAPI,
+          {
+            receiverMail: operation.owner ? operation.owner.email : adminEmail,
+            gufi: operation.gufi,
+            bodyMail: `La operación ${operation.gufi} está pendiente de aprobación.`,
+          },
+          { role: Role.ADMIN }
+        );
+        return newState;
       }
     }
 
-    // for (let index = 0; index < operation.operation_volumes.length; index++) {
-    // 	const operationVolume = operation.operation_volumes[index];
-    // 	const dateBegin = new Date(operationVolume.effective_time_begin);
-    // 	const dateEnd = new Date(operationVolume.effective_time_end);
-    // 	if (
-    // 		currentDate.getTime() >= dateBegin.getTime() &&
-    // 		currentDate.getTime() < dateEnd.getTime()
-    // 	) {
-    // 		changeToActived = true; // changeState(operation, OperationState.ACTIVATED)
-    // 	}
-    // }
-    //TODO: for now we only want to change to pending
-    // if (changeToActived) {
-    // 	changeState(operation, OperationState.ACTIVATED);
-    // } else {
-    // 	// changeState(operation, OperationState.ACCEPTED);
-    // 	changeState(operation, OperationState.PENDING);
-    // }
     if (OPERATION_DEFAULT_STATE === OperationState.ACCEPTED) {
-      changeState(operation, OperationState.ACCEPTED, "accepted by cronjob");
+      await changeState(
+        operation,
+        OperationState.ACCEPTED,
+        "accepted by cronjob"
+      );
     } else {
-      changeState(operation, OperationState.PENDING, "pending by cronjob");
+      await changeState(
+        operation,
+        OperationState.PENDING,
+        "pending by cronjob"
+      );
     }
   } catch (error) {
-    // console.log(`Error::${JSON.stringify(error)}`)
-    // console.log(`Error::${JSON.stringify(operation)}`)
     errorOnOperation(operation, JSON.stringify(error));
   }
 }
