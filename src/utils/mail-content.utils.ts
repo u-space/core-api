@@ -5,7 +5,12 @@
  */
 
 import { VehicleReg, VehicleAuthorizeStatus } from "../entities/vehicle-reg";
-import { COMPANY_NAME, frontEndUrl, SUPPORT_EMAIL } from "./config.utils";
+import {
+  COMPANY_NAME,
+  frontEndUrl,
+  OPERATION_PAYMENT_THROW_THE_APP,
+  SUPPORT_EMAIL,
+} from "./config.utils";
 import { Operation } from "../entities/operation";
 import { getLocalTime } from "./date.utils";
 import { Document } from "../entities/document";
@@ -285,13 +290,17 @@ function bodyOperationMail(operation: Operation) {
   // labelsAndFields.push(['Polígono', `${JSON.stringify(operation.operation_volumes)}`]);
   const operationBody = `
       ${title(`Información sobre la operación: <i>${operation.name}</i>`)}
-	${paragraph(
-    operation.state === "PROPOSED"
-      ? "Nos contactaremos con usted para proceder al pago de la operación"
-      : operation.state === "PENDING"
-      ? 'Puede realizar el pago de la operación en el enlace que aparece bajo "comentarios del vuelo". Una vez hecho nos contactaremos con usted'
-      : "Pago realizado correctamente"
-  )}
+      ${
+        OPERATION_PAYMENT_THROW_THE_APP
+          ? paragraph(
+              operation.state === "PROPOSED"
+                ? "Nos contactaremos con usted para proceder al pago de la operación"
+                : operation.state === "PENDING"
+                ? 'Puede realizar el pago de la operación en el enlace que aparece bajo "comentarios del vuelo". Una vez hecho nos contactaremos con usted'
+                : "Pago realizado correctamente"
+            )
+          : ""
+      }
       <mj-table border="solid 1px" padding="10px" mj-class="celdita">
       ${labelsAndFields
         .map(([label, field]) => {

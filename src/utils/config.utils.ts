@@ -101,3 +101,6 @@ export const OPERATION_DEFAULT_STATE =
   process.env.OPERATION_DEFAULT_STATE === "ACCEPTED"
     ? OperationState.ACCEPTED
     : OperationState.PENDING;
+
+export const OPERATION_PAYMENT_THROW_THE_APP =
+  process.env.OPERATION_PAYMENT_THROW_THE_APP === "true";
