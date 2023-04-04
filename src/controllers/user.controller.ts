@@ -362,6 +362,7 @@ export class UserController {
 
       user.verification_token = bcrypt.hashSync(user.email, 8);
       user.verified = false;
+      user.settings = "EN";
 
       // console.log('Register request', request.headers.origin);
 
