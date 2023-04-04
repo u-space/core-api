@@ -214,6 +214,36 @@ export class VehicleDao {
     return result;
   }
 
+  async oneByTrackerId(trackerId: string): Promise<VehicleReg> {
+    try {
+      const v = await this.repository.findOneOrFail({
+        where: {
+          trackerId,
+        },
+      });
+      GeneralUtils.setExtraFields(v);
+      await this.setVehicleDocuments(v);
+      delete v.strExtraFields;
+      return v;
+    } catch (error: any) {
+      if (
+        error.name === TypeOrmErrorType.EntityNotFound ||
+        (error.name === TypeOrmErrorType.QueryFailedError &&
+          error.message.startsWith("invalid input syntax for type uuid"))
+      ) {
+        throw new NotFoundError(
+          `There is no vehicle with the "trackerId" received (trackerId=${trackerId})`,
+          error
+        );
+      } else {
+        throw new DataBaseError(
+          `There was an error trying to execute oneByTrackerId(${trackerId})`,
+          error
+        );
+      }
+    }
+  }
+
   async oneByUser(uvin: string, username: string) {
     try {
       const v = await this.repository.findOneOrFail(uvin, {

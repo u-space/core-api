@@ -70,20 +70,16 @@ export class MQTTOperationController {
       return;
     }
 
-    // Verify vehicle received exists
-    console.log("Verify vehicle received exists");
-    const vehicleId = reqValidated.vehicleId;
+    // Get vehicle associated to the tracker
+    console.log("Get vehicle associated to the tracker");
     let vehicle: VehicleReg;
     try {
-      vehicle = await new VehicleDao().one(vehicleId);
+      vehicle = await new VehicleDao().oneByTrackerId(trackerId);
     } catch (error) {
       if (error instanceof NotFoundError) {
-        return this.respondError(
-          resTopic,
-          `No vehicle (vehicleId=${vehicleId})`
-        );
+        return this.respondError(resTopic, `Tracker has no vehicle`);
       }
-      return this.respondError(resTopic, (error as Error).message);
+      return this.respondError(resTopic, `${(error as Error).message}`);
     }
 
     // Verify vehicle belongs to the user
@@ -294,6 +290,5 @@ type CreateExpressOperationRequest = {
   };
   radiusInKm: number;
   durationInHours: number;
-  vehicleId: string;
   phone: string;
 };
