@@ -11,6 +11,7 @@ import { MQTTPositionController } from "./controllers/position.controller";
 
 const positionTopic = "position/#";
 const getGufiTopic = "getGufi/#";
+const expressOperationTopic = "expressOperation/#";
 
 export class MQTT {
   private mqttClient: mqtt.Client;
@@ -34,6 +35,9 @@ export class MQTT {
       });
       this.mqttClient.subscribe([getGufiTopic], () => {
         console.log(`Subscribed to topic '${getGufiTopic}'`);
+      });
+      this.mqttClient.subscribe([expressOperationTopic], () => {
+        console.log(`Subscribed to topic '${expressOperationTopic}'`);
       });
     });
     this.mqttClient.on("message", async (topic, message) => {
@@ -63,6 +67,13 @@ export class MQTT {
           username,
           parsedMessage,
           trackerId
+        );
+        break;
+      case "expressOperation":
+        this.operationController.createExpressOperation(
+          username,
+          trackerId,
+          parsedMessage
         );
         break;
       default:
