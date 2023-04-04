@@ -303,10 +303,19 @@ export class UserController {
       firstName: Joi.string().min(3).max(100).required(),
       lastName: Joi.string().min(3).max(100).required(),
       extra_fields: Joi.object().optional(),
+      role: Joi.string().optional(),
     });
-    const validationResult = reqBodySchema.validate(request.body);
+    const validationResult = reqBodySchema.validate(userParams);
     if (validationResult.error !== undefined)
       logAndRespond400(response, 400, validationResult.error.message);
+
+    if (
+      userParams.role !== undefined &&
+      userParams.role !== null &&
+      (userParams.role as string).toLowerCase() !== "pilot"
+    ) {
+      logAndRespond400(response, 400, "Invalid role received");
+    }
 
     try {
       this.validateExtraFields(userParams.extra_fields);
