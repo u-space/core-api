@@ -255,7 +255,6 @@ export class MQTTOperationController {
       }).required(),
       radiusInKm: Joi.number().required(),
       durationInHours: Joi.number().integer().min(1).required(),
-      vehicleId: Joi.string().required(),
       phone: Joi.string().required(),
     });
     const validationResult = schema.validate(createExpressOperationRequest);
@@ -269,7 +268,6 @@ export class MQTTOperationController {
       },
       radiusInKm: createExpressOperationRequest.radiusInKm,
       durationInHours: createExpressOperationRequest.durationInHours,
-      vehicleId: createExpressOperationRequest.vehicleId,
       phone: createExpressOperationRequest.phone,
     };
   }
