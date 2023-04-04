@@ -87,6 +87,7 @@ export const VEHICLE_EXTRA_FIELDS_SCHEMA =
   process.env.VEHICLE_EXTRA_FIELDS_SCHEMA;
 
 export const COMPANY_NAME = process.env.COMPANY_NAME;
+export const APP_NAME = process.env.APP_NAME;
 export const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL;
 
 export const MOCK_MAIL_API = process.env.MOCK_MAIL_API === "true";

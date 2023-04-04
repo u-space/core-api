@@ -589,3 +589,39 @@ export function getDMSFromDecimal(decimal: any) {
   const seconds = Math.floor((minutesNotTruncated - minutes) * 60);
   return `${degrees}°${minutes}'${seconds}"`;
 }
+
+export function buildConfirmationTextMail(
+  username: any,
+  link: any,
+  appName: string
+) {
+  return `
+    Hello ${username},
+    Thank you for registering in ${appName}!
+    To finish the user registration process, please click in the following link.
+
+    ${link}
+    `;
+}
+
+export function buildConfirmationHtmlMail(
+  username: any,
+  link: any,
+  appName: string
+) {
+  const mjmlBody = `
+    ${title(`Bienvenido a bordo ${username}!`)}
+    ${paragraph(`Gracias por registrarte en ${appName}!`, "10px 10px 0px 10px")}
+    ${paragraph(
+      "La forma más rápida de gestionar tus operaciones con drones.",
+      "0px 10px 10px 10px"
+    )}
+    ${paragraph(
+      "Para finalizar el proceso de registro, haga click o copie el siguiente link en tu navegador."
+    )}
+    ${paragraph(`<a href="${link}">${link}</a>`)}
+    `;
+  const email = generateBaseMail(mjmlBody);
+  // console.log(email);
+  return email;
+}

@@ -40,17 +40,42 @@ import { isNullOrUndefined, isObject, isString } from "util";
 import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
 import { DocumentDao } from "../daos/document.dao";
 import {
+  adminEmail,
+  APP_NAME,
+  COMPANY_NAME,
   MOCK_AUTH_SERVER_API,
+  MOCK_MAIL_API,
+  SMTP_PASSWORD,
+  SMTP_PORT,
+  SMTP_SECURE,
+  SMTP_URL,
+  SMTP_USERNAME,
   USER_DOCUMENT_EXTRA_FIELDS_SCHEMA,
   USER_EXTRA_FIELDS_SCHEMA,
 } from "../utils/config.utils";
 import GeneralUtils from "../utils/general.utils";
 import Joi from "joi";
+import {
+  buildConfirmationHtmlMail,
+  buildConfirmationLink,
+  buildConfirmationTextMail,
+  buildNewUserMail,
+} from "../utils/mail-content.utils";
+import IMailAPI from "../apis/mail/imail-api";
+import MailAPIFactory from "../apis/mail/mail-api-factory";
 
 export class UserController {
   private dao = new UserDao();
   private authServer = AuthServerAPIFactory.getAuthServerAPI(
     MOCK_AUTH_SERVER_API === "true"
+  );
+  private mailAPI: IMailAPI = MailAPIFactory.getMailAPI(
+    MOCK_MAIL_API,
+    SMTP_URL!,
+    SMTP_PORT,
+    SMTP_SECURE,
+    SMTP_USERNAME!,
+    SMTP_PASSWORD!
   );
 
   private userControllerExtension: IUserControllerExtension =
@@ -370,7 +395,9 @@ export class UserController {
       if (errors.length == 0) {
         const insertedDetails = await dao.save(user);
         // console.log(JSON.stringify(user));
-        userControllerExtension.postProcessRegisterUser(user, origin);
+        sendMailToConfirm(user, origin, this.mailAPI);
+        //Also send mail to admin
+        sendMailToAdmin(user, this.mailAPI);
         await this.authServer.createUserExternalAuth(
           insertedDetails,
           password,
@@ -1021,4 +1048,34 @@ function getTypedDocument(document: any): Document {
     document["extra_fields"]
   );
   return doc;
+}
+
+function sendMailToConfirm(user: any, url: any, mailAPI: IMailAPI) {
+  const subject = `${user.firstName}, por favor, confirma tu nuevo usuario en ${APP_NAME}`;
+  const link = buildConfirmationLink(
+    user.username,
+    user.verification_token,
+    url
+  );
+  const textContent = buildConfirmationTextMail(user.username, link, APP_NAME!);
+  const htmlContent = buildConfirmationHtmlMail(user.username, link, APP_NAME!);
+  mailAPI.sendMail(
+    COMPANY_NAME!,
+    [user.email],
+    subject,
+    textContent,
+    htmlContent
+  );
+}
+function sendMailToAdmin(user: any, mailAPI: IMailAPI) {
+  const adminSubject = `Nuevo usuario registrado en ${APP_NAME}`;
+  const adminTextContent = `El usuario ${user.username} se ha registrado en ${APP_NAME}`;
+  const adminHtmlContent = buildNewUserMail(user);
+  mailAPI.sendMail(
+    COMPANY_NAME!,
+    adminEmail,
+    adminSubject,
+    adminTextContent,
+    adminHtmlContent
+  );
 }
