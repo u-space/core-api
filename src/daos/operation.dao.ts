@@ -456,9 +456,10 @@ export class OperationDao {
       const res = await this.intersectWithOperationUvrOrRfv(entManager, op);
 
       // define operation state depending on if it intersects or not with other entities
-      if (res) {
+      if (res !== undefined) {
         // operation intersects with another entity, so we created in PENDING state
         op.state = OperationState.PENDING;
+        op.flight_comments = `${res}\n\n${op.flight_comments}`;
       } else {
         // operation does not intersect with another entity
         if (end <= new Date()) {
@@ -1001,17 +1002,17 @@ export class OperationDao {
   async intersectWithOperationUvrOrRfv(
     entManager: EntityManager,
     operation: Operation
-  ): Promise<boolean> {
+  ): Promise<string | undefined> {
     // We have to iterate each volume
     for (let i = 0; i < operation.operation_volumes.length; i++) {
       const volume = operation.operation_volumes[i];
       const gufi = operation.gufi;
       const res = await this.checkIntersections(entManager, gufi, volume);
-      if (res.operationsCount > 0 || res.uvrsCount > 0 || res.rfvsCount > 0) {
-        return true;
-      }
+      if (res.uvrsCount > 0) return "Intersect with UVR";
+      if (res.operationsCount > 0) return "Intersect with operation";
+      if (res.rfvsCount > 0) return "Intersect with RFV";
     }
-    return false;
+    return undefined;
   }
 
   // ---------------------------------------------------------------
