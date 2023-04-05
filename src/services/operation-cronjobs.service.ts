@@ -170,12 +170,11 @@ async function checkIntersection(
   operationVolume: OperationVolume
 ) {
   try {
-    const operationsCount =
-      await operationDao.countOperationVolumeByVolumeCountExcludingOneOperation(
-        operation.gufi,
-        operationVolume
-      );
-    const uvrCount = await uvrDao.countUvrIntersections(operationVolume);
+    const operationsCount = await operationDao.intersectingVolumesCount(
+      operation.gufi,
+      operationVolume
+    );
+    const uvrCount = await uvrDao.intersectingUvrsCount(operationVolume);
     let msg = "";
     if (operationsCount > 0 || uvrCount > 0) {
       msg = "Operation overlaps: ";

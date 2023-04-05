@@ -159,7 +159,7 @@ export class MQTTOperationController {
     console.log("Save operation");
     let operationAdded: Operation;
     try {
-      operationAdded = await new OperationDao().save(operation);
+      operationAdded = await new OperationDao().saveOverridingState(operation);
     } catch (error) {
       return this.respondError(resTopic, (error as Error).message);
     }

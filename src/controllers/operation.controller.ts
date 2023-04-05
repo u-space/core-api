@@ -409,7 +409,7 @@ export class OperationController {
 
     if (errors.length == 0) {
       try {
-        const operation = await this.dao.save(operationToSave);
+        const operation = await this.dao.saveOverridingState(operationToSave);
 
         if (isCreating) {
           //If im creating the the new state is proposed
@@ -1005,7 +1005,7 @@ export class OperationController {
 
     if (errors.length == 0) {
       try {
-        <Operation>await this.dao.save(operation);
+        await this.dao.saveOverridingState(operation);
         sendNewOperation({
           gufi: operation.gufi,
           name: operation.name,

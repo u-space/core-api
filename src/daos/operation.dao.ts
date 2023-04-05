@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { getRepository, ILike, In } from "typeorm";
+import { EntityManager, getManager, getRepository, ILike, In } from "typeorm";
 
 import { Point, Polygon } from "geojson";
 import { Operation, OperationState } from "../entities/operation";
@@ -26,6 +26,8 @@ import { User } from "../entities/user";
 import { buffer, circle, distance, lineString } from "@turf/turf";
 import { Tracker } from "../entities/trackers/tracker";
 import { logStateChange } from "../controllers/utils";
+import { UASVolumeReservationDao } from "./uas-volume-reservation.dao";
+import { RestrictedFlightVolumeDao } from "./restricted-flight-volume.dao";
 // import { polygon, union } from 'turf';
 
 export class OperationDao {
@@ -154,60 +156,41 @@ export class OperationDao {
     }
   }
 
-  async countOperationVolumeByVolumeCountExcludingOneOperation(
+  async intersectingVolumesCount(
     gufi: string,
-    volume: OperationVolume
+    volume: OperationVolume,
+    entManager?: EntityManager
   ) {
-    if (!gufi || !volume) {
-      throw new InvalidDataError(
-        '"gufi" and "volume" are mandatory fields',
-        null
-      );
+    let qBuilder = this.repository.createQueryBuilder("operation");
+    if (entManager !== undefined) {
+      qBuilder = entManager.createQueryBuilder(Operation, "operation");
     }
-    try {
-      return await this.repository
-        .createQueryBuilder("operation")
-        .leftJoinAndSelect("operation.creator", "creator")
-        .leftJoinAndSelect("operation.owner", "owner")
-        .innerJoinAndSelect("operation.operation_volumes", "operation_volume")
-        .where('operation_volume."operationGufi" != :gufi')
-        .andWhere(
-          "\"state\" in ('ACCEPTED', 'ACTIVATED', 'ROGUE', 'PENDING', 'PROPOSED')"
-        )
-        .andWhere(
-          '(tstzrange(operation_volume."effective_time_begin", operation_volume."effective_time_end") && tstzrange(:date_begin, :date_end))'
-        )
-        .andWhere(
-          '(numrange(operation_volume."min_altitude", operation_volume."max_altitude") && numrange(:min_altitude, :max_altitude))'
-        )
-        .andWhere(
-          '(ST_Intersects(operation_volume."operation_geography" ,ST_GeomFromGeoJSON(:geom)))'
-        )
-        .setParameters({
-          gufi: gufi,
-          date_begin: volume.effective_time_begin,
-          date_end: volume.effective_time_end,
-          min_altitude: volume.min_altitude,
-          max_altitude: volume.max_altitude,
-          geom: JSON.stringify(volume.operation_geography),
-        })
-        .getCount();
-    } catch (error: any) {
-      if (
-        error.name === TypeOrmErrorType.QueryFailedError &&
-        error.message.startsWith("invalid input syntax for type uuid")
-      ) {
-        throw new InvalidDataError(
-          `The gufi received is not a valid uuid (gufi=${gufi})`,
-          error
-        );
-      } else {
-        throw new DataBaseError(
-          "There was an error trying to execute OperationDaos.countOperationVolumeByVolumeCountExcludingOneOperation(gufi, volume)",
-          error
-        );
-      }
-    }
+    return await qBuilder
+      .leftJoinAndSelect("operation.creator", "creator")
+      .leftJoinAndSelect("operation.owner", "owner")
+      .innerJoinAndSelect("operation.operation_volumes", "operation_volume")
+      .where('operation_volume."operationGufi" != :gufi')
+      .andWhere(
+        "\"state\" in ('ACCEPTED', 'ACTIVATED', 'ROGUE', 'PENDING', 'PROPOSED')"
+      )
+      .andWhere(
+        '(tstzrange(operation_volume."effective_time_begin", operation_volume."effective_time_end") && tstzrange(:date_begin, :date_end))'
+      )
+      .andWhere(
+        '(numrange(operation_volume."min_altitude", operation_volume."max_altitude") && numrange(:min_altitude, :max_altitude))'
+      )
+      .andWhere(
+        '(ST_Intersects(operation_volume."operation_geography" ,ST_GeomFromGeoJSON(:geom)))'
+      )
+      .setParameters({
+        gufi: gufi,
+        date_begin: volume.effective_time_begin,
+        date_end: volume.effective_time_end,
+        min_altitude: volume.min_altitude,
+        max_altitude: volume.max_altitude,
+        geom: JSON.stringify(volume.operation_geography),
+      })
+      .getCount();
   }
 
   async getOperationVolumeByVolumeCountExcludingOneOperation(
@@ -449,6 +432,52 @@ export class OperationDao {
         error
       );
     }
+  }
+
+  async saveOverridingState(op: Operation): Promise<Operation> {
+    // check operation have exactly one volume
+    if (op.operation_volumes.length !== 1) {
+      throw new InvalidDataError(
+        `This method only can be used to save operations with one volume (volumesCount=${op.operation_volumes.length})`,
+        undefined
+      );
+    }
+    const volume = op.operation_volumes[0];
+    const begin = new Date(volume.effective_time_begin);
+    const end = new Date(volume.effective_time_end);
+
+    // normalize operation data
+    this.normalizeOperationData(op);
+
+    // we have to execute a db transaction
+    const result = await getManager().transaction(async (entManager) => {
+      // check the operation intersects with rfvs, uvrs or with other operations
+      const res = await this.intersectWithOperationUvrOrRfv(entManager, op);
+
+      // define operation state depending on if it intersects or not with other entities
+      if (res) {
+        // operation intersects with another entity, so we created in PENDING state
+        op.state = OperationState.PENDING;
+      } else {
+        // operation does not intersect with another entity
+        if (end <= new Date()) {
+          // it means operation already finished
+          op.state = OperationState.CLOSED;
+        } else if (begin <= new Date()) {
+          // it means operation should be ACTIVATED
+          op.state = OperationState.ACTIVATED;
+        } else {
+          // operation begins in the future
+          op.state = OperationState.ACCEPTED;
+        }
+      }
+
+      // save the operation
+      entManager.save(Operation, op);
+    });
+
+    console.log(result);
+    throw new Error("falta terminar");
   }
 
   async updateState(
@@ -962,4 +991,53 @@ export class OperationDao {
       operation.priority_elements.priority_status = PriorityStatus.NONE;
     }
   };
+
+  async intersectWithOperationUvrOrRfv(
+    entManager: EntityManager,
+    operation: Operation
+  ): Promise<boolean> {
+    // We have to iterate each volume
+    for (let i = 0; i < operation.operation_volumes.length; i++) {
+      const volume = operation.operation_volumes[i];
+      const gufi = operation.gufi;
+      const res = await this.checkIntersections(entManager, gufi, volume);
+      if (res.operationsCount > 0 || res.uvrsCount > 0 || res.rfvsCount > 0) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  // ---------------------------------------------------------------
+  // ---------------------- PRIVATE FUNCTIONS ----------------------
+  // ---------------------------------------------------------------
+
+  private async checkIntersections(
+    entManager: EntityManager,
+    gufi: string,
+    volume: OperationVolume
+  ): Promise<CheckIntersectionsResult> {
+    const operationsCount = await this.intersectingVolumesCount(
+      gufi,
+      volume,
+      entManager
+    );
+    const uvrDao = new UASVolumeReservationDao();
+    const uvrsCount = await uvrDao.intersectingUvrsCount(volume, entManager);
+    const rfvDao = new RestrictedFlightVolumeDao();
+    const rfvsCount = await (
+      await rfvDao.getRfvIntersections(volume, entManager)
+    ).length;
+    return {
+      operationsCount,
+      uvrsCount,
+      rfvsCount,
+    };
+  }
 }
+
+type CheckIntersectionsResult = {
+  operationsCount: number;
+  uvrsCount: number;
+  rfvsCount: number;
+};

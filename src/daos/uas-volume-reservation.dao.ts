@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { getRepository, QueryFailedError } from "typeorm";
+import { EntityManager, getRepository, QueryFailedError } from "typeorm";
 import { UASVolumeReservation } from "../entities/uas-volume-reservation";
 import { OperationVolume } from "../entities/operation-volume";
 import {
@@ -16,7 +16,9 @@ import { DataBaseError, InvalidDataError, NotFoundError } from "./db-errors";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 
 export class UASVolumeReservationDao {
-  private repository = getRepository(UASVolumeReservation);
+  private tabName = "uas_volume_reservation";
+  private repo = getRepository(UASVolumeReservation);
+  private uvrClass = UASVolumeReservation;
 
   async all(
     take?: number,
@@ -46,7 +48,7 @@ export class UASVolumeReservationDao {
         filterValue
       );
 
-      const [uvrs, count] = await this.repository.findAndCount(filter);
+      const [uvrs, count] = await this.repo.findAndCount(filter);
 
       return { uvrs, count };
     } catch (error: any) {
@@ -84,7 +86,7 @@ export class UASVolumeReservationDao {
 
   async one(message_id: string) {
     try {
-      return await this.repository.findOneOrFail(message_id);
+      return await this.repo.findOneOrFail(message_id);
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -105,12 +107,12 @@ export class UASVolumeReservationDao {
   }
 
   getFromEnaireLayerId(enaire_layer_id: string) {
-    return this.repository.find({ where: { enaire_layer_id } });
+    return this.repo.find({ where: { enaire_layer_id } });
   }
 
   async save(entity: UASVolumeReservation) {
     try {
-      return await this.repository.save(entity);
+      return await this.repo.save(entity);
     } catch (error: any) {
       console.log(error);
       throw new DataBaseError(
@@ -122,7 +124,7 @@ export class UASVolumeReservationDao {
 
   async remove(id: string) {
     try {
-      await this.repository.softDelete(id);
+      await this.repo.softDelete(id);
     } catch (error: any) {
       if (error instanceof QueryFailedError) {
         if (
@@ -144,9 +146,15 @@ export class UASVolumeReservationDao {
     }
   }
 
-  async countUvrIntersections(volume: OperationVolume) {
-    return this.repository
-      .createQueryBuilder("uas_volume_reservation")
+  async intersectingUvrsCount(
+    volume: OperationVolume,
+    entManager?: EntityManager
+  ) {
+    let qBuilder = this.repo.createQueryBuilder(this.tabName);
+    if (entManager !== undefined) {
+      qBuilder = entManager.createQueryBuilder(this.uvrClass, this.tabName);
+    }
+    return qBuilder
       .where(
         '(tsrange(effective_time_begin, "effective_time_end") && tsrange(:date_begin, :date_end) ) ' +
           ' AND (numrange("min_altitude", "max_altitude") && numrange(:min_altitude, :max_altitude)) ' +
@@ -163,7 +171,7 @@ export class UASVolumeReservationDao {
   }
 
   async getUvrIntersections(volume: OperationVolume) {
-    return this.repository
+    return this.repo
       .createQueryBuilder("uas_volume_reservation")
       .where(
         '(tsrange(effective_time_begin, "effective_time_end") && tsrange(:date_begin, :date_end) ) ' +
