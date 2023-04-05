@@ -157,20 +157,19 @@ export class OperationDao {
   }
 
   async intersectingVolumesCount(
-    gufi: string,
     volume: OperationVolume,
-    entManager?: EntityManager
+    entManager?: EntityManager,
+    gufi?: string
   ) {
     let qBuilder = this.repository.createQueryBuilder("operation");
     if (entManager !== undefined) {
       qBuilder = entManager.createQueryBuilder(Operation, "operation");
     }
-    return await qBuilder
+    qBuilder = qBuilder
       .leftJoinAndSelect("operation.creator", "creator")
       .leftJoinAndSelect("operation.owner", "owner")
       .innerJoinAndSelect("operation.operation_volumes", "operation_volume")
-      .where('operation_volume."operationGufi" != :gufi')
-      .andWhere(
+      .where(
         "\"state\" in ('ACCEPTED', 'ACTIVATED', 'ROGUE', 'PENDING', 'PROPOSED')"
       )
       .andWhere(
@@ -181,16 +180,23 @@ export class OperationDao {
       )
       .andWhere(
         '(ST_Intersects(operation_volume."operation_geography" ,ST_GeomFromGeoJSON(:geom)))'
-      )
-      .setParameters({
-        gufi: gufi,
-        date_begin: volume.effective_time_begin,
-        date_end: volume.effective_time_end,
-        min_altitude: volume.min_altitude,
-        max_altitude: volume.max_altitude,
-        geom: JSON.stringify(volume.operation_geography),
-      })
-      .getCount();
+      );
+
+    const params: any = {
+      date_begin: volume.effective_time_begin,
+      date_end: volume.effective_time_end,
+      min_altitude: volume.min_altitude,
+      max_altitude: volume.max_altitude,
+      geom: JSON.stringify(volume.operation_geography),
+    };
+
+    if (gufi !== undefined) {
+      params.gufi = gufi;
+      qBuilder = qBuilder.andWhere('operation_volume."operationGufi" != :gufi');
+    }
+
+    qBuilder = qBuilder.setParameters(params);
+    return await qBuilder.getCount();
   }
 
   async getOperationVolumeByVolumeCountExcludingOneOperation(
@@ -1007,7 +1013,7 @@ export class OperationDao {
     for (let i = 0; i < operation.operation_volumes.length; i++) {
       const volume = operation.operation_volumes[i];
       const gufi = operation.gufi;
-      const res = await this.checkIntersections(entManager, gufi, volume);
+      const res = await this.checkIntersections(volume, entManager, gufi);
       if (res.uvrsCount > 0) return "Intersect with UVR";
       if (res.operationsCount > 0) return "Intersect with operation";
       if (res.rfvsCount > 0) return "Intersect with RFV";
@@ -1020,14 +1026,14 @@ export class OperationDao {
   // ---------------------------------------------------------------
 
   private async checkIntersections(
+    volume: OperationVolume,
     entManager: EntityManager,
-    gufi: string,
-    volume: OperationVolume
+    gufi?: string
   ): Promise<CheckIntersectionsResult> {
     const operationsCount = await this.intersectingVolumesCount(
-      gufi,
       volume,
-      entManager
+      entManager,
+      gufi
     );
     const uvrDao = new UASVolumeReservationDao();
     const uvrsCount = await uvrDao.intersectingUvrsCount(volume, entManager);
