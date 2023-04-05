@@ -36,6 +36,7 @@ import {
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
+  TRY_TO_ACTIVATE_NEW_OPERATIONS,
 } from "../utils/config.utils";
 import { operationMailHtml } from "../utils/mail-content.utils";
 import { VehicleReg } from "../entities/vehicle-reg";
@@ -409,7 +410,12 @@ export class OperationController {
 
     if (errors.length == 0) {
       try {
-        const operation = await this.dao.saveOverridingState(operationToSave);
+        let operation: Operation;
+        if (TRY_TO_ACTIVATE_NEW_OPERATIONS) {
+          operation = await this.dao.saveOverridingState(operationToSave);
+        } else {
+          operation = await this.dao.save(operationToSave);
+        }
 
         if (isCreating) {
           //If im creating the the new state is proposed
@@ -1005,7 +1011,11 @@ export class OperationController {
 
     if (errors.length == 0) {
       try {
-        await this.dao.saveOverridingState(operation);
+        if (TRY_TO_ACTIVATE_NEW_OPERATIONS) {
+          await this.dao.saveOverridingState(operation);
+        } else {
+          await this.dao.save(operation);
+        }
         sendNewOperation({
           gufi: operation.gufi,
           name: operation.name,

@@ -22,6 +22,7 @@ import { PriorityStatus } from "../../../entities/priority-elements";
 import { Severity } from "../../../types";
 import { OperationVolume } from "../../../entities/operation-volume";
 import { Polygon } from "geojson";
+import { TRY_TO_ACTIVATE_NEW_OPERATIONS } from "../../../utils/config.utils";
 
 export class MQTTOperationController {
   private dao: OperationDao;
@@ -157,9 +158,14 @@ export class MQTTOperationController {
 
     // Save operation
     console.log("Save operation");
+    const opDao = new OperationDao();
     let operationAdded: Operation;
     try {
-      operationAdded = await new OperationDao().saveOverridingState(operation);
+      if (TRY_TO_ACTIVATE_NEW_OPERATIONS) {
+        operationAdded = await opDao.saveOverridingState(operation);
+      } else {
+        operationAdded = await opDao.save(operation);
+      }
     } catch (error) {
       return this.respondError(resTopic, (error as Error).message);
     }

@@ -104,3 +104,6 @@ export const OPERATION_DEFAULT_STATE =
 
 export const OPERATION_PAYMENT_THROW_THE_APP =
   process.env.OPERATION_PAYMENT_THROW_THE_APP === "true";
+
+export const TRY_TO_ACTIVATE_NEW_OPERATIONS =
+  process.env.TRY_TO_ACTIVATE_NEW_OPERATIONS === "true";
