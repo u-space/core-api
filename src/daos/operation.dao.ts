@@ -450,7 +450,8 @@ export class OperationDao {
     this.normalizeOperationData(op);
 
     // we have to execute a db transaction
-    const result = await getManager().transaction(async (entManager) => {
+    let opSaved: Operation | undefined = undefined;
+    await getManager().transaction(async (entManager) => {
       // check the operation intersects with rfvs, uvrs or with other operations
       const res = await this.intersectWithOperationUvrOrRfv(entManager, op);
 
@@ -473,11 +474,16 @@ export class OperationDao {
       }
 
       // save the operation
-      entManager.save(Operation, op);
+      opSaved = await entManager.save(Operation, op);
     });
 
-    console.log(result);
-    throw new Error("falta terminar");
+    // return result
+    if (opSaved === undefined) {
+      throw new DataBaseError(
+        "There was an error trying to save the operation into the database"
+      );
+    }
+    return opSaved;
   }
 
   async updateState(
