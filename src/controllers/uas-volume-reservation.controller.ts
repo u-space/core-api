@@ -102,13 +102,7 @@ export class UASVolumeReservationController {
    */
   async save(request: Request, response: Response) {
     const requestBody = request.body;
-    if (requestBody.message_id) {
-      return logAndRespond400(
-        response,
-        400,
-        "You can not send the message_id when you create a new uvr"
-      );
-    }
+    delete requestBody.message_id;
     let uvr: UASVolumeReservation;
     try {
       uvr = this.convertAnyToUVR(requestBody);
