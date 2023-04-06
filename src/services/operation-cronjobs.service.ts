@@ -153,6 +153,7 @@ async function processProposed(operation: Operation) {
         OperationState.ACCEPTED,
         "accepted by cronjob"
       );
+      processAccepted(operation);
     } else {
       await changeState(
         operation,
@@ -272,19 +273,6 @@ function processAccepted(operation: Operation) {
     if (date.getTime() > dateEnd.getTime()) {
       changeState(operation, OperationState.CLOSED, "closed because of time");
     }
-
-    // for (let index = 0; index < operation.operation_volumes.length; index++) {
-    // 	const operationVolume = operation.operation_volumes[index];
-    // 	const dateBegin = new Date(operationVolume.effective_time_begin);
-    // 	const dateEnd = new Date(operationVolume.effective_time_end);
-    // 	// console.log(`(${date.toISOString()} >= ${dateBegin.toISOString()}) && (${date.toISOString()} < ${dateEnd.toISOString()})`)
-    // 	if (date.getTime() >= dateBegin.getTime() && date.getTime() < dateEnd.getTime()) {
-    // 		changeState(operation, OperationState.ACTIVATED);
-    // 	}
-    // 	if (date.getTime() > dateEnd.getTime()) {
-    // 		changeState(operation, OperationState.CLOSED);
-    // 	}
-    // }
   } catch (error) {
     errorOnOperation(operation, JSON.stringify(error));
   }
