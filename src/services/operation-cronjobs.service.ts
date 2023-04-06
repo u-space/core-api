@@ -171,8 +171,9 @@ async function checkIntersection(
 ) {
   try {
     const operationsCount = await operationDao.intersectingVolumesCount(
-      operation.gufi,
-      operationVolume
+      operationVolume,
+      undefined,
+      operation.gufi
     );
     const uvrCount = await uvrDao.intersectingUvrsCount(operationVolume);
     let msg = "";
