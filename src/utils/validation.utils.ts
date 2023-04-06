@@ -90,6 +90,8 @@ export function validateObjectKeys(
   const allKeys = [...mandatoryKeys, ...optionalKeys];
   for (let i = 0; i < objKeys.length; i++) {
     const objKey = objKeys[i];
+    // if objKey value is null, we assume that key is not in the object
+    if (obj[objKey] === null) continue;
     const vec = allKeys.filter((key) => key.name === objKey);
     if (vec.length === 0) {
       throw new Error(`'${objKeys[i]}' key does not belong to the object`);
