@@ -295,23 +295,12 @@ export class AuthController {
       return logAndRespond200(response, { message: "User authorized" }, []);
     }
     const separeted_topic = topic.split("/");
-    switch (separeted_topic[0]) {
-      // gufi/username/trackerId
-      case "getGufi":
-        if (separeted_topic[1] === username) {
-          return logAndRespond200(response, { message: "User authorized" }, []);
-        } else {
-          return logAndRespond400(response, 401, "User unauthorized");
-        }
-        break;
-      // position/username/trackerId
-      case "position":
-        if (separeted_topic[1] === username) {
-          return logAndRespond200(response, { message: "User authorized" }, []);
-        } else {
-          return logAndRespond400(response, 401, "User unauthorized");
-        }
-        break;
+    const method = separeted_topic[0];
+    const topicUsername = separeted_topic[1];
+    const validMethods = ["getGufi", "position", "expressOperation"];
+    if (!validMethods.includes(method) || topicUsername !== username) {
+      return logAndRespond400(response, 401, "User unauthorized");
     }
+    return logAndRespond200(response, { message: "User authorized" }, []);
   }
 }
