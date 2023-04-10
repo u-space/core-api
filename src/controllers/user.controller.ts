@@ -331,14 +331,14 @@ export class UserController {
     });
     const validationResult = reqBodySchema.validate(userParams);
     if (validationResult.error !== undefined)
-      logAndRespond400(response, 400, validationResult.error.message);
+      return logAndRespond400(response, 400, validationResult.error.message);
 
     if (
       userParams.role !== undefined &&
       userParams.role !== null &&
       (userParams.role as string).toLowerCase() !== "pilot"
     ) {
-      logAndRespond400(response, 400, "Invalid role received");
+      return logAndRespond400(response, 400, "Invalid role received");
     }
 
     try {
