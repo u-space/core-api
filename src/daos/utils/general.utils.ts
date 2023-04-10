@@ -5,28 +5,9 @@
  */
 
 import GeneralUtilsFromUtils from "../../utils/general.utils";
-import IEntityWithExtraFields from "../../entities/ientity-with-extra-fields";
 import { isNullOrUndefined, isArray, isString } from "util";
 
 export default class GeneralUtils {
-  static setExtraFields(obj: IEntityWithExtraFields): void {
-    obj.extra_fields = {};
-    if (
-      obj.strExtraFields !== null &&
-      obj.strExtraFields !== undefined &&
-      obj.strExtraFields !== ""
-    ) {
-      obj.extra_fields = JSON.parse(obj.strExtraFields);
-    }
-    delete obj.strExtraFields;
-  }
-  static setExtraFieldsAndDocumentsDownloadFileUrl(
-    obj: IEntityWithExtraFields
-  ) {
-    this.setExtraFields(obj);
-    this.setDocumentsDownloadFileUrl(obj);
-  }
-
   static setDocumentsDownloadFileUrl(obj: any) {
     const documents = obj.extra_fields["documents"];
     if (documents && Array.isArray(documents)) {

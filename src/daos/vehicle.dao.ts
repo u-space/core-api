@@ -66,9 +66,8 @@ export class VehicleDao {
       const [vehicles, count] = await qb.getManyAndCount();
       for (let i = 0; i < vehicles.length; i++) {
         const vehicle = vehicles[i];
-        GeneralUtils.setExtraFields(vehicle);
+        vehicle.extra_fields = vehicle.extra_fields_json;
         await this.setVehicleDocuments(vehicle);
-        delete vehicle.strExtraFields;
       }
       return { vehicles, count };
     } catch (error) {
@@ -96,9 +95,8 @@ export class VehicleDao {
         .getMany();
       for (let i = 0; i < allVehicles.length; i++) {
         const vehicle = allVehicles[i];
-        GeneralUtils.setExtraFields(vehicle);
+        vehicle.extra_fields = vehicle.extra_fields_json;
         await this.setVehicleDocuments(vehicle);
-        delete vehicle.strExtraFields;
       }
       return allVehicles;
     } catch (error: any) {
@@ -154,9 +152,8 @@ export class VehicleDao {
       const [vehicles, count] = await qb.getManyAndCount();
       for (let i = 0; i < vehicles.length; i++) {
         const vehicle = vehicles[i];
-        GeneralUtils.setExtraFields(vehicle);
+        vehicle.extra_fields = vehicle.extra_fields_json;
         await this.setVehicleDocuments(vehicle);
-        delete vehicle.strExtraFields;
       }
       // let matchedVehicles = allVehicles;
       // // TODO:
@@ -202,9 +199,7 @@ export class VehicleDao {
         );
       }
     }
-    if (isString(result.strExtraFields)) {
-      result.extra_fields = JSON.parse(result.strExtraFields);
-    }
+    result.extra_fields = result.extra_fields_json;
     if (
       isObject(result.extra_fields) &&
       Object.keys(result.extra_fields).includes("documents")
@@ -221,9 +216,8 @@ export class VehicleDao {
           trackerId,
         },
       });
-      GeneralUtils.setExtraFields(v);
+      v.extra_fields = v.extra_fields_json;
       await this.setVehicleDocuments(v);
-      delete v.strExtraFields;
       return v;
     } catch (error: any) {
       if (
@@ -251,9 +245,8 @@ export class VehicleDao {
           owner: username,
         },
       });
-      GeneralUtils.setExtraFields(v);
+      v.extra_fields = v.extra_fields_json;
       await this.setVehicleDocuments(v);
-      delete v.strExtraFields;
       return v;
     } catch (error: any) {
       if (
@@ -275,7 +268,7 @@ export class VehicleDao {
   }
 
   async add(vehicle: VehicleReg, registeredByUsername: string) {
-    const registeredByUser: User = new User("", "", "", "", Role.PILOT, "");
+    const registeredByUser: User = new User("", "", "", "", Role.PILOT);
     registeredByUser.username = registeredByUsername;
     const vehicleToAdd: VehicleReg = {
       registeredBy: registeredByUser,
@@ -310,11 +303,10 @@ export class VehicleDao {
 
     try {
       // TODO We have to check that if trackerId is not null, it belongs to an existing tracker
-      vehicleToAdd.strExtraFields = JSON.stringify(vehicleToAdd.extra_fields);
+      vehicleToAdd.extra_fields_json = vehicleToAdd.extra_fields;
       const dbVehicle: VehicleReg = await this.repository.save(vehicleToAdd);
-      GeneralUtils.setExtraFields(dbVehicle);
+      dbVehicle.extra_fields = dbVehicle.extra_fields_json;
       await this.setVehicleDocuments(dbVehicle);
-      delete dbVehicle.strExtraFields;
 
       return await this.one(dbVehicle.uvin!);
     } catch (error: any) {
@@ -346,7 +338,7 @@ export class VehicleDao {
           vehicleExtraFields.documents = dbVehicle.extra_fields.documents;
         }
         GeneralUtils.removeDocumentsAndKeepIds(vehicleExtraFields);
-        vehicle.strExtraFields = JSON.stringify(vehicleExtraFields);
+        vehicle.extra_fields_json = vehicle.extra_fields;
       }
       await this.repository.save(vehicle);
 

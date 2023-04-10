@@ -352,7 +352,6 @@ export type AAAUser = {
   settings?: string;
   extraFields?: any;
   deletedAt?: Date;
-  strExtraFields?: string;
   verificationToken?: string;
   verified?: boolean;
 };

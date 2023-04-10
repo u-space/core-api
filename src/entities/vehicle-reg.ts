@@ -13,7 +13,6 @@ import {
   JoinTable,
   ManyToMany,
 } from "typeorm";
-import IEntityWithExtraFields from "./ientity-with-extra-fields";
 import { User } from "./user";
 
 export enum vehicleType {
@@ -49,7 +48,7 @@ export function parseVehicleAuthorizeStatus(
 }
 
 @Entity()
-export class VehicleReg implements IEntityWithExtraFields {
+export class VehicleReg {
   @PrimaryGeneratedColumn("uuid")
   uvin?: string;
 
@@ -112,8 +111,8 @@ export class VehicleReg implements IEntityWithExtraFields {
 
   extra_fields?: any;
 
-  @Column({ type: "varchar", nullable: true, name: "strExtraFields" })
-  strExtraFields?: string;
+  @Column({ type: "json", nullable: true })
+  extra_fields_json?: object;
 }
 
 export const vehicleRegSchema: any = {

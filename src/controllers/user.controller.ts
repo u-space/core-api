@@ -240,8 +240,7 @@ export class UserController {
           userParams.firstName,
           userParams.lastName,
           userParams.email,
-          userRole!,
-          ""
+          userRole!
         );
         user.extra_fields = userParams.extra_fields;
         user.verified = false;
@@ -375,8 +374,7 @@ export class UserController {
         userParams.firstName,
         userParams.lastName,
         userParams.email,
-        Role.PILOT,
-        ""
+        Role.PILOT
       );
       user.verified = false;
       const role = Role.PILOT;
@@ -458,13 +456,6 @@ export class UserController {
     }
     if (requestBodyKeys.includes("verified")) {
       return logAndRespond400(response, 400, "Key verified must not be sent");
-    }
-    if (requestBodyKeys.includes("strExtraFields")) {
-      return logAndRespond400(
-        response,
-        400,
-        "Key strExtraFields must not be sent"
-      );
     }
     // if the user is PILOT, we check that the role parameter was not received
     if (role === Role.PILOT && Object.keys(requestBody).includes("role")) {

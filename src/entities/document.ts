@@ -48,7 +48,10 @@ export class Document {
   valid: boolean;
 
   @Column("simple-json", { nullable: true, default: {} })
-  extra_fields: ObjectLiteral;
+  extra_fields?: object;
+
+  @Column({ type: "json", nullable: true })
+  extra_fields_json?: object;
 
   downloadFileUrl?: string;
 

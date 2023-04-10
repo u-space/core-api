@@ -12,9 +12,11 @@ import { TypeOrmErrorType } from "./type-orm-error-type";
 export class DocumentDao {
   private repository = getRepository(Document);
 
-  async all() {
+  async all(): Promise<Document[]> {
     try {
-      return this.repository.find({});
+      const documents = await this.repository.find({});
+      documents.forEach((doc) => (doc.extra_fields = doc.extra_fields_json));
+      return documents;
     } catch (error: any) {
       throw new DataBaseError(
         "There was an error trying to execute Document.all()",
@@ -23,9 +25,11 @@ export class DocumentDao {
     }
   }
 
-  async one(id: string) {
+  async one(id: string): Promise<Document> {
     try {
-      return await this.repository.findOneOrFail(id);
+      const document = await this.repository.findOneOrFail(id);
+      document.extra_fields = document.extra_fields_json;
+      return document;
     } catch (error: any) {
       if (
         error.name === TypeOrmErrorType.EntityNotFound ||
@@ -47,11 +51,12 @@ export class DocumentDao {
 
   async save(document: Document): Promise<void> {
     try {
+      document.extra_fields_json = document.extra_fields;
       const dbResult: InsertResult = await this.repository.insert(document);
       document.id = dbResult.raw[0]["id"];
       document.upload_time = `${dbResult.raw[0]["upload_time"]}`;
       document.valid = dbResult.raw[0]["valid"];
-      document.extra_fields = JSON.parse(dbResult.raw[0]["extra_fields"]);
+      document.extra_fields = dbResult.raw[0]["extra_fields_json"];
     } catch (error: any) {
       throw new DataBaseError(
         "There was an error trying to execute DocumentDao.save(entity)",
@@ -62,7 +67,10 @@ export class DocumentDao {
 
   async update(entity: Document) {
     try {
-      return this.repository.save(entity);
+      entity.extra_fields_json = entity.extra_fields;
+      const docUpdated = await this.repository.save(entity);
+      docUpdated.extra_fields = docUpdated.extra_fields_json;
+      return docUpdated;
     } catch (error: any) {
       throw new DataBaseError(
         "There was an error trying to execute Document.update(entity)",

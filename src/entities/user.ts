@@ -12,7 +12,6 @@ import {
   Unique,
 } from "typeorm";
 import { Polygon } from "geojson";
-import IEntityWithExtraFields from "./ientity-with-extra-fields";
 
 export enum Role {
   ADMIN = "ADMIN",
@@ -33,7 +32,7 @@ export function roleValueOf(strRole: string) {
 
 @Entity()
 @Unique(["email"])
-export class User implements IEntityWithExtraFields {
+export class User {
   @PrimaryColumn({ type: "varchar" })
   username: string;
 
@@ -60,8 +59,8 @@ export class User implements IEntityWithExtraFields {
   @DeleteDateColumn()
   deletedAt?: Date;
 
-  @Column({ type: "varchar", nullable: true })
-  strExtraFields?: string;
+  @Column({ type: "json", nullable: true })
+  extra_fields_json?: object;
 
   verification_token?: string;
   verified?: boolean;
@@ -72,7 +71,6 @@ export class User implements IEntityWithExtraFields {
     lastName: string,
     email: string,
     role: Role,
-    strExtraFields: string,
     VolumesOfInterest?: Polygon,
     settings?: string,
     extra_fields?: unknown,
@@ -87,7 +85,6 @@ export class User implements IEntityWithExtraFields {
     this.verification_token = verification_token;
     this.verified = verified;
     this.role = role;
-    this.strExtraFields = strExtraFields;
     this.VolumesOfInterest = VolumesOfInterest;
     this.settings = settings;
     this.extra_fields = extra_fields;

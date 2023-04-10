@@ -97,7 +97,7 @@ export class UserDao {
     const users = [];
     for (let i = 0; i < coreUsers.length; i++) {
       const user = coreUsers[i];
-      GeneralUtils.setExtraFields(user);
+      user.extra_fields = user.extra_fields_json;
       await this.setUserDocuments(user);
       users.push(user);
     }
@@ -121,12 +121,7 @@ export class UserDao {
         );
       }
     }
-    if (isString(user.strExtraFields)) {
-      try {
-        user.extra_fields = JSON.parse(user.strExtraFields);
-        // eslint-disable-next-line no-empty
-      } catch (error: any) {}
-    }
+    user.extra_fields = user.extra_fields_json;
     if (
       isObject(user.extra_fields) &&
       Object.keys(user.extra_fields).includes("documents")
@@ -137,7 +132,6 @@ export class UserDao {
   }
 
   async save(user: User) {
-    console.log(user);
     if (
       user.extra_fields !== null &&
       user.extra_fields !== undefined &&
@@ -145,19 +139,16 @@ export class UserDao {
     ) {
       // before serialize the extra fields, we have to remove the documents and keep only the ids
       GeneralUtils.removeDocumentsAndKeepIds(user.extra_fields);
-      user.strExtraFields = JSON.stringify(user.extra_fields);
-    } else {
-      user.strExtraFields = undefined;
     }
+    user.extra_fields_json = user.extra_fields;
     const u = await this.userRepository.save(user);
-    GeneralUtils.setExtraFieldsAndDocumentsDownloadFileUrl(u);
-    delete u.strExtraFields;
+    u.extra_fields = u.extra_fields_json;
+    GeneralUtils.setDocumentsDownloadFileUrl(u);
     return u;
   }
 
   async update(user: User) {
     try {
-      // let ef = user.extra_fields;
       if (user.extra_fields) {
         if (!user.extra_fields.documents) {
           // if user received does not contain the documents, we keep the documents the user has right now
@@ -166,10 +157,10 @@ export class UserDao {
         }
         // before serialize the extra fields, we have to remove the documents and keep only the ids
         GeneralUtils.removeDocumentsAndKeepIds(user.extra_fields);
-        user.strExtraFields = JSON.stringify(user.extra_fields);
+        user.extra_fields_json = user.extra_fields;
       }
       const u = await this.userRepository.save(user);
-      // u.extra_fields = ef;
+      u.extra_fields = u.extra_fields_json;
       return u;
     } catch (error: any) {
       throw new Error(`An error has ocurred: ${error}`);
@@ -268,6 +259,10 @@ export class UserDao {
       }
     }
   }
+
+  // ---------------------------------------------------------------
+  // ---------------------- PRIVATE FUNCTIONS ----------------------
+  // ---------------------------------------------------------------
 
   private async setUserDocuments(user: User): Promise<void> {
     if (

@@ -448,7 +448,7 @@ export class VehicleController {
         (op) => op.username === vehicleToAdd.owner!.username
       ).length === 0
     ) {
-      const ownerOperator = new User("", "", "", "", Role.PILOT, "");
+      const ownerOperator = new User("", "", "", "", Role.PILOT);
       ownerOperator.username = vehicleToAdd.owner!.username;
       vehicleToAdd.operators!.push(ownerOperator);
     }
@@ -484,7 +484,7 @@ export class VehicleController {
       const key = vehicleDataKeys[i];
       result[key] = vehicleData[key];
       if (key === "owner_id") {
-        result.owner = new User("", "", "", "", Role.PILOT, "");
+        result.owner = new User("", "", "", "", Role.PILOT);
         result.owner.username = vehicleData["owner_id"];
       } else if (key === "operators") {
         result.operators = this.parseOperators(vehicleData["operators"]);
@@ -530,7 +530,7 @@ export class VehicleController {
     const result: User[] = [];
     for (let i = 0; i < jsonArrayOperators.length; i++) {
       const opAux = jsonArrayOperators[i];
-      const operator: User = new User("", "", "", "", Role.PILOT, "");
+      const operator: User = new User("", "", "", "", Role.PILOT);
       operator.username = opAux;
       result.push(operator);
     }
