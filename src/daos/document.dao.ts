@@ -15,7 +15,10 @@ export class DocumentDao {
   async all(): Promise<Document[]> {
     try {
       const documents = await this.repository.find({});
-      documents.forEach((doc) => (doc.extra_fields = doc.extra_fields_json));
+      documents.forEach((doc) => {
+        doc.extra_fields = doc.extra_fields_json;
+        delete doc.extra_fields_json;
+      });
       return documents;
     } catch (error: any) {
       throw new DataBaseError(
@@ -29,6 +32,7 @@ export class DocumentDao {
     try {
       const document = await this.repository.findOneOrFail(id);
       document.extra_fields = document.extra_fields_json;
+      delete document.extra_fields_json;
       return document;
     } catch (error: any) {
       if (
@@ -57,6 +61,7 @@ export class DocumentDao {
       document.upload_time = `${dbResult.raw[0]["upload_time"]}`;
       document.valid = dbResult.raw[0]["valid"];
       document.extra_fields = dbResult.raw[0]["extra_fields_json"];
+      delete document.extra_fields_json;
     } catch (error: any) {
       throw new DataBaseError(
         "There was an error trying to execute DocumentDao.save(entity)",
@@ -70,6 +75,7 @@ export class DocumentDao {
       entity.extra_fields_json = entity.extra_fields;
       const docUpdated = await this.repository.save(entity);
       docUpdated.extra_fields = docUpdated.extra_fields_json;
+      delete docUpdated.extra_fields_json;
       return docUpdated;
     } catch (error: any) {
       throw new DataBaseError(
