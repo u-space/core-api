@@ -9,7 +9,9 @@ import { IVehicleControllerExtension } from "./extensions-interfaces";
 
 class DefaultVehicleControllerExtension implements IVehicleControllerExtension {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  preProcessUpdateVehicle(_vehicle: unknown) {}
+  preProcessUpdateVehicle(_vehicle: unknown) {
+    return _vehicle;
+  }
   preProcessSaveVehicle(_vehicle: unknown) {
     return _vehicle;
   }
