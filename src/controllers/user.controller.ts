@@ -728,6 +728,7 @@ export class UserController {
       try {
         const requestBody = request.body;
         requestBody["valid"] = false;
+        requestBody["name"] = "";
         document = convertAnyToDocument(requestBody);
       } catch (error) {
         return logAndRespond400(response, 400, `${(error as Error).message}`);
