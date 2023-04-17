@@ -12,6 +12,7 @@ import {
   QueryFailedError,
 } from "typeorm";
 import { isArray, isNullOrUndefined, isObject, isString } from "util";
+import { Document } from "../entities/document";
 import { OperationState } from "../entities/operation";
 import { roleValueOf, User } from "../entities/user";
 import { VehicleAuthorizeStatus, VehicleReg } from "../entities/vehicle-reg";
@@ -21,12 +22,11 @@ import {
   InvalidDataError,
   NotFoundError,
 } from "./db-errors";
+import { DocumentDao } from "./document.dao";
 import { OperationDao } from "./operation.dao";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 import GeneralUtils from "./utils/general.utils";
 import { VehicleDao } from "./vehicle.dao";
-import { Document } from "../entities/document";
-import { DocumentDao } from "./document.dao";
 
 export class UserDao {
   private userRepository = getRepository(User);
@@ -149,6 +149,8 @@ export class UserDao {
     } else {
       user.strExtraFields = undefined;
     }
+    if (user.settings === null || user.settings === undefined)
+      user.settings = "EN";
     const u = await this.userRepository.save(user);
     GeneralUtils.setExtraFieldsAndDocumentsDownloadFileUrl(u);
     delete u.strExtraFields;
