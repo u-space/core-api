@@ -35,9 +35,9 @@ export function parseRegularFlight(
   const keys = [
     { name: "startingPort", type: ObjectKeyType.OBJECT },
     { name: "endingPort", type: ObjectKeyType.OBJECT },
-    { name: "path", type: ObjectKeyType.OTHER },
+    { name: "path", type: ObjectKeyType.OBJECT },
     { name: "name", type: ObjectKeyType.STRING },
-    { name: "verticalSpeed", type: ObjectKeyType.NUMBER },
+    { name: "verticalSpeed", type: ObjectKeyType.STRING },
   ];
   if (objMustHaveId) keys.push({ name: "id", type: ObjectKeyType.STRING });
   validateObjectKeys(obj, keys, []);
