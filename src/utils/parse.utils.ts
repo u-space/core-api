@@ -97,7 +97,7 @@ export function parseVertiport(
     { name: "name", type: ObjectKeyType.STRING },
     { name: "point", type: ObjectKeyType.OBJECT },
     { name: "buffer", type: ObjectKeyType.NUMBER },
-    { name: "closedHours", type: ObjectKeyType.OTHER },
+    { name: "closedHours", type: ObjectKeyType.OBJECT },
     { name: "timeBetweenFlights", type: ObjectKeyType.NUMBER },
   ];
 
