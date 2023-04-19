@@ -61,8 +61,8 @@ export class MQTTOperationController {
                 longitude: 10,
               },
               radiusInKm: 1,
+              maxAltitudeInMeters: 80,
               durationInHours: 1,
-              vehicleId: "uvin",
               phone: "1234",
             }
           )})`,
@@ -150,7 +150,7 @@ export class MQTTOperationController {
       effective_time_begin: beginDate.toISOString(),
       effective_time_end: endDate.toISOString(),
       min_altitude: 0,
-      max_altitude: 120,
+      max_altitude: reqValidated.maxAltitudeInMeters,
       beyond_visual_line_of_sight: false,
       operation_geography: polygon as Polygon,
     };
@@ -260,6 +260,7 @@ export class MQTTOperationController {
         longitude: Joi.number().min(-180).max(180).required(),
       }).required(),
       radiusInKm: Joi.number().required(),
+      maxAltitudeInMeters: Joi.number().required(),
       durationInHours: Joi.number().integer().min(1).required(),
       phone: Joi.string().required(),
     });
@@ -273,6 +274,7 @@ export class MQTTOperationController {
         longitude: createExpressOperationRequest.location.longitude,
       },
       radiusInKm: createExpressOperationRequest.radiusInKm,
+      maxAltitudeInMeters: createExpressOperationRequest.maxAltitudeInMeters,
       durationInHours: createExpressOperationRequest.durationInHours,
       phone: createExpressOperationRequest.phone,
     };
@@ -293,6 +295,7 @@ type CreateExpressOperationRequest = {
     longitude: number;
   };
   radiusInKm: number;
+  maxAltitudeInMeters: number;
   durationInHours: number;
   phone: string;
 };
