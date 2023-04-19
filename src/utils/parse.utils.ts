@@ -264,8 +264,8 @@ function parseRegularFlightSegment(
 ): RegularFlightSegment {
   // validate the keys of the object received
   const keys = [
-    { name: "start", type: ObjectKeyType.STRING },
-    { name: "end", type: ObjectKeyType.STRING },
+    { name: "start", type: ObjectKeyType.OBJECT },
+    { name: "end", type: ObjectKeyType.OBJECT },
     { name: "horizontalBuffer", type: ObjectKeyType.NUMBER },
     { name: "verticalBuffer", type: ObjectKeyType.NUMBER },
     { name: "groundSpeed", type: ObjectKeyType.NUMBER },
