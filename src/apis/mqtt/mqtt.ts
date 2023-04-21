@@ -5,9 +5,13 @@
  */
 
 import * as mqtt from "mqtt";
+import { NotFoundError } from "../../daos/db-errors";
+import { VehicleDao } from "../../daos/vehicle.dao";
+import { VehicleReg } from "../../entities/vehicle-reg";
 import { MQTT_ENDPOINT, MQTT_PASS, MQTT_USER } from "../../utils/config.utils";
 import { MQTTOperationController } from "./controllers/operation.controller";
 import { MQTTPositionController } from "./controllers/position.controller";
+import { respondError } from "./utils";
 
 const positionTopic = "position/#";
 const getGufiTopic = "getGufi/#";
@@ -56,6 +60,51 @@ export class MQTT {
     const username = topicSplit[1];
     const trackerId = topicSplit[2];
 
+    // get vehicle associated to the tracker
+    let vehicle: VehicleReg;
+    try {
+      vehicle = await new VehicleDao().oneByTrackerId(trackerId);
+    } catch (error) {
+      let message: string;
+      if (error instanceof NotFoundError) {
+        respondError(
+          this.mqttClient,
+          topic,
+          `There is no vehicle associated to the tracker ${trackerId}`
+        );
+        return;
+      }
+      respondError(
+        this.mqttClient,
+        topic,
+        `There was an error trying to get the vehicle associated to the tracker (error=${
+          (error as Error).message
+        })`
+      );
+      return;
+    }
+
+    // verify user is operator of the vehicle
+    if (vehicle.operators === undefined) {
+      respondError(
+        this.mqttClient,
+        topic,
+        "Vehicle associated has no operators"
+      );
+      return;
+    }
+    const userIsOperator =
+      vehicle.operators.find((operator) => operator.username === username) !==
+      undefined;
+    if (!userIsOperator) {
+      respondError(
+        this.mqttClient,
+        topic,
+        `User '${username}' is not operator of the vehicle '${vehicle.uvin}' associated to the tracker '${trackerId}'`
+      );
+      return;
+    }
+
     //parse the position
     const parsedMessage = JSON.parse(message);
     switch (topicName) {
@@ -66,7 +115,8 @@ export class MQTT {
         this.operationController.activatedOperationByLocation(
           username,
           parsedMessage,
-          trackerId
+          trackerId,
+          vehicle
         );
         break;
       case "expressOperation":
