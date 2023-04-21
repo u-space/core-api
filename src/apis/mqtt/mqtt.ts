@@ -65,7 +65,6 @@ export class MQTT {
     try {
       vehicle = await new VehicleDao().oneByTrackerId(trackerId);
     } catch (error) {
-      let message: string;
       if (error instanceof NotFoundError) {
         respondError(
           this.mqttClient,
