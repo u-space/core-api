@@ -181,11 +181,13 @@ export class MQTTOperationController {
   async activatedOperationByLocation(
     username: string,
     position: getgufiPosition,
-    trackerId: string
+    trackerId: string,
+    vehicle: VehicleReg
   ) {
     const responseTopic =
       "getGufi" + "/" + username + "/" + trackerId + "/" + "response";
     const { location, altitude_gps } = position;
+
     const alt = await getElevation([
       {
         lat: location?.coordinates[1],
@@ -201,6 +203,15 @@ export class MQTTOperationController {
         location,
         altitude_gps
       );
+      // verify that the vehicle is one of the vehicles authorized to fly in the operation
+      if (operation.uas_registrations === undefined) {
+        throw new Error("error");
+        return;
+      }
+      const vehicleIsAuth =
+        operation.uas_registrations.find((v) => v.uvin === vehicle.uvin) !==
+        undefined;
+
       // if the user is PILOT, we have to check that he es one of the operators of the operation
       if (
         operation.uas_registrations!.filter(
@@ -217,6 +228,7 @@ export class MQTTOperationController {
           )}, altitude_gps=${altitude_gps})`,
         };
       }
+
       const gufi = operation.gufi;
 
       response = {
