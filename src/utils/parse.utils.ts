@@ -35,9 +35,9 @@ export function parseRegularFlight(
   const keys = [
     { name: "startingPort", type: ObjectKeyType.OBJECT },
     { name: "endingPort", type: ObjectKeyType.OBJECT },
-    { name: "path", type: ObjectKeyType.OTHER },
+    { name: "path", type: ObjectKeyType.OBJECT },
     { name: "name", type: ObjectKeyType.STRING },
-    { name: "verticalSpeed", type: ObjectKeyType.NUMBER },
+    { name: "verticalSpeed", type: ObjectKeyType.STRING },
   ];
   if (objMustHaveId) keys.push({ name: "id", type: ObjectKeyType.STRING });
   validateObjectKeys(obj, keys, []);
@@ -97,7 +97,7 @@ export function parseVertiport(
     { name: "name", type: ObjectKeyType.STRING },
     { name: "point", type: ObjectKeyType.OBJECT },
     { name: "buffer", type: ObjectKeyType.NUMBER },
-    { name: "closedHours", type: ObjectKeyType.OTHER },
+    { name: "closedHours", type: ObjectKeyType.OBJECT },
     { name: "timeBetweenFlights", type: ObjectKeyType.NUMBER },
   ];
 
@@ -262,8 +262,8 @@ function parseRegularFlightSegment(
 ): RegularFlightSegment {
   // validate the keys of the object received
   const keys = [
-    { name: "start", type: ObjectKeyType.STRING },
-    { name: "end", type: ObjectKeyType.STRING },
+    { name: "start", type: ObjectKeyType.OBJECT },
+    { name: "end", type: ObjectKeyType.OBJECT },
     { name: "horizontalBuffer", type: ObjectKeyType.NUMBER },
     { name: "verticalBuffer", type: ObjectKeyType.NUMBER },
     { name: "groundSpeed", type: ObjectKeyType.NUMBER },

@@ -411,7 +411,7 @@ export class OperationController {
     if (errors.length == 0) {
       try {
         let operation: Operation;
-        if (TRY_TO_ACTIVATE_NEW_OPERATIONS) {
+        if (isCreating && TRY_TO_ACTIVATE_NEW_OPERATIONS) {
           operation = await this.dao.saveOverridingState(operationToSave);
         } else {
           operation = await this.dao.save(operationToSave);

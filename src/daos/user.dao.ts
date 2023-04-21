@@ -12,6 +12,7 @@ import {
   QueryFailedError,
 } from "typeorm";
 import { isArray, isNullOrUndefined, isObject, isString } from "util";
+import { Document } from "../entities/document";
 import { OperationState } from "../entities/operation";
 import { roleValueOf, User } from "../entities/user";
 import { VehicleAuthorizeStatus, VehicleReg } from "../entities/vehicle-reg";
@@ -21,12 +22,11 @@ import {
   InvalidDataError,
   NotFoundError,
 } from "./db-errors";
+import { DocumentDao } from "./document.dao";
 import { OperationDao } from "./operation.dao";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 import GeneralUtils from "./utils/general.utils";
 import { VehicleDao } from "./vehicle.dao";
-import { Document } from "../entities/document";
-import { DocumentDao } from "./document.dao";
 
 export class UserDao {
   private userRepository = getRepository(User);
@@ -140,6 +140,8 @@ export class UserDao {
       // before serialize the extra fields, we have to remove the documents and keep only the ids
       GeneralUtils.removeDocumentsAndKeepIds(user.extra_fields);
     }
+    if (user.settings === null || user.settings === undefined)
+      user.settings = "EN";
     user.extra_fields_json = user.extra_fields;
     const u = await this.userRepository.save(user);
     u.extra_fields = u.extra_fields_json;
