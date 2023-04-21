@@ -205,28 +205,21 @@ export class MQTTOperationController {
       );
       // verify that the vehicle is one of the vehicles authorized to fly in the operation
       if (operation.uas_registrations === undefined) {
-        throw new Error("error");
+        this.respondError(
+          responseTopic,
+          `The operation '${operation.gufi}' has no vehicles authorized to fly.`
+        );
         return;
       }
       const vehicleIsAuth =
         operation.uas_registrations.find((v) => v.uvin === vehicle.uvin) !==
         undefined;
-
-      // if the user is PILOT, we have to check that he es one of the operators of the operation
-      if (
-        operation.uas_registrations!.filter(
-          (vehicle) =>
-            vehicle.operators!.filter(
-              (operator) => operator.username === username
-            ).length > 0
-        ).length === 0
-      ) {
-        response = {
-          status: "error",
-          message: `There is no operation ACTIVATED in the location received (location=${JSON.stringify(
-            location
-          )}, altitude_gps=${altitude_gps})`,
-        };
+      if (!vehicleIsAuth) {
+        this.respondError(
+          responseTopic,
+          `The vehicle '${vehicle.uvin}' associated to the tracker '${trackerId}' is not authorized to fly in the operation '${operation.gufi}'.`
+        );
+        return;
       }
 
       const gufi = operation.gufi;
