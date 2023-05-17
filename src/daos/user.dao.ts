@@ -128,6 +128,7 @@ export class UserDao {
     ) {
       await this.setUserDocuments(user);
     }
+    delete user.extra_fields_json;
     return user;
   }
 
