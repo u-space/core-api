@@ -780,12 +780,13 @@ export class UserController {
         return logAndRespond500(response, 500, err.message);
       }
       const usernameToUpdateDoc = request.params.username;
-      const document = request.body;
+      let document = request.body;
       if (isNullOrUndefined(document.id)) {
         return logAndRespond400(response, 400, "Invalid document id");
       }
       const documentId = document.id;
 
+      // check that if user is pilot, he is updating one of his documents
       if (role == Role.PILOT && username !== usernameToUpdateDoc) {
         return logAndRespond400(
           response,
@@ -807,6 +808,9 @@ export class UserController {
             `Docuemnt ${documentId} not exists`
           );
         }
+        // update the document
+        document = await new DocumentDao().update(document);
+
         const user: any = await dao.one(usernameToUpdateDoc);
         if (user.extra_fields["documents"] === undefined) {
           user.extra_fields["documents"] = [];
