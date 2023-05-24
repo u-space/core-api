@@ -335,7 +335,8 @@ export class VehicleDao {
         if (!vehicleExtraFields.documents) {
           // if vehicle received does not contain the documents, we keep the documents the vehicle has right now
           const dbVehicle = await this.one(vehicle.uvin);
-          vehicleExtraFields.documents = dbVehicle.extra_fields.documents;
+          if (dbVehicle.extra_fields && dbVehicle.extra_fields.documents)
+            vehicleExtraFields.documents = dbVehicle.extra_fields.documents;
         }
         GeneralUtils.removeDocumentsAndKeepIds(vehicleExtraFields);
         vehicle.extra_fields_json = vehicle.extra_fields;
