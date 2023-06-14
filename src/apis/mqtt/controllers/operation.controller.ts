@@ -13,7 +13,6 @@ import { getgufiResponse } from "../model/get-gufi-response";
 import GeneralUtils from "../../../utils/general.utils";
 import Joi from "joi";
 import { VehicleReg } from "../../../entities/vehicle-reg";
-import { VehicleDao } from "../../../daos/vehicle.dao";
 import { generateFeatureFromExpress } from "../../../services/express-operation.service";
 import { User } from "../../../entities/user";
 import { UserDao } from "../../../daos/user.dao";
@@ -24,6 +23,7 @@ import { OperationVolume } from "../../../entities/operation-volume";
 import { Polygon } from "geojson";
 import { TRY_TO_ACTIVATE_NEW_OPERATIONS } from "../../../utils/config.utils";
 import { TrackersDao } from "../../../daos/trackers/tracker.dao";
+import { isNullOrUndefined } from "util";
 
 export class MQTTOperationController {
   private dao: OperationDao;
@@ -72,16 +72,17 @@ export class MQTTOperationController {
       return;
     }
 
+    // get tracker from the db
+    const tracker = await new TrackersDao().one(trackerId, false);
+    if (tracker === null) {
+      return this.respondError(resTopic, `No tracker with the id ${trackerId}`);
+    }
+
     // Get vehicle associated to the tracker
     console.log("Get vehicle associated to the tracker");
-    let vehicle: VehicleReg;
-    try {
-      vehicle = await new VehicleDao().oneByTrackerId(trackerId);
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        return this.respondError(resTopic, `Tracker has no vehicle`);
-      }
-      return this.respondError(resTopic, `${(error as Error).message}`);
+    const vehicle = tracker.vehicle;
+    if (isNullOrUndefined(vehicle)) {
+      return this.respondError(resTopic, `Tracker has no vehicle`);
     }
 
     // Verify vehicle belongs to the user

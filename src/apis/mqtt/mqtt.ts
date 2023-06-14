@@ -5,13 +5,12 @@
  */
 
 import * as mqtt from "mqtt";
-import { NotFoundError } from "../../daos/db-errors";
-import { VehicleDao } from "../../daos/vehicle.dao";
-import { VehicleReg } from "../../entities/vehicle-reg";
 import { MQTT_ENDPOINT, MQTT_PASS, MQTT_USER } from "../../utils/config.utils";
 import { MQTTOperationController } from "./controllers/operation.controller";
 import { MQTTPositionController } from "./controllers/position.controller";
 import { respondError } from "./utils";
+import { TrackersDao } from "../../daos/trackers/tracker.dao";
+import { isNullOrUndefined } from "util";
 
 const positionTopic = "position/#";
 const getGufiTopic = "getGufi/#";
@@ -60,27 +59,24 @@ export class MQTT {
     const username = topicSplit[1];
     const trackerId = topicSplit[2];
 
-    // get vehicle associated to the tracker
-    let vehicle: VehicleReg;
-    try {
-      vehicle = await new VehicleDao().oneByTrackerId(trackerId);
-    } catch (error) {
-      if (error instanceof NotFoundError) {
-        respondError(
-          this.mqttClient,
-          topic,
-          `There is no vehicle associated to the tracker ${trackerId}`
-        );
-        return;
-      }
-      respondError(
+    // get tracker from db
+    const tracker = await new TrackersDao().one(trackerId, false);
+    if (tracker === null) {
+      return respondError(
         this.mqttClient,
         topic,
-        `There was an error trying to get the vehicle associated to the tracker (error=${
-          (error as Error).message
-        })`
+        `No tracker with the id ${trackerId}`
       );
-      return;
+    }
+
+    // get vehicle associated to the tracker
+    const vehicle = tracker.vehicle;
+    if (isNullOrUndefined(vehicle)) {
+      return respondError(
+        this.mqttClient,
+        topic,
+        `There is no vehicle associated to the tracker ${trackerId}`
+      );
     }
 
     // verify user is operator of the vehicle
