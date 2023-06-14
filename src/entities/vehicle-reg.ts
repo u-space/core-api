@@ -103,9 +103,6 @@ export class VehicleReg {
   @Column({ type: "varchar", nullable: true })
   "org-uuid": string;
 
-  @Column({ type: "varchar", unique: true, nullable: true })
-  "trackerId"?: string;
-
   @Column({ type: "varchar", default: VehicleAuthorizeStatus.PENDING })
   authorized?: VehicleAuthorizeStatus;
 

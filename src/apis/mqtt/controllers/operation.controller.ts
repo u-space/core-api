@@ -23,6 +23,7 @@ import { Severity } from "../../../types";
 import { OperationVolume } from "../../../entities/operation-volume";
 import { Polygon } from "geojson";
 import { TRY_TO_ACTIVATE_NEW_OPERATIONS } from "../../../utils/config.utils";
+import { TrackersDao } from "../../../daos/trackers/tracker.dao";
 
 export class MQTTOperationController {
   private dao: OperationDao;
@@ -94,7 +95,10 @@ export class MQTTOperationController {
     }
 
     // verify tracker is asociated to the vehicle
-    if (vehicle.trackerId === undefined || vehicle.trackerId !== trackerId) {
+    const dbTracker = await new TrackersDao().one(trackerId, false);
+    if (dbTracker === null) {
+      return this.respondError(resTopic, `No tracker with the id ${trackerId}`);
+    } else if (dbTracker.vehicle.uvin !== vehicle.uvin) {
       return this.respondError(
         resTopic,
         `Tracker is not asociated to the vehicle`
