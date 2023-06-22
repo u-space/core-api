@@ -9,4 +9,5 @@ export class getgufiResponse {
   message?: string;
   gufi?: string;
   altitude?: number;
+  publisherId?: string;
 }

@@ -11,12 +11,16 @@ import { MQTTPositionController } from "./controllers/position.controller";
 import { respondError } from "./utils";
 import { TrackersDao } from "../../daos/trackers/tracker.dao";
 import { isNullOrUndefined } from "util";
+import logger from "./logger";
+import { v4 as uuidv4 } from "uuid";
 
 const positionTopic = "position/#";
 const getGufiTopic = "getGufi/#";
 const expressOperationTopic = "expressOperation/#";
 
 export class MQTT {
+  private static PUBLISHER_ID = uuidv4();
+
   private mqttClient: mqtt.Client;
   private positionController: MQTTPositionController;
   private operationController: MQTTOperationController;
@@ -29,7 +33,10 @@ export class MQTT {
     });
 
     this.positionController = new MQTTPositionController();
-    this.operationController = new MQTTOperationController(this.mqttClient);
+    this.operationController = new MQTTOperationController(
+      this.mqttClient,
+      MQTT.PUBLISHER_ID
+    );
 
     this.mqttClient.on("connect", () => {
       console.log("Connected to MQTT");
@@ -45,6 +52,7 @@ export class MQTT {
     });
     this.mqttClient.on("message", async (topic, message) => {
       this.handleIncomingMessage(topic, message.toString());
+      logger.tryToLog(JSON.stringify({ topic, message: message.toString() }));
     });
   }
 
@@ -62,21 +70,25 @@ export class MQTT {
     // get tracker from db
     const tracker = await new TrackersDao().one(trackerId, false);
     if (tracker === null) {
-      return respondError(
+      respondError(
         this.mqttClient,
         topic,
-        `No tracker with the id ${trackerId}`
+        `No tracker with the id ${trackerId}`,
+        MQTT.PUBLISHER_ID
       );
+      return;
     }
 
     // get vehicle associated to the tracker
     const vehicle = tracker.vehicle;
     if (isNullOrUndefined(vehicle)) {
-      return respondError(
+      respondError(
         this.mqttClient,
         topic,
-        `There is no vehicle associated to the tracker ${trackerId}`
+        `There is no vehicle associated to the tracker ${trackerId}`,
+        MQTT.PUBLISHER_ID
       );
+      return;
     }
 
     // verify user is operator of the vehicle
@@ -84,7 +96,8 @@ export class MQTT {
       respondError(
         this.mqttClient,
         topic,
-        "Vehicle associated has no operators"
+        "Vehicle associated has no operators",
+        MQTT.PUBLISHER_ID
       );
       return;
     }
@@ -95,7 +108,8 @@ export class MQTT {
       respondError(
         this.mqttClient,
         topic,
-        `User '${username}' is not operator of the vehicle '${vehicle.uvin}' associated to the tracker '${trackerId}'`
+        `User '${username}' is not operator of the vehicle '${vehicle.uvin}' associated to the tracker '${trackerId}'`,
+        MQTT.PUBLISHER_ID
       );
       return;
     }

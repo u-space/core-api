@@ -28,10 +28,12 @@ import { isNullOrUndefined } from "util";
 export class MQTTOperationController {
   private dao: OperationDao;
   private mqttClient: mqtt.Client;
+  private publisherId: string;
 
-  constructor(mqttClient: mqtt.Client) {
+  constructor(mqttClient: mqtt.Client, publisherId: string) {
     this.dao = new OperationDao();
     this.mqttClient = mqttClient;
+    this.publisherId = publisherId;
   }
 
   async createExpressOperation(
@@ -66,7 +68,8 @@ export class MQTTOperationController {
               durationInHours: 1,
               phone: "1234",
             }
-          )})`,
+          )}`,
+          publisherId: this.publisherId,
         })
       );
       return;
@@ -179,7 +182,11 @@ export class MQTTOperationController {
     console.log("Respond");
     this.mqttClient.publish(
       resTopic,
-      JSON.stringify({ status: "ok", operation: operationAdded })
+      `${JSON.stringify({
+        status: "ok",
+        operation: operationAdded,
+        publisherId: this.publisherId,
+      })}`
     );
   }
 
@@ -233,6 +240,7 @@ export class MQTTOperationController {
         status: "ok",
         gufi: gufi,
         altitude: alt.results[0].elevation,
+        publisherId: this.publisherId,
       };
 
       this.mqttClient.publish(responseTopic, JSON.stringify(response));
@@ -251,6 +259,7 @@ export class MQTTOperationController {
         response = {
           status: "error",
           message: GeneralUtils.getErrorMessage(error),
+          publisherId: this.publisherId,
         };
       }
       this.mqttClient.publish(responseTopic, JSON.stringify(response));
@@ -294,6 +303,7 @@ export class MQTTOperationController {
     const response = {
       status: "error",
       message,
+      publisherId: this.publisherId,
     };
     this.mqttClient.publish(responseTopic, JSON.stringify(response));
   }
