@@ -115,7 +115,12 @@ export class MQTT {
     }
 
     //parse the position
-    const parsedMessage = JSON.parse(message);
+    let parsedMessage: any;
+    try {
+      parsedMessage = JSON.parse(message);
+    } catch (error) {
+      return;
+    }
     switch (topicName) {
       case "position":
         this.positionController.save(parsedMessage, username);

@@ -4,22 +4,32 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { devLogger } from "./dev.logger";
-import { prodLogger } from "./prod.logger";
 import { dummyLogger } from "./dummy.logger";
 import winston from "winston";
 import { LOGS_ENABLED, NODE_ENV } from "../config.utils";
+import { createProdLogger } from "./prod.logger";
+import { createDevLogger } from "./dev.logger";
 
 let logger1: winston.Logger = dummyLogger();
+let smsLogger: winston.Logger = dummyLogger();
+let emailLogger: winston.Logger = dummyLogger();
+
 if (NODE_ENV === "dev") {
   // development
   if (LOGS_ENABLED) {
-    logger1 = devLogger;
+    logger1 = createDevLogger();
+    smsLogger = createDevLogger();
+    emailLogger = createDevLogger();
   }
 } else if (NODE_ENV === "test") {
   // test
 } else {
   // production
-  logger1 = prodLogger;
+  logger1 = createProdLogger("logs/info-logs");
+  smsLogger = createProdLogger("logs/sms-logs");
+  emailLogger = createProdLogger("logs/email-logs");
 }
+
 export const logger = logger1;
+export const smsSentLogger = smsLogger;
+export const emailSentLogger = emailLogger;

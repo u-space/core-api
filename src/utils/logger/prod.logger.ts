@@ -4,24 +4,26 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { createLogger, format, transports } from "winston";
+import winston, { createLogger, format, transports } from "winston";
 const { combine, timestamp } = format;
 
-export const prodLogger = createLogger({
-  level: "info",
-  format: combine(timestamp(), format.errors({ stack: true }), format.json()),
-  transports: [
-    new transports.File({
-      level: "error",
-      filename: "logs/error-logs",
-      maxsize: 104857600, // 100Mb
-      maxFiles: 3,
-    }),
-    new transports.File({
-      level: "info",
-      filename: "logs/info-logs",
-      maxsize: 104857600, // 100Mb
-      maxFiles: 3,
-    }),
-  ],
-});
+export function createProdLogger(infoLevelFilename: string): winston.Logger {
+  return createLogger({
+    level: "info",
+    format: combine(timestamp(), format.errors({ stack: true }), format.json()),
+    transports: [
+      new transports.File({
+        level: "error",
+        filename: "logs/error-logs",
+        maxsize: 104857600, // 100Mb
+        maxFiles: 3,
+      }),
+      new transports.File({
+        level: "info",
+        filename: infoLevelFilename,
+        maxsize: 104857600, // 100Mb
+        maxFiles: 3,
+      }),
+    ],
+  });
+}

@@ -12,6 +12,7 @@ export default interface IMailAPI {
     to: string[],
     subject: string,
     text: string,
-    html: string
+    html: string,
+    showUASPrefixInFrom?: boolean
   ): Promise<any>;
 }

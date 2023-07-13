@@ -30,13 +30,18 @@ import { OperationVolume } from "../entities/operation-volume";
 import {
   adminEmail,
   COMPANY_NAME,
+  frontEndUrl,
   MOCK_MAIL_API,
+  MOCK_SMS_SENDING,
   SMTP_PASSWORD,
   SMTP_PORT,
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
   TRY_TO_ACTIVATE_NEW_OPERATIONS,
+  TWILIO_ACCOUNT_SID,
+  TWILIO_AUTH_TOKEN,
+  TWILIO_FROM_NUMBER,
 } from "../utils/config.utils";
 import { operationMailHtml } from "../utils/mail-content.utils";
 import { VehicleReg } from "../entities/vehicle-reg";
@@ -64,7 +69,14 @@ import { RegularFlight } from "../entities/regular-flight";
 import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
 import GeneralUtils from "../utils/general.utils";
-// import { polygon, union } from 'turf';
+import ISmsApi from "../apis/sms/isms-api";
+import SmsAPIFactory from "../apis/sms/sms-api-factory";
+import {
+  formatDateDDMMYYYY,
+  formatDateLong,
+  formatTime,
+} from "../utils/date.utils";
+import OperationSubscriber from "../entities/operation-subscriber";
 
 const MIN_MIN_ALTITUDE = -300;
 //const MAX_MIN_ALTITUDE = 0;
@@ -88,6 +100,12 @@ export class OperationController {
     SMTP_SECURE,
     SMTP_USERNAME!,
     SMTP_PASSWORD!
+  );
+  private smsApi: ISmsApi = SmsAPIFactory.getSmsApi(
+    MOCK_SMS_SENDING,
+    TWILIO_ACCOUNT_SID!,
+    TWILIO_AUTH_TOKEN!,
+    TWILIO_FROM_NUMBER!
   );
 
   async activatedOperationByLocation(request: Request, response: Response) {
@@ -456,6 +474,13 @@ export class OperationController {
             previousState: previousState,
           });
         }
+
+        // send notifications to operation subscribers
+        sendNotificationsToOperationSubscribers(
+          operation,
+          this.mailAPI,
+          this.smsApi
+        );
         return logAndRespond200(res, operation, []);
       } catch (error) {
         console.log(error);
@@ -1281,6 +1306,10 @@ export class OperationController {
   }
 }
 
+// ---------------------------------------------------------------
+// ---------------------- PRIVATE FUNCTIONS ----------------------
+// ---------------------------------------------------------------
+
 function validateVolumesOrdinals(volumes: any[]) {
   const ordinals: number[] = [];
   let someVolumeHasOrdinal = false;
@@ -1391,4 +1420,171 @@ function validateOperation(operation: any, checkVolumesHaveId?: boolean) {
     }
   }
   return errors;
+}
+
+async function sendNotificationsToOperationSubscribers(
+  operation: Operation,
+  mailApi: IMailAPI,
+  smsApi: ISmsApi
+): Promise<void> {
+  if (!operation.subscribers) return;
+
+  // format operation data
+  const fromTo = getFromTo(operation);
+  let vehicle = "NO_VEHICLE";
+  if (operation.uas_registrations && operation.uas_registrations.length > 0) {
+    const uas = operation.uas_registrations[0];
+    vehicle = `${uas.vehicleName} (${uas.manufacturer} ${uas.model})`;
+  }
+
+  // Send SMS and emails
+  for (const subscriber of operation.subscribers) {
+    if (subscriber.email) {
+      // Send email
+      sendNewOperationNotificationEmail(
+        subscriber,
+        mailApi,
+        operation,
+        vehicle,
+        fromTo
+      );
+    }
+    if (subscriber.mobile) {
+      smsApi.sendSms(
+        subscriber.mobile,
+        `Nueva operación "${
+          operation.name
+        }" creada en Cielum Easy, para volar del ${formatOperationPeriod(
+          operation,
+          subscriber.timeZone
+        )}. Puede ver más información en ${frontEndUrl}public/map?operation=${
+          operation.gufi
+        }&volume=0`
+      );
+    }
+  }
+}
+
+function getFromTo(operation: Operation): [Date, Date] {
+  if (operation.operation_volumes.length === 0)
+    throw Error("This operation has no volumes");
+  let from: Date = new Date(
+    operation.operation_volumes[0].effective_time_begin
+  );
+  let to: Date = new Date(operation.operation_volumes[0].effective_time_end);
+  for (const volume of operation.operation_volumes) {
+    const volumeFrom = new Date(volume.effective_time_begin);
+    const volumeTo = new Date(volume.effective_time_end);
+    if (from > volumeFrom) from = volumeFrom;
+    if (to < volumeTo) to = volumeTo;
+  }
+  return [from, to];
+}
+
+function formatOperationPeriod(
+  operation: Operation,
+  timeZone?: string
+): string {
+  const fromTo = getFromTo(operation);
+  const fromDate = fromTo[0].toLocaleString("es-uy", {
+    timeZone: timeZone ? timeZone : "UTC",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const fromTime = fromTo[0].toLocaleString("es-uy", {
+    timeZone: timeZone ? timeZone : "UTC",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const toDate = fromTo[1].toLocaleString("es-uy", {
+    timeZone: timeZone ? timeZone : "UTC",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const toTime = fromTo[1].toLocaleString("es-uy", {
+    timeZone: timeZone ? timeZone : "UTC",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  return `${fromDate} ${fromTime} a ${
+    fromDate === toDate ? "" : `${toDate} `
+  }${toTime}${timeZone ? "" : " (UTC)"}`;
+}
+
+async function sendNewOperationNotificationEmail(
+  subscriber: OperationSubscriber,
+  mailApi: IMailAPI,
+  operation: Operation,
+  vehicle: string,
+  fromTo: [Date, Date]
+) {
+  if (!subscriber.email) return;
+
+  let fromStr = fromTo[0].toLocaleString("es-uy", {
+    timeZone: subscriber.timeZone ? subscriber.timeZone : "UTC",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  fromStr +=
+    " a las " +
+    fromTo[0].toLocaleString("es-uy", {
+      timeZone: subscriber.timeZone ? subscriber.timeZone : "UTC",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  fromStr =
+    fromStr.substring(0, 1).toUpperCase() +
+    fromStr.substring(1, fromStr.length);
+  let toStr = fromTo[1].toLocaleString("es-uy", {
+    timeZone: subscriber.timeZone ? subscriber.timeZone : "UTC",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  toStr +=
+    " a las " +
+    fromTo[1].toLocaleString("es-uy", {
+      timeZone: subscriber.timeZone ? subscriber.timeZone : "UTC",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  toStr =
+    toStr.substring(0, 1).toUpperCase() + toStr.substring(1, toStr.length);
+  if (!subscriber.timeZone) {
+    fromStr += " (UTC)";
+    toStr += " (UTC)";
+  }
+  await mailApi.sendMail(
+    COMPANY_NAME ? COMPANY_NAME : "Cielum",
+    [subscriber.email],
+    `🔵 Nueva Operación | ${formatOperationPeriod(
+      operation,
+      subscriber.timeZone
+    )} | ${operation.name}`,
+    "",
+    `
+    <div style="font-size:16px">
+    <div style="text-align:center;font-size:24px;font-weight:bold">Nueva Operación</div>
+    <div style="text-align:center;font-size:18px;font-weight:bold">${operation.name}</div>
+    <p style="text-align:center">El usuario ${operation.creator.username} ha agregado a Cielum Easy la siguiente operación:</p>
+    <div>
+      <div style="background-color:#F8F9F9;padding:20px;max-width:800px;margin:0 auto">
+        <div><strong>Nombre:</strong> ${operation.name}</div>
+        <div><strong>Comienzo:</strong> ${fromStr}</div>
+        <div><strong>Fin:</strong> ${toStr}</div>
+        <div><strong>Aeronave:</strong> ${vehicle}</div>
+      </div>
+    </div>
+    <p style="text-align:center">Para ver más información sobre dicha operación puede utilizar el siguiente link:</p>
+    <p style="text-align:center">${frontEndUrl}public/map?operation=${operation.gufi}&volume=0
+    </p>
+    </div>
+    `,
+    false
+  );
 }

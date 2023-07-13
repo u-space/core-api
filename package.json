@@ -60,6 +60,7 @@
     "swagger-ui-express": "^4.1.6",
     "ts-node": "3.3.0",
     "ts-node-dev": "^1.0.0-pre.44",
+    "twilio": "^4.13.0",
     "typeorm": "^0.2.24",
     "underscore": "^1.13.1",
     "uuid-validate": "0.0.3",

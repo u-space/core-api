@@ -6,6 +6,7 @@
 
 import nodemailer from "nodemailer";
 import IMailAPI from "./imail-api";
+import { emailSentLogger } from "../../utils/logger/main.logger";
 
 export default class MailAPINodemailerImp implements IMailAPI {
   username: string;
@@ -61,15 +62,19 @@ export default class MailAPINodemailerImp implements IMailAPI {
     to: string[],
     subject: string,
     text: string,
-    html: string
+    html: string,
+    showUASPrefixInFrom = true
   ): Promise<any> {
     const info = await this.transporter.sendMail({
-      from: `"UAS | ${companyName}" <${this.username}>`,
+      from: `${showUASPrefixInFrom ? "UAS | " : ""}${companyName}" <${
+        this.username
+      }>`,
       to: to,
       subject: subject,
       text: text,
       html: html,
     });
+    emailSentLogger.info("Email Sent", { info });
     return info;
   }
 }

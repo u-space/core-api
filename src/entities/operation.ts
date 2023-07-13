@@ -23,6 +23,7 @@ import { VehicleReg } from "./vehicle-reg";
 import { ContingencyPlan } from "./contingency-plan";
 import { NegotiationAgreement } from "./negotiation-agreement";
 import { PriorityElements } from "./priority-elements";
+import OperationSubscriber from "./operation-subscriber";
 
 /**
  *
@@ -194,4 +195,7 @@ export class Operation {
   @Column(() => PriorityElements)
   // @JoinColumn()
   "priority_elements"?: PriorityElements;
+
+  @Column({ type: "json", nullable: true })
+  subscribers?: OperationSubscriber[];
 }

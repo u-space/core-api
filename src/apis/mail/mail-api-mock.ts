@@ -16,7 +16,8 @@ export default class MailAPIMock implements IMailAPI {
     to: string[],
     subject: string,
     text: string,
-    html: string
+    html: string,
+    showUASPrefixInFrom?: boolean
   ): Promise<any> {
     return Promise.resolve();
   }

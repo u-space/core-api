@@ -22,13 +22,15 @@ const customFormat = printf((info) => {
   }\nmetadata: ${JSON.stringify(metadata)}\n`;
 });
 
-export const devLogger = createLogger({
-  level: "info",
-  format: combine(
-    format.colorize(),
-    timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    format.errors({ stack: true }),
-    customFormat
-  ),
-  transports: [new transports.Console()],
-});
+export function createDevLogger() {
+  return createLogger({
+    level: "info",
+    format: combine(
+      format.colorize(),
+      timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+      format.errors({ stack: true }),
+      customFormat
+    ),
+    transports: [new transports.Console()],
+  });
+}
