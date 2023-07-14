@@ -1520,9 +1520,9 @@ async function sendNotificationsToOperationSubscribers(
         }" creada en Cielum Easy, para volar del ${formatOperationPeriod(
           operation,
           subscriber.timeZone
-        )}. Puede ver más información en ${frontEndUrl}public/map?operation=${
+        )}. Puede ver más información en https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
           operation.gufi
-        }&volume=0`
+        }`
       );
     }
   }
@@ -1644,7 +1644,7 @@ async function sendNewOperationNotificationEmail(
       </div>
     </div>
     <p style="text-align:center">Para ver más información sobre dicha operación puede utilizar el siguiente link:</p>
-    <p style="text-align:center">${frontEndUrl}public/map?operation=${operation.gufi}&volume=0
+    <p style="text-align:center">https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${operation.gufi}
     </p>
     </div>
     `,
