@@ -18,10 +18,34 @@ export const checkJwt = async (
   res: Response,
   next: NextFunction
 ) => {
+  checkJwtAux(req, res, next, true);
+};
+
+export const checkJwtButDoNotFail = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  checkJwtAux(req, res, next, false);
+};
+
+// ---------------------------------------------------------------
+// ---------------------- PRIVATE FUNCTIONS ----------------------
+// ---------------------------------------------------------------
+
+async function checkJwtAux(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+  failIfInvalidToken: boolean
+): Promise<void> {
   //Get the jwt token from the head
   const token: string = (req.headers["auth"] ||
     req.headers.authorization) as string;
-  if (!token) return res.sendStatus(401);
+  if (!token) {
+    failIfInvalidToken ? res.sendStatus(401) : next();
+    return;
+  }
   const compliantToken = token.replace("Bearer ", "");
   const bypass = <string>req.headers["bypass"];
   let jwtPayload: any;
@@ -55,10 +79,10 @@ export const checkJwt = async (
     res.locals.jwtPayload = jwtPayload;
   } catch (error) {
     //If token is not valid, respond with 401 (unauthorized)
-    res.sendStatus(401);
+    failIfInvalidToken ? res.sendStatus(401) : next();
     return;
   }
 
   //Call the next middleware or controller
   next();
-};
+}

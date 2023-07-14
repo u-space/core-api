@@ -16,7 +16,10 @@ import { RestrictedFlightVolumeController } from "./controllers/restricted-fligh
 import { MailController } from "./controllers/mail.controller";
 import { RegularFlightController } from "./controllers/regular-flight.controller";
 
-import { checkJwt } from "./middleware/check-jwt.middleware";
+import {
+  checkJwt,
+  checkJwtButDoNotFail,
+} from "./middleware/check-jwt.middleware";
 import { isAdminUser, isAdminOrPilotUser } from "./middleware/other-middleware";
 
 import { body, query } from "express-validator";
@@ -39,14 +42,20 @@ interface CustomRoute {
   middlewares?: unknown;
 }
 
-const doRoutes = (route: string, Dao: unknown) => {
+const doRoutes = (
+  route: string,
+  Dao: unknown,
+  checkJwtButDoNotFailInGetAll = false
+) => {
   return [
     {
       method: "get",
       route: `/${route}`,
       controller: Dao,
       action: "all",
-      middlewares: [checkJwt],
+      middlewares: checkJwtButDoNotFailInGetAll
+        ? [checkJwtButDoNotFail]
+        : [checkJwt],
     },
     {
       method: "get",
@@ -146,7 +155,7 @@ const operations = [
     action: "closeOwnOperation",
     middlewares: [checkJwt, isAdminOrPilotUser],
   },
-  ...doRoutes("operation", OperationController),
+  ...doRoutes("operation", OperationController, true),
 ];
 
 const user = [

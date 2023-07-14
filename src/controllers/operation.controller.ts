@@ -1181,7 +1181,11 @@ export class OperationController {
     next: NextFunction,
     filterByOwner: boolean
   ) => {
-    const { username, role } = getPayloadFromResponse(response);
+    const responsePayload = getPayloadFromResponse(response);
+    if (!responsePayload) {
+      return getOperationsForNoAuthenticatedUser(response, this.dao);
+    }
+    const { username, role } = responsePayload;
     let ops;
     if (filterByOwner || role == Role.ADMIN || role == Role.MONITOR) {
       try {
@@ -1309,6 +1313,65 @@ export class OperationController {
 // ---------------------------------------------------------------
 // ---------------------- PRIVATE FUNCTIONS ----------------------
 // ---------------------------------------------------------------
+
+async function getOperationsForNoAuthenticatedUser(
+  response: Response,
+  operationDao: OperationDao
+): Promise<void> {
+  // Get all operations
+  let daoResult: [Operation[], number];
+  try {
+    daoResult = await operationDao.all(
+      undefined,
+      undefined,
+      undefined,
+      999999,
+      0,
+      undefined,
+      undefined,
+      undefined
+    );
+  } catch (error) {
+    return logAndRespond500(response, 500, error, false);
+  }
+
+  // Filter finished operations
+  const operations = daoResult[0].filter(
+    (operation) => getFromTo(operation)[1] > new Date()
+  );
+
+  // Extract operations public data
+  const operationsPublicData = operations.map((operation) => {
+    const uas_registrations = !operation.uas_registrations
+      ? []
+      : operation.uas_registrations.map((uas) => {
+          return {
+            uvin: uas.uvin,
+            vehicleName: uas.vehicleName,
+            manufacturer: uas.manufacturer,
+            model: uas.model,
+            registrationNumber: uas.extra_fields_json
+              ? (uas.extra_fields_json as any).serial_number
+              : "",
+          };
+        });
+    return {
+      gufi: operation.gufi,
+      name: operation.name,
+      state: operation.state,
+      operation_volumes: operation.operation_volumes,
+      uas_registrations: uas_registrations,
+      operators: [],
+    };
+  });
+
+  // Return operations
+  return logAndRespond200(
+    response,
+    { count: operations.length, ops: operationsPublicData },
+    []
+  );
+}
 
 function validateVolumesOrdinals(volumes: any[]) {
   const ordinals: number[] = [];
