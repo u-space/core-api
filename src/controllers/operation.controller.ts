@@ -1513,7 +1513,7 @@ async function sendNotificationsToOperationSubscribers(
       );
     }
     if (subscriber.mobile) {
-      smsApi.sendSms(
+      /*smsApi.sendSms(
         subscriber.mobile,
         `Nueva operación "${
           operation.name
@@ -1521,6 +1521,16 @@ async function sendNotificationsToOperationSubscribers(
           operation,
           subscriber.timeZone
         )}. Puede ver más información en https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
+          operation.gufi
+        }`
+      );*/
+      smsApi.sendSms(
+        subscriber.mobile,
+        `AVISO DE VUELO NO TRIPULADO CX-2023-58 Operación prevista ${formatDateDDMMYYYY(
+          fromTo[0]
+        )} ${formatTime(fromTo[0])} hasta ${formatTime(
+          fromTo[1]
+        )}. Detalles de la operación: https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
           operation.gufi
         }`
       );
