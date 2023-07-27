@@ -15,6 +15,7 @@ import {
   validateObjectKeys,
   validateString,
   validateStringArray,
+  validateStringDateIso,
 } from "./validation.utils";
 import { Geo3DPoint } from "../entities/geo3d-point";
 import { User } from "../entities/user";
@@ -316,14 +317,14 @@ function parseRegularFlightSegment(
   );
 }
 
-export function convertAnyToDocument(obj: any): Document {
+export function convertAnyToDocument(obj: any, documentSchemas: any): Document {
   if (!isObject(obj)) throw new Error("Invalid parameter type");
   const mandatoryKeys = [
     { name: "name", type: ObjectKeyType.STRING },
     { name: "valid", type: ObjectKeyType.BOOLEAN },
+    { name: "tag", type: ObjectKeyType.STRING },
   ];
   const optionalKeys = [
-    { name: "tag", type: ObjectKeyType.STRING },
     { name: "valid_until", type: ObjectKeyType.STRING },
     { name: "observations", type: ObjectKeyType.STRING },
     { name: "extra_fields_str", type: ObjectKeyType.STRING },
@@ -339,6 +340,42 @@ export function convertAnyToDocument(obj: any): Document {
       );
     }
   }
+  const tag = obj.tag;
+  if (!Object.keys(documentSchemas).includes(tag)) {
+    throw new Error(
+      `'${tag}' is not a valid tag (validTags=${Object.keys(documentSchemas)})`
+    );
+  }
+
+  const schema = documentSchemas[tag];
+  const fieldsNames = Object.keys(schema);
+  const extraFieldsKeys = extraFields ? Object.keys(extraFields) : [];
+  for (const fieldName of fieldsNames) {
+    const field = schema[fieldName];
+    if (extraFieldsKeys.includes(fieldName)) {
+      // verify the type of the field
+      const fieldType = (field.type as string).toLowerCase();
+      const value = extraFields[fieldName];
+      if (fieldType === "string" && typeof value !== "string") {
+        throw new Error(`${fieldName} must be a ${fieldType}`);
+      } else if (fieldType === "number" && typeof value !== "number") {
+        throw new Error(`${fieldName} must be a ${fieldType}`);
+      } else if (fieldType === "date" && !validateStringDateIso(value)) {
+        throw new Error(
+          `${fieldName} must be a utc date (YYYY-MM-DDTHH:MM:SSZ)`
+        );
+      } else if (fieldType === "boolean" && typeof value !== "boolean") {
+        throw new Error(`${fieldName} must be a ${fieldType}`);
+      }
+    } else {
+      if (field.required) {
+        throw new Error(
+          `'extra_fields_str.${fieldName}' is mandatory for '${tag}' documents`
+        );
+      }
+    }
+  }
+
   const result = new Document(
     obj["name"],
     obj["tag"],

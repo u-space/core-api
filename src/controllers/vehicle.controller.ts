@@ -538,6 +538,8 @@ export class VehicleController {
   }
 
   async addDocument(request: Request, response: Response) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const documentSchemas = require(VEHICLE_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
     const { role, username } = getPayloadFromResponse(response);
     const dao = this.dao;
     const documentDao = this.documentDao;
@@ -545,13 +547,17 @@ export class VehicleController {
     const vehicleControllerExtension = this.vehicleControllerExtension;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     upload(request, response, async function (_err: unknown) {
+      if (!Array.isArray(request.files)) {
+        return logAndRespond400(response, 400, "No file received");
+      }
+
       const vehicleUvinToAdd = request.params.uvin;
       let document: Document;
       try {
         const requestBody = request.body;
         requestBody["valid"] = false;
         requestBody["name"] = "";
-        document = convertAnyToDocument(requestBody);
+        document = convertAnyToDocument(requestBody, documentSchemas);
       } catch (error) {
         return logAndRespond400(response, 400, `${(error as Error).message}`);
       }
