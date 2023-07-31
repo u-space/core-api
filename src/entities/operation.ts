@@ -198,4 +198,10 @@ export class Operation {
 
   @Column({ type: "json", nullable: true })
   subscribers?: OperationSubscriber[];
+
+  @Column({ type: "timestamp with time zone" })
+  "begin": string;
+
+  @Column({ type: "timestamp with time zone" })
+  "end": string;
 }

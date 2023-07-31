@@ -429,6 +429,17 @@ export class OperationDao {
   }
 
   async save(op: Operation) {
+    // verify op has 1 volume at least
+    if (op.operation_volumes.length === 0)
+      throw new InvalidDataError(
+        "operation.operation_volumes.length === 0",
+        null
+      );
+
+    // set operation begin and end
+    this.setOperationBeginAndEnd(op);
+
+    // save operation
     try {
       this.normalizeOperationData(op);
       return await this.repository.save(op);
@@ -454,6 +465,10 @@ export class OperationDao {
 
     // normalize operation data
     this.normalizeOperationData(op);
+
+    // set operation begin and end
+    op.begin = begin.toISOString();
+    op.end = end.toISOString();
 
     // we have to execute a db transaction
     let opSaved: Operation | undefined = undefined;
@@ -964,6 +979,17 @@ export class OperationDao {
         null
       );
     }
+  }
+
+  private setOperationBeginAndEnd(operation: Operation) {
+    let begin = Number.MAX_VALUE;
+    let end = -Number.MAX_VALUE;
+    for (const volume of operation.operation_volumes) {
+      begin = Math.min(begin, new Date(volume.effective_time_begin).getTime());
+      end = Math.max(end, new Date(volume.effective_time_end).getTime());
+    }
+    operation.begin = new Date(begin).toISOString();
+    operation.end = new Date(end).toISOString();
   }
 
   private normalizeOperationData = (operation: Operation) => {

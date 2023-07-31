@@ -33,6 +33,7 @@ import { AircraftTypeController } from "./controllers/aircraft-type.controller";
 import { DocumentRestController } from "./controllers/document.controller";
 import TestController from "./controllers/test.controller";
 import { NODE_ENV } from "./utils/config.utils";
+import { MigrationController } from "./controllers/migration.controller";
 
 interface CustomRoute {
   method: string;
@@ -744,6 +745,16 @@ const document = [
   ...doRoutes("document", DocumentRestController),
 ];
 
+const migrations = [
+  {
+    method: "post",
+    route: "/migrations/execute/:id",
+    controller: MigrationController,
+    action: "executeMigration",
+    middlewares: [checkJwt, isAdminUser],
+  },
+];
+
 const r: CustomRoute[] = [
   ...user, // ...doRoutes("user",UserController),
   ...doRoutes("notam", NotamController),
@@ -764,6 +775,7 @@ const r: CustomRoute[] = [
   ...trackers,
   ...schemas,
   ...aircraftTypeRoutes,
+  ...migrations,
 ];
 if (NODE_ENV === "test") {
   r.push(...test);
