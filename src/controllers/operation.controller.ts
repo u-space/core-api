@@ -1362,6 +1362,8 @@ async function getOperationsForNoAuthenticatedUser(
       operation_volumes: operation.operation_volumes,
       uas_registrations: uas_registrations,
       operators: [],
+      contact: operation.contact,
+      contact_phone: operation.contact_phone,
     };
   });
 
