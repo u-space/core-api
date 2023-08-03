@@ -58,7 +58,8 @@ export function sendTrackerPosition(position: Position, gufi: string) {
 
 export function sendPositionToMonitor(
   position: Position,
-  controller_location: any
+  controller_location: any,
+  publicPosition = false
 ) {
   const positionToSend = {
     altitude_gps: castAsANumber(position.altitude_gps),
@@ -77,7 +78,8 @@ export function sendPositionToMonitor(
       : null,
   };
   // console.log(JSON.stringify(position, null, 2))
-  return send("new-position", positionToSend);
+  send("new-position", positionToSend);
+  if (publicPosition) sendPublic("new-position", positionToSend);
 }
 
 export function sendHazardPositionToMonitor(position: any) {

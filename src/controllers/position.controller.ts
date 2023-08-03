@@ -159,11 +159,20 @@ export class PositionController {
         const pilotPosition = await this.pilotPositionDao.findLastPosition(
           gufi
         );
+        const publicPosition = request.body.public;
 
         if (pilotPosition === undefined) {
-          sendPositionToMonitor(position, operation.controller_location);
+          sendPositionToMonitor(
+            position,
+            operation.controller_location,
+            publicPosition
+          );
         } else {
-          sendPositionToMonitor(position, pilotPosition.location);
+          sendPositionToMonitor(
+            position,
+            pilotPosition.location,
+            publicPosition
+          );
         }
 
         return logAndRespond200(response, position, []);
