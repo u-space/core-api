@@ -7,6 +7,7 @@
 import { app } from "../../main";
 import { Position } from "../../entities/position";
 import { OperationState } from "../../entities/operation";
+import { Telemetry } from "../../entities/telemetry";
 
 //This type is set so only gufi is passed
 type Gufi = {
@@ -36,6 +37,11 @@ function sendPublic(topic: any, object: PublicObject) {
   }
 }
 
+function sendPublic2(topic: string, object: any) {
+  if (!app.publicIo) return;
+  app.publicIo.emit(topic, object);
+}
+
 function castAsANumber(number: any) {
   if (typeof number == "number") {
     return number;
@@ -54,6 +60,12 @@ export function sendTrackerPosition(position: Position, gufi: string) {
     heading: castAsANumber(position.heading),
     time_sent: position.time_sent,
   });
+}
+
+export function sendTelemetry(telemetry: Telemetry) {
+  const topicName = "new-telemetry";
+  send(topicName, telemetry);
+  if (telemetry.publicTelemetry) sendPublic2(topicName, telemetry);
 }
 
 export function sendPositionToMonitor(

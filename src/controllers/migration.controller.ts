@@ -7,13 +7,14 @@
 import { Request, Response } from "express";
 import { Connection, createConnection } from "typeorm";
 import { executeMigration as v0_9_to_v0_10 } from "../dbmigrations/v0_9_to_v0_10";
+import { executeMigration as v0_11_to_v0_12 } from "../dbmigrations/v0_11_to_v0_12";
 import { logAndRespond200, logAndRespond400, logAndRespond500 } from "./utils";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const fs = require("fs");
 
 export class MigrationController {
-  migrations = ["v0_9_to_v0_10"];
+  migrations = ["v0_9_to_v0_10", "v0_11_to_v0_12"];
 
   async executeMigration(req: Request, res: Response) {
     const migrationId = req.params.id;
@@ -31,6 +32,7 @@ export class MigrationController {
     try {
       const connection = await this.getConnection(`${connectionName}`);
       if (migrationId === "v0_9_to_v0_10") v0_9_to_v0_10(connection);
+      else if (migrationId === "v0_11_to_v0_12") v0_11_to_v0_12(connection);
       return logAndRespond200(res, null, [], 200);
     } catch (error) {
       return logAndRespond500(res, 500, error, true);

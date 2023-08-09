@@ -34,6 +34,7 @@ import { DocumentRestController } from "./controllers/document.controller";
 import TestController from "./controllers/test.controller";
 import { NODE_ENV } from "./utils/config.utils";
 import { MigrationController } from "./controllers/migration.controller";
+import { TelemetryController } from "./controllers/telemetry.controller";
 
 interface CustomRoute {
   method: string;
@@ -755,6 +756,16 @@ const migrations = [
   },
 ];
 
+const telemetries = [
+  {
+    method: "post",
+    route: "/telemetries",
+    controller: TelemetryController,
+    action: "postTelemetry",
+    middlewares: [checkJwt],
+  },
+];
+
 const r: CustomRoute[] = [
   ...user, // ...doRoutes("user",UserController),
   ...doRoutes("notam", NotamController),
@@ -776,6 +787,7 @@ const r: CustomRoute[] = [
   ...schemas,
   ...aircraftTypeRoutes,
   ...migrations,
+  ...telemetries,
 ];
 if (NODE_ENV === "test") {
   r.push(...test);
