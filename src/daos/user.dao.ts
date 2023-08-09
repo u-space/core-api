@@ -49,7 +49,7 @@ export class UserDao {
         if (isNullOrUndefined(roleValueOf(filterValue))) {
           throw new InvalidDataError(
             `If filterProp is role, filterValue must be a valid role (filterValue=${filterValue})`,
-            null
+            undefined
           );
         }
         filter.where.role = roleValueOf(filterValue);
