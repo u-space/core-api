@@ -10,6 +10,8 @@ import { Telemetry } from "../entities/telemetry";
 import { Operation } from "../entities/operation";
 import { VehicleReg } from "../entities/vehicle-reg";
 import { Role, User } from "../entities/user";
+import { CorruptedDataBaseError } from "./db-errors";
+import { handleTypeORMError } from "./utils";
 
 export class TelemetryDao {
   private telemetryRepository = getRepository(TelemetryEntity);
@@ -41,9 +43,15 @@ export class TelemetryDao {
       telemetry.inAir
     );
     telEntity.id = undefined;
-    const dbResult = await this.telemetryRepository.save(telEntity);
+    let dbResult: TelemetryEntity;
+    try {
+      dbResult = await this.telemetryRepository.save(telEntity);
+    } catch (error) {
+      handleTypeORMError(error, "Telemetry", "", "");
+      throw new Error("typeormerror was not handle");
+    }
     if (!dbResult.id) {
-      throw new Error("Inserted telemetry has no id");
+      throw new CorruptedDataBaseError("Inserted telemetry has no id");
     }
     return dbResult.id;
   }

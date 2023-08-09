@@ -10,6 +10,7 @@ import { PostTelemetryDto } from "./dtos/telemetry.dto";
 import { logAndRespond200, logAndRespond400, logAndRespond500 } from "./utils";
 import Joi from "joi";
 import { getPayloadFromResponse } from "../utils/auth.utils";
+import * as ServiceTypes from "../services2/_types";
 
 export class TelemetryController {
   private telemetryService = new TelemetryService();
@@ -42,7 +43,20 @@ export class TelemetryController {
       });
       logAndRespond200(res, undefined, []);
     } catch (error) {
-      logAndRespond500(res, 500, error, true);
+      if (error instanceof ServiceTypes.InvalidDataError) {
+        return logAndRespond400(
+          res,
+          400,
+          (error as ServiceTypes.InvalidDataError).message
+        );
+      } else if (error instanceof ServiceTypes.NotFoundError) {
+        return logAndRespond400(
+          res,
+          404,
+          (error as ServiceTypes.NotFoundError).message
+        );
+      }
+      return logAndRespond500(res, 500, error, true);
     }
   }
 }

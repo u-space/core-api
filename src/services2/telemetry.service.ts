@@ -7,12 +7,18 @@
 import { sendTelemetry } from "../apis/socket-io/async-browser-comunication";
 import { TelemetryDao } from "../daos/telemetry.dao";
 import { Telemetry } from "../entities/telemetry";
+import * as ServiceTypes from "./_types";
+import { handleDaoError } from "./utils/error.utils";
 
 export class TelemetryService {
   private telemetryDao = new TelemetryDao();
 
   async addTelemetry(username: string, telemetry: Telemetry): Promise<void> {
-    await this.telemetryDao.addTelemetry(username, telemetry);
+    try {
+      await this.telemetryDao.addTelemetry(username, telemetry);
+    } catch (error) {
+      throw handleDaoError(error);
+    }
     sendTelemetry(telemetry);
   }
 }

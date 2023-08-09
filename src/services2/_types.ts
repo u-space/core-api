@@ -14,16 +14,6 @@ export class DataBaseError {
   }
 }
 
-export class DuplicateEntryError {
-  message: string;
-  error?: Error;
-
-  constructor(message: string, error?: Error) {
-    this.message = message;
-    this.error = error;
-  }
-}
-
 export class InvalidDataError {
   message: string;
   error?: Error;
@@ -35,16 +25,6 @@ export class InvalidDataError {
 }
 
 export class NotFoundError {
-  message: string;
-  error?: Error;
-
-  constructor(message: string, error?: Error) {
-    this.message = message;
-    this.error = error;
-  }
-}
-
-export class CorruptedDataBaseError {
   message: string;
   error?: Error;
 
