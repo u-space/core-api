@@ -27,33 +27,33 @@ export const validatePaginationParams = (
     //TODO: || take > 200 deleted for now
     throw new InvalidDataError(
       `The take param must be a number between 1 and 200 (take=${take})`,
-      null
+      undefined
     );
   } else if (skip !== undefined && skip < 0) {
     throw new InvalidDataError(
       `The skip param must be a natural number (skip=${skip})`,
-      null
+      undefined
     );
   } else if (filterProp && !filterValue) {
     throw new InvalidDataError(
       "If you pass the filterProp param, you also have to pass the filterValue param",
-      null
+      undefined
     );
   } else if (!filterProp && filterValue) {
     throw new InvalidDataError(
       "If you pass the filterValue param, you also have to pass the filterProp param",
-      null
+      undefined
     );
   } else if (filterProp && filterValue) {
     if (filterProp.length < 1 || filterProp.length > 255) {
       throw new InvalidDataError(
         "The length of the filterProp param must be between 1 and 255 characters",
-        null
+        undefined
       );
     } else if (filterValue.length < 1 || filterValue.length > 255) {
       throw new InvalidDataError(
         "The length of the filterValue param must be between 1 and 255 characters",
-        null
+        undefined
       );
     }
   }
@@ -61,23 +61,23 @@ export const validatePaginationParams = (
   if (orderProp && !orderValue) {
     throw new InvalidDataError(
       "If you pass the orderProp param, you also have to pass the orderValue param",
-      null
+      undefined
     );
   } else if (!orderProp && orderValue) {
     throw new InvalidDataError(
       "If you pass the orderValue param, you also have to pass the orderProp param",
-      null
+      undefined
     );
   } else if (orderProp && orderValue) {
     if (orderProp.length < 1 || orderProp.length > 255) {
       throw new InvalidDataError(
         "The length of the orderProp param must be between 1 and 255 characters",
-        null
+        undefined
       );
     } else if (orderValue !== "ASC" && orderValue !== "DESC") {
       throw new InvalidDataError(
         `The orderValue param must be "ASC" or "DESC" (orderValue=${orderValue})`,
-        null
+        undefined
       );
     }
   }
@@ -108,13 +108,13 @@ export const validatePaginationParams2 = (
   ) {
     throw new InvalidDataError(
       `You can not filter by the column '${filterProp}'`,
-      null
+      undefined
     );
   }
   if (orderProp && orderValue && !validOrderingColumns.includes(orderProp)) {
     throw new InvalidDataError(
       `You can not order by the column '${orderProp}'`,
-      null
+      undefined
     );
   }
 };
@@ -214,7 +214,7 @@ export const checkStringLength = (
   if (str.length < minLength || str.length > maxLength) {
     throw new InvalidDataError(
       `${strName} must have between ${minLength} and ${maxLength} characters (${strName}=${str})`,
-      null
+      undefined
     );
   }
 };
@@ -228,7 +228,7 @@ export const checkStringLengthAndNotNull = (
   if (!str) {
     throw new InvalidDataError(
       `${strName} can not be null, undefined or empty`,
-      null
+      undefined
     );
   }
   checkStringLength(str, strName, minLength, maxLength);
@@ -243,7 +243,7 @@ export const getUserAndIfItDoesntExistThrowInvalidDataError = async (
     if (error instanceof NotFoundError) {
       throw new InvalidDataError(
         `There is no user with the username received (username=${username})`,
-        error
+        undefined
       );
     } else {
       throw error;
@@ -260,7 +260,7 @@ export const getVehicleAndIfItDoesntExistThrowInvalidDataError = async (
     if (error instanceof NotFoundError) {
       throw new InvalidDataError(
         `There is no vehicle with the uvin received (uvin=${uvin})`,
-        error
+        undefined
       );
     } else {
       throw error;

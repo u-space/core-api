@@ -80,7 +80,7 @@ export class VehicleDao {
       if (!(await new UserDao().exists(username))) {
         throw new NotFoundError(
           `There is no user with the username received (username="${username}")`,
-          null
+          undefined
         );
       }
       const allVehicles = await this.repository
@@ -124,7 +124,7 @@ export class VehicleDao {
     if (!(await new UserDao().exists(username))) {
       throw new NotFoundError(
         `There is no user with the username received (username=${username})`,
-        null
+        undefined
       );
     }
 
@@ -261,7 +261,7 @@ export class VehicleDao {
     ) {
       throw new InvalidDataError(
         `You can not add a vehicle with more than 10 operators (operators=${vehicleToAdd.operators.length})`,
-        null
+        undefined
       );
     }
     if (vehicleToAdd.operators !== undefined) {
@@ -295,7 +295,7 @@ export class VehicleDao {
       if (!vehicle.uvin) {
         throw new InvalidDataError(
           `You must to pass the uvin of the vehicle you want to update (uvin=${vehicle.uvin})`,
-          null
+          undefined
         );
       }
       await this.one(vehicle.uvin);
@@ -389,22 +389,22 @@ export class VehicleDao {
     if (!vehicle.class)
       throw new InvalidDataError(
         "class can not be null, undefined or empty",
-        null
+        undefined
       );
     if (vehicle.date)
       throw new InvalidDataError(
         "date must be null, undefined or empty, because it is setted automatically by the dao",
-        null
+        undefined
       );
     if (!vehicle.registeredBy || !vehicle.registeredBy.username)
       throw new InvalidDataError(
         "It is mandatory to specify registeredBy parameter",
-        null
+        undefined
       );
     if (!vehicle.owner || !vehicle.owner.username)
       throw new InvalidDataError(
         "It is mandatory to specify owner parameter",
-        null
+        undefined
       );
     if (vehicle.nNumber) checkStringLength(vehicle.nNumber, "nNumber", 1, 100);
     if (vehicle.faaNumber)

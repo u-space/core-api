@@ -38,7 +38,7 @@ export class RestrictedFlightVolumeDao {
       orderValue
     );
     if (isString(filterProp) && !["id", "comments"].includes(filterProp)) {
-      throw new InvalidDataError("Invalid filter", null);
+      throw new InvalidDataError("Invalid filter", undefined);
     }
     try {
       const filter: any = createFilter(

@@ -68,19 +68,19 @@ export class OperationDao {
     if (!dateBegin || !dateEnd || !operationGeography) {
       throw new InvalidDataError(
         `dateBegin, dateEnd and operationGeography can not be undefined or null (dateBegin=${dateBegin} dateEnd=${dateEnd} operationGeography=${operationGeography})`,
-        null
+        undefined
       );
     }
     if (dateEnd <= dateBegin) {
       throw new InvalidDataError(
         `dateEnd must be after dateBegin (dateBegin=${dateBegin}, dateEnd=${dateEnd})`,
-        null
+        undefined
       );
     }
     if (maxAltitude <= minAltitude) {
       throw new InvalidDataError(
         `maxAltitude must be greater than minAltitude (minAltitude=${minAltitude}, maxAltitude=${maxAltitude})`,
-        null
+        undefined
       );
     }
     try {
@@ -122,13 +122,13 @@ export class OperationDao {
     if (!operationGeography) {
       throw new InvalidDataError(
         `operationGeography can not be undefined or null (operationGeography=${operationGeography})`,
-        null
+        undefined
       );
     }
     if (maxAltitude <= minAltitude) {
       throw new InvalidDataError(
         `maxAltitude must be greater than minAltitude (minAltitude=${minAltitude}, maxAltitude=${maxAltitude})`,
-        null
+        undefined
       );
     }
     try {
@@ -206,7 +206,7 @@ export class OperationDao {
     if (!gufi || !volume) {
       throw new InvalidDataError(
         '"gufi" and "volume" are mandatory fields',
-        null
+        undefined
       );
     }
     try {
@@ -293,7 +293,7 @@ export class OperationDao {
         if (!timeRange.start || !timeRange.end) {
           throw new InvalidDataError(
             '"start" and "end" are mandatory fields',
-            null
+            undefined
           );
         }
         const qb = this.repository
@@ -433,7 +433,7 @@ export class OperationDao {
     if (op.operation_volumes.length === 0)
       throw new InvalidDataError(
         "operation.operation_volumes.length === 0",
-        null
+        undefined
       );
 
     // set operation begin and end
@@ -651,14 +651,14 @@ export class OperationDao {
       if (!point || isNullOrUndefined(altitude)) {
         throw new InvalidDataError(
           `point and altitude can not be null or undefined (point=${point}, altitude=${altitude})`,
-          null
+          undefined
         );
       }
       this.validate2DPoint(point);
       if (!validateNumber(altitude, -100000000, 100000000)) {
         throw new InvalidDataError(
           `Invalid altitude. Must be a number between -100.000.000 and 100.000.000 (altitude=${altitude})`,
-          null
+          undefined
         );
       }
       const result = await this.repository
@@ -681,7 +681,7 @@ export class OperationDao {
       if (result.length === 0) {
         throw new NotFoundError(
           `There is no ACTIVATED operation in the point and altitude received (point=${point}, altitude=${altitude})`,
-          null
+          undefined
         );
       } else if (result.length === 1) {
         return result[0];
@@ -922,35 +922,38 @@ export class OperationDao {
     )
       throw new InvalidDataError(
         "point must have a 'type' and a 'coordinates' property",
-        null
+        undefined
       );
     if ((point as { type: unknown }).type !== "Point")
       throw new InvalidDataError(
         `Point type must be 'Point' (type=${
           (point as { type: unknown }).type
         })`,
-        null
+        undefined
       );
     if (!Array.isArray((point as { coordinates: unknown }).coordinates))
-      throw new InvalidDataError("Point coordinates must be an array", null);
+      throw new InvalidDataError(
+        "Point coordinates must be an array",
+        undefined
+      );
     if ((point as { coordinates: Array<unknown> }).coordinates.length !== 2)
       throw new InvalidDataError(
         `Point must have 2 coordinates (coordinates=${
           (point as { coordinates: Array<unknown> }).coordinates.length
         })`,
-        null
+        undefined
       );
     const lng = (point as { coordinates: Array<unknown> }).coordinates[0];
     const lat = (point as { coordinates: Array<unknown> }).coordinates[1];
     if (!validateNumber(lng, -180, 180))
       throw new InvalidDataError(
         `Longitude must be a number between -180 and 180 (longitude=${lng})`,
-        null
+        undefined
       );
     if (!validateNumber(lat, -90, 90))
       throw new InvalidDataError(
         `Latitude must be a number between -90 and 90 (latitude=${lat})`,
-        null
+        undefined
       );
   }
 
@@ -958,25 +961,25 @@ export class OperationDao {
     if (point.coordinates.length !== 3) {
       throw new InvalidDataError(
         `The point must have 3 coordinates [lng, lat, alt] (coordinates=${point.coordinates.length})`,
-        null
+        undefined
       );
     }
     if (point.coordinates[0] < -180 || point.coordinates[0] > 180) {
       throw new InvalidDataError(
         "The longitude must be a value between -180 and 180",
-        null
+        undefined
       );
     }
     if (point.coordinates[1] < -90 || point.coordinates[1] > 90) {
       throw new InvalidDataError(
         "The latitude must be a value between -90 and 90",
-        null
+        undefined
       );
     }
     if (point.coordinates[2] < -99999 || point.coordinates[2] > 99999) {
       throw new InvalidDataError(
         "The altitude must be a value between -99.999 and 99.999",
-        null
+        undefined
       );
     }
   }
