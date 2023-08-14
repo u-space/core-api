@@ -12,6 +12,7 @@ import { createDevLogger } from "./dev.logger";
 
 let logger1: winston.Logger = dummyLogger();
 let smsLogger: winston.Logger = dummyLogger();
+let wpLogger: winston.Logger = dummyLogger();
 let emailLogger: winston.Logger = dummyLogger();
 
 if (NODE_ENV === "dev") {
@@ -19,6 +20,7 @@ if (NODE_ENV === "dev") {
   if (LOGS_ENABLED) {
     logger1 = createDevLogger();
     smsLogger = createDevLogger();
+    wpLogger = createDevLogger();
     emailLogger = createDevLogger();
   }
 } else if (NODE_ENV === "test") {
@@ -27,9 +29,11 @@ if (NODE_ENV === "dev") {
   // production
   logger1 = createProdLogger("logs/info-logs");
   smsLogger = createProdLogger("logs/sms-logs");
+  wpLogger = createProdLogger("logs/whatsapp-logs");
   emailLogger = createProdLogger("logs/email-logs");
 }
 
 export const logger = logger1;
 export const smsSentLogger = smsLogger;
+export const whatsappSentLogger = wpLogger;
 export const emailSentLogger = emailLogger;

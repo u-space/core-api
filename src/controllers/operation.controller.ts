@@ -33,6 +33,7 @@ import {
   frontEndUrl,
   MOCK_MAIL_API,
   MOCK_SMS_SENDING,
+  MOCK_WHATSAPP_SENDING,
   SMTP_PASSWORD,
   SMTP_PORT,
   SMTP_SECURE,
@@ -41,7 +42,8 @@ import {
   TRY_TO_ACTIVATE_NEW_OPERATIONS,
   TWILIO_ACCOUNT_SID,
   TWILIO_AUTH_TOKEN,
-  TWILIO_FROM_NUMBER,
+  TWILIO_FROM_SMS_NUMBER,
+  TWILIO_FROM_WHATSAPP_NUMBER,
 } from "../utils/config.utils";
 import { operationMailHtml } from "../utils/mail-content.utils";
 import { VehicleReg } from "../entities/vehicle-reg";
@@ -71,12 +73,9 @@ import MailAPIFactory from "../apis/mail/mail-api-factory";
 import GeneralUtils from "../utils/general.utils";
 import ISmsApi from "../apis/sms/isms-api";
 import SmsAPIFactory from "../apis/sms/sms-api-factory";
-import {
-  formatDateDDMMYYYY,
-  formatDateLong,
-  formatTime,
-} from "../utils/date.utils";
 import OperationSubscriber from "../entities/operation-subscriber";
+import IWhatsappApi from "../apis/whatsapp/iwhatsapp-api";
+import WhatsappAPIFactory from "../apis/whatsapp/whatsapp-api-factory";
 
 const MIN_MIN_ALTITUDE = -300;
 //const MAX_MIN_ALTITUDE = 0;
@@ -105,7 +104,13 @@ export class OperationController {
     MOCK_SMS_SENDING,
     TWILIO_ACCOUNT_SID!,
     TWILIO_AUTH_TOKEN!,
-    TWILIO_FROM_NUMBER!
+    TWILIO_FROM_SMS_NUMBER!
+  );
+  private whatsappApi: IWhatsappApi = WhatsappAPIFactory.getWhatsappApi(
+    MOCK_WHATSAPP_SENDING,
+    TWILIO_ACCOUNT_SID!,
+    TWILIO_AUTH_TOKEN!,
+    TWILIO_FROM_WHATSAPP_NUMBER!
   );
 
   async activatedOperationByLocation(request: Request, response: Response) {
@@ -479,7 +484,8 @@ export class OperationController {
         sendNotificationsToOperationSubscribers(
           operation,
           this.mailAPI,
-          this.smsApi
+          this.smsApi,
+          this.whatsappApi
         );
         return logAndRespond200(res, operation, []);
       } catch (error) {
@@ -1490,7 +1496,8 @@ function validateOperation(operation: any, checkVolumesHaveId?: boolean) {
 async function sendNotificationsToOperationSubscribers(
   operation: Operation,
   mailApi: IMailAPI,
-  smsApi: ISmsApi
+  smsApi: ISmsApi,
+  whatsappApi: IWhatsappApi
 ): Promise<void> {
   if (!operation.subscribers) return;
 
@@ -1502,7 +1509,7 @@ async function sendNotificationsToOperationSubscribers(
     vehicle = `${uas.vehicleName} (${uas.manufacturer} ${uas.model})`;
   }
 
-  // Send SMS and emails
+  // Send SMS, whatsapp messages and emails
   for (const subscriber of operation.subscribers) {
     if (subscriber.email) {
       // Send email
@@ -1514,16 +1521,17 @@ async function sendNotificationsToOperationSubscribers(
         fromTo
       );
     }
-    if (subscriber.mobile) {
-      smsApi.sendSms(
-        subscriber.mobile,
-        `AVISO DE VUELO NO TRIPULADO CX-2023-58 Operación prevista ${formatOperationPeriod(
-          operation,
-          subscriber.timeZone
-        )}. Detalles de la operación: https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
-          operation.gufi
-        }`
-      );
+    const mobileMessage = `AVISO DE VUELO NO TRIPULADO CX-2023-58 Operación prevista ${formatOperationPeriod(
+      operation,
+      subscriber.timeZone
+    )}. Detalles de la operación: https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
+      operation.gufi
+    }`;
+    if (subscriber.smsMobile) {
+      smsApi.sendSms(subscriber.smsMobile, mobileMessage);
+    }
+    if (subscriber.whatsappMobile) {
+      whatsappApi.sendMessage(subscriber.whatsappMobile, mobileMessage);
     }
   }
 }

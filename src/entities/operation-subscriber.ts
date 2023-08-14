@@ -1,18 +1,21 @@
 export default class OperationSubscriber {
   name?: string;
   timeZone?: string;
-  mobile?: string;
+  smsMobile?: string;
+  whatsappMobile?: string;
   email?: string;
 
   constructor(
     name?: string,
     timeZone?: string,
-    mobile?: string,
+    smsMobile?: string,
+    whatsappMobile?: string,
     email?: string
   ) {
     this.name = name;
     this.timeZone = timeZone;
-    this.mobile = mobile;
+    this.smsMobile = smsMobile;
+    this.whatsappMobile = whatsappMobile;
     this.email = email;
   }
 }

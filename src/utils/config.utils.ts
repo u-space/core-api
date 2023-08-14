@@ -109,7 +109,11 @@ export const TRY_TO_ACTIVATE_NEW_OPERATIONS =
   process.env.TRY_TO_ACTIVATE_NEW_OPERATIONS === "true";
 
 export const MOCK_SMS_SENDING = process.env.MOCK_SMS_SENDING === "true";
+export const MOCK_WHATSAPP_SENDING =
+  process.env.MOCK_WHATSAPP_SENDING === "true";
 
 export const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID;
 export const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
-export const TWILIO_FROM_NUMBER = process.env.TWILIO_FROM_NUMBER;
+export const TWILIO_FROM_SMS_NUMBER = process.env.TWILIO_FROM_SMS_NUMBER;
+export const TWILIO_FROM_WHATSAPP_NUMBER =
+  process.env.TWILIO_FROM_WHATSAPP_NUMBER;
