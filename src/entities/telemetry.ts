@@ -17,4 +17,9 @@ export interface Telemetry {
   altitudeAbs?: number;
   altitudeRel?: number;
   inAir?: boolean;
+  calculatedData?: {
+    groundElevationInMeters?: number;
+    elevationProviderAPI?: string;
+    altitudeAGLInMeters?: number;
+  };
 }

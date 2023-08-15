@@ -42,3 +42,20 @@ export const getElevation = async (locs: any) => {
   });
   return r.data;
 };
+
+export const getElevation2 = async (
+  lat: number,
+  lng: number
+): Promise<{ elevation: number; provider: string }> => {
+  const r = await client.elevation({
+    params: {
+      locations: [{ lat, lng }],
+      key: GOOGLE_API!,
+    },
+    timeout: 1000, // milliseconds
+  });
+  return {
+    elevation: r.data.results[0].elevation,
+    provider: "GOOGLE",
+  };
+};

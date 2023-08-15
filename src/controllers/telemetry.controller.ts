@@ -28,7 +28,7 @@ export class TelemetryController {
     }
 
     try {
-      this.telemetryService.addTelemetry(username, {
+      const result = await this.telemetryService.addTelemetry(username, {
         timestamp: dto.timestamp,
         lat: dto.lat,
         lon: dto.lon,
@@ -41,7 +41,7 @@ export class TelemetryController {
         altitudeRel: dto.altitudeRel,
         inAir: dto.inAir,
       });
-      logAndRespond200(res, undefined, []);
+      logAndRespond200(res, result, []);
     } catch (error) {
       if (error instanceof ServiceTypes.InvalidDataError) {
         return logAndRespond400(

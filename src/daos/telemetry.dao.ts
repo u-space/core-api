@@ -40,7 +40,10 @@ export class TelemetryDao {
       telemetry.heading,
       telemetry.altitudeAbs,
       telemetry.altitudeRel,
-      telemetry.inAir
+      telemetry.inAir,
+      telemetry.calculatedData?.groundElevationInMeters,
+      telemetry.calculatedData?.elevationProviderAPI,
+      telemetry.calculatedData?.altitudeAGLInMeters
     );
     telEntity.id = undefined;
     let dbResult: TelemetryEntity;

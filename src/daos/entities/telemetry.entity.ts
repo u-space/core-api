@@ -59,6 +59,15 @@ export class TelemetryEntity {
   @JoinColumn({ name: "user_username" })
   user: User;
 
+  @Column({ type: "numeric", name: "elevation", nullable: true })
+  elevation?: number;
+
+  @Column({ type: "varchar", name: "elevation_provider", nullable: true })
+  elevationProvider?: string;
+
+  @Column({ type: "numeric", name: "altitude_agl", nullable: true })
+  altitudeAGL?: number;
+
   constructor(
     user: User,
     timestamp: number,
@@ -72,6 +81,9 @@ export class TelemetryEntity {
     altitudeAbs?: number,
     altitudeRel?: number,
     inAir?: boolean,
+    elevation?: number,
+    elevationProvider?: string,
+    altitudeAGL?: number,
     id?: number
   ) {
     this.user = user;
@@ -86,6 +98,9 @@ export class TelemetryEntity {
     this.altitudeAbs = altitudeAbs;
     this.altitudeRel = altitudeRel;
     this.inAir = inAir;
+    this.elevation = elevation;
+    this.elevationProvider = elevationProvider;
+    this.altitudeAGL = altitudeAGL;
     this.id = id;
   }
 }
