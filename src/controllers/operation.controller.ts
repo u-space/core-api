@@ -393,6 +393,10 @@ export class OperationController {
       errors.push(`There is no user with the username '${usernameOwner}'.`);
     }
 
+    // validate operation did not finish
+    const [from, to] = getFromTo(operationReceived);
+    if (to <= new Date()) errors.push(`Operation finished`);
+
     try {
       for (
         let index = 0;
