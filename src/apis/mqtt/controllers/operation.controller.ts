@@ -98,17 +98,6 @@ export class MQTTOperationController {
       return this.respondError(resTopic, `You are not the vehicle owner`);
     }
 
-    // verify tracker is asociated to the vehicle
-    const dbTracker = await new TrackersDao().one(trackerId, false);
-    if (dbTracker === null) {
-      return this.respondError(resTopic, `No tracker with the id ${trackerId}`);
-    } else if (dbTracker.vehicle.uvin !== vehicle.uvin) {
-      return this.respondError(
-        resTopic,
-        `Tracker is not asociated to the vehicle`
-      );
-    }
-
     // Create operation polygon
     console.log("Create operation polygon");
     const location = reqValidated.location;
