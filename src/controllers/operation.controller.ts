@@ -1507,10 +1507,12 @@ async function sendNotificationsToOperationSubscribers(
 
   // format operation data
   const fromTo = getFromTo(operation);
-  let vehicle = "NO_VEHICLE";
+  let vehicle = "<NO_VEHICLE>";
+  let vehicleRegId = "<REG_ID>";
   if (operation.uas_registrations && operation.uas_registrations.length > 0) {
     const uas = operation.uas_registrations[0];
     vehicle = `${uas.vehicleName} (${uas.manufacturer} ${uas.model})`;
+    vehicleRegId = uas.faaNumber ? uas.faaNumber : vehicleRegId;
   }
 
   // Send SMS, whatsapp messages and emails
@@ -1525,10 +1527,12 @@ async function sendNotificationsToOperationSubscribers(
         fromTo
       );
     }
-    const mobileMessage = `AVISO DE VUELO NO TRIPULADO CX-2023-58 Operación prevista ${formatOperationPeriod(
+    const mobileMessage = `AVISO DE VUELO NO TRIPULADO ${vehicleRegId} Operación prevista ${formatOperationPeriod(
       operation,
       subscriber.timeZone
-    )}. Detalles de la operación: https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
+    )}. RUTA: ${
+      operation.name
+    }. Detalles de la operación: https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
       operation.gufi
     }`;
     if (subscriber.smsMobile) {
