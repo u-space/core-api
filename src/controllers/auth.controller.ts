@@ -383,9 +383,7 @@ export class AuthController {
         payload.email,
         request.body.password
       );
-      console.log("holaaaaaaa");
     } catch (error) {
-      console.log(error);
       return logAndRespond400(response, 400, null);
     }
 
