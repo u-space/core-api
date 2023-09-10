@@ -284,6 +284,20 @@ const auth = [
   },
   {
     method: "post",
+    route: "/auth/forgot-password",
+    controller: AuthController,
+    action: "forgotPassword",
+    middlewares: [],
+  },
+  {
+    method: "post",
+    route: "/auth/reset-password",
+    controller: AuthController,
+    action: "resetPassword",
+    middlewares: [],
+  },
+  {
+    method: "post",
     route: "/auth/mqtt/acl",
     controller: AuthController,
     action: "mqttAcl",

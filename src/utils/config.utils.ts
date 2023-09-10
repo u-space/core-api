@@ -18,6 +18,7 @@ if (NODE_ENV === "test") {
 
 export const jwtSecret: string = process.env.JWTSECRET!; //"@876fyivd&(&*%EH";
 export const jwtExpTime: string = process.env.JWT_EXPIRATION_TIME!; //"1h";
+export const jwtResetPassSecret: string = process.env.JWT_RESET_PASS_SECRET!;
 
 if (
   NODE_ENV == "production" &&
@@ -61,6 +62,8 @@ export const SMTP_SELF_SIGNED = process.env.SMTP_SELF_SIGNED
   : true;
 
 export const frontEndUrl = process.env.FRONT_END_URL || "http://localhost/";
+export const frontEndUrlMobile =
+  process.env.FRONT_END_URL_MOBILE || "http://localhost/";
 export const backendUrl = process.env.BACKEND_URL || "http://localhost:4000/";
 export const fileServerUrl = backendUrl; // process.env.BACKEND_URL || 'http://localhost:4000/';
 

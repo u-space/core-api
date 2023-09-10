@@ -10,6 +10,7 @@ import { UserDao } from "../daos/user.dao";
 import {
   COMPANY_NAME,
   MICROUTM_AUTH_URL,
+  MOCK_AUTH_SERVER_API,
   MOCK_MAIL_API,
   NODE_ENV,
   SMTP_PASSWORD,
@@ -17,6 +18,9 @@ import {
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
+  frontEndUrl,
+  frontEndUrlMobile,
+  jwtResetPassSecret,
 } from "../utils/config.utils";
 import { logInfo } from "../services/winston-logger.service";
 import { TokenDao } from "../daos/token.dao";
@@ -32,12 +36,15 @@ import {
   buildMagicSignUpHtml,
   buildMagicSignupLink,
   buildMagicSignUpText,
+  buildResetPasswordHtml,
+  buildResetPasswordText,
 } from "../utils/mail-content.utils";
 import { parseErrorAndRespond } from "../utils/auth.utils";
 import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
 import { NotFoundError } from "../daos/db-errors";
 import Joi from "joi";
+import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
 
 export class AuthController {
   private dao = new UserDao();
@@ -280,6 +287,109 @@ export class AuthController {
     });
 
     return logAndRespond200(response, { message: "Cookies removed" }, []);
+  }
+
+  async forgotPassword(request: Request, response: Response) {
+    // validate request body
+    const reqBodySchema = Joi.object({
+      email: Joi.string().min(3).max(255).required(),
+      mobileClient: Joi.boolean().optional(),
+      format: "json",
+    });
+    const validationResult = reqBodySchema.validate(request.body);
+    if (validationResult.error !== undefined)
+      return logAndRespond400(response, 400, validationResult.error.message);
+
+    // get auth server api
+    const authServerApi = AuthServerAPIFactory.getAuthServerAPI(
+      MOCK_AUTH_SERVER_API === "true"
+    );
+
+    // verify user exists
+    let authServerResponse: any;
+    try {
+      authServerResponse = await authServerApi.getUserByUsername(
+        request.body.email
+      );
+    } catch (error) {
+      return logAndRespond400(response, 404, null);
+    }
+
+    // generate link
+    const currentHashedPass = authServerResponse.data.data.password;
+    const secret = `${jwtResetPassSecret}${currentHashedPass}`;
+    const tokenPayload = {
+      email: request.body.email,
+    };
+    const token = jwt.sign(tokenPayload, secret, { expiresIn: "15m" });
+    const mobileClient = request.body.mobileClient === true;
+    const link = `${
+      mobileClient ? frontEndUrlMobile : frontEndUrl
+    }reset-password?email=${request.body.email}&token=${token}`;
+
+    // send email with generated link
+    this.mailAPI.sendMail(
+      COMPANY_NAME!,
+      [request.body.email],
+      "Cambiar Contraseña",
+      buildResetPasswordText(request.body.email, link),
+      buildResetPasswordHtml(request.body.email, link)
+    );
+
+    // respond
+    return logAndRespond200(response, null, []);
+  }
+
+  async resetPassword(request: Request, response: Response) {
+    // validate request body
+    const reqBodySchema = Joi.object({
+      email: Joi.string().min(3).max(255).required(),
+      token: Joi.string().required(),
+      password: Joi.string().min(8).required(),
+      format: "json",
+    });
+    const validationResult = reqBodySchema.validate(request.body);
+    if (validationResult.error !== undefined)
+      return logAndRespond400(response, 400, validationResult.error.message);
+
+    // get auth server api
+    const authServerApi = AuthServerAPIFactory.getAuthServerAPI(
+      MOCK_AUTH_SERVER_API === "true"
+    );
+
+    // get user current hashed password from auth server
+    let authServerResponse: any;
+    try {
+      authServerResponse = await authServerApi.getUserByUsername(
+        request.body.email
+      );
+    } catch (error) {
+      return logAndRespond400(response, 404, null);
+    }
+
+    // verify token
+    const currentHashedPass = authServerResponse.data.data.password;
+    const secret = `${jwtResetPassSecret}${currentHashedPass}`;
+    let payload: any;
+    try {
+      payload = jwt.verify(request.body.token, secret);
+    } catch (error) {
+      return logAndRespond400(response, 400, null);
+    }
+
+    // update password
+    try {
+      await authServerApi.externalAuthUpdatePassword(
+        payload.email,
+        request.body.password
+      );
+      console.log("holaaaaaaa");
+    } catch (error) {
+      console.log(error);
+      return logAndRespond400(response, 400, null);
+    }
+
+    return logAndRespond200(response, null, [], 200);
   }
 
   async mqttAcl(request: Request, response: Response) {

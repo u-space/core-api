@@ -332,6 +332,29 @@ function bodyOperationMail(operation: Operation) {
 
 ////////// SPECIFIC EMAILS
 
+// RESET PASSWORD
+export function buildResetPasswordText(username: string, link: string) {
+  return `
+    Hola ${username},
+    Para poder cambiar la contraseña haz click en el siguiente link, el cual es válido por 15 minutos.
+    Deberá establecer una nueva contraseña.
+
+    ${link}
+    `;
+}
+export function buildResetPasswordHtml(username: string, link: string) {
+  const mjmlBody = `
+    ${title(`Hola ${username}`)}
+    ${paragraph(
+      "Para poder cambiar la contraseña haz click en el siguiente link, el cual es válido por 15 minutos."
+    )}
+    ${paragraph("Deberá establecer una nueva contraseña.")}
+    ${paragraph(`<a href="${link}">${link}</a>`)}
+    `;
+  const email = generateBaseMail(mjmlBody);
+  return email;
+}
+
 // SET YOUR PASSWORD, MAGIC SIGNUP
 export function buildMagicSignUpText(username: any, link: any) {
   return `
