@@ -62,6 +62,7 @@ export const SMTP_SELF_SIGNED = process.env.SMTP_SELF_SIGNED
   : true;
 
 export const frontEndUrl = process.env.FRONT_END_URL || "http://localhost/";
+export const frontEndAssets = process.env.FRONT_END_ASSETS || "<env-missing>";
 export const frontEndUrlMobile =
   process.env.FRONT_END_URL_MOBILE || "http://localhost/";
 export const backendUrl = process.env.BACKEND_URL || "http://localhost:4000/";

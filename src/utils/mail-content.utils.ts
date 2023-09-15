@@ -4,19 +4,20 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { VehicleReg, VehicleAuthorizeStatus } from "../entities/vehicle-reg";
+import mjml from "mjml";
+import { Document } from "../entities/document";
+import { Operation } from "../entities/operation";
+import { User } from "../entities/user";
+import { VehicleAuthorizeStatus, VehicleReg } from "../entities/vehicle-reg";
 import {
   COMPANY_NAME,
-  frontEndUrl,
   OPERATION_PAYMENT_THROW_THE_APP,
   SUPPORT_EMAIL,
+  frontEndAssets,
+  frontEndUrl,
 } from "./config.utils";
-import { Operation } from "../entities/operation";
 import { getLocalTime } from "./date.utils";
-import { Document } from "../entities/document";
-import { User } from "../entities/user";
 import GeneralUtils from "./general.utils";
-import mjml from "mjml";
 
 export function mjml2htmlCompleto(str: any, opt: { validationLevel: string }) {
   const optionsPreset: any = { ...opt };
@@ -53,8 +54,8 @@ export const getUrlUvr = (id: any) => {
 };
 
 // export const LOGO_LINK = `${backendUrl}logo.png`;
-export const LOGO_LINK = `${frontEndUrl}platform.png`;
-export const ORGANIZATION_LOGO_LINK = `${frontEndUrl}organization.png`;
+export const LOGO_LINK = `${frontEndUrl}${frontEndAssets}platform.png`;
+export const ORGANIZATION_LOGO_LINK = `${frontEndUrl}${frontEndAssets}organization.png`;
 // https://localhost:8228/platform.png
 ////// GENERIC UTILS to use on all emails
 
@@ -71,7 +72,7 @@ function initMailAndPutHeader() {
   <mj-body background-color="#ffffff">
 
     <!-- Header -->
-    <mj-section background-color="#2d2c59">
+    <mj-section background-color="#1e3a8a">
       <mj-column>
         <mj-text font-style="bold" font-weight="900" width="360px" font-size="20px" color="#ffffff" align="center">
           <img style="max-height:100px" src="${LOGO_LINK}" alt="" />
@@ -99,7 +100,7 @@ function endMailAndPutFooter(supportEmail: string, companyName: string) {
     </mj-column>
   </mj-section>
   <!-- Footer -->
-  <mj-section background-color="#2d2c59">
+  <mj-section background-color="#1e3a8a">
     <mj-column>
       <mj-text  font-size="14px" color="#ffffff" align="right" padding-right="20px">
         <a href="https://cielum.eu"><img style="max-width:100px" src="${ORGANIZATION_LOGO_LINK}" alt="Organization" /> </a>
