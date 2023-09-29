@@ -1532,7 +1532,7 @@ async function sendNotificationsToOperationSubscribers(
       subscriber.timeZone
     )}. RUTA: ${
       operation.name
-    }. Detalles de la operación: https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${
+    }. Detalles de la operación: https://easy.cielum.eu:4000?operation=${
       operation.gufi
     }`;
     if (subscriber.smsMobile) {
