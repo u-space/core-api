@@ -5,32 +5,37 @@
  */
 
 import { NextFunction, Request, Response } from "express";
+import { ApprovalDao } from "../daos/approval.dao";
 import { OperationDao } from "../daos/operation.dao";
-import { Role, User } from "../entities/user";
-import { getPayloadFromResponse } from "../utils/auth.utils";
+import { UserDao } from "../daos/user.dao";
 import { VehicleDao } from "../daos/vehicle.dao";
 import {
   Operation,
   OperationState,
   parseOperationState,
 } from "../entities/operation";
+import { Role, User } from "../entities/user";
+import { getPayloadFromResponse } from "../utils/auth.utils";
 import {
   dateTimeStringFormat,
   validateStringDateIso,
 } from "../utils/validation.utils";
-import { UserDao } from "../daos/user.dao";
-import { ApprovalDao } from "../daos/approval.dao";
 
+import { Point, Polygon } from "geojson";
+import * as _ from "underscore";
 import {
   sendNewOperation,
   sendOperationStateChange,
   sendUpdateOperation,
 } from "../apis/socket-io/async-browser-comunication";
+import { PositionDao } from "../daos/position.dao";
 import { OperationVolume } from "../entities/operation-volume";
+import { PriorityStatus } from "../entities/priority-elements";
+import { Severity } from "../entities/severety";
+import { VehicleReg } from "../entities/vehicle-reg";
+import { generateFeatureFromExpress } from "../services/express-operation.service";
 import {
-  adminEmail,
   COMPANY_NAME,
-  frontEndUrl,
   MOCK_MAIL_API,
   MOCK_SMS_SENDING,
   MOCK_WHATSAPP_SENDING,
@@ -44,38 +49,32 @@ import {
   TWILIO_AUTH_TOKEN,
   TWILIO_FROM_SMS_NUMBER,
   TWILIO_FROM_WHATSAPP_NUMBER,
+  adminEmail,
 } from "../utils/config.utils";
 import { operationMailHtml } from "../utils/mail-content.utils";
-import { VehicleReg } from "../entities/vehicle-reg";
-import * as _ from "underscore";
-import { PositionDao } from "../daos/position.dao";
-import { generateFeatureFromExpress } from "../services/express-operation.service";
-import { Geometry, Point, Polygon } from "geojson";
-import { Severity } from "../entities/severety";
-import { PriorityStatus } from "../entities/priority-elements";
 import {
   CustomError,
   getPaginationParametersFromRequestQuery,
   logAndRespond200,
-  logAndRespond400 as res400,
   logAndRespond500,
   logStateChange,
   removeNullProperties,
+  logAndRespond400 as res400,
   validateObjectStructure,
   validateOperationVolume,
 } from "./utils";
 
-import { InvalidDataError, NotFoundError } from "../daos/db-errors";
-import { RegularFlightDao } from "../daos/regular-flight.dao";
-import { RegularFlight } from "../entities/regular-flight";
 import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
-import GeneralUtils from "../utils/general.utils";
 import ISmsApi from "../apis/sms/isms-api";
 import SmsAPIFactory from "../apis/sms/sms-api-factory";
-import OperationSubscriber from "../entities/operation-subscriber";
 import IWhatsappApi from "../apis/whatsapp/iwhatsapp-api";
 import WhatsappAPIFactory from "../apis/whatsapp/whatsapp-api-factory";
+import { InvalidDataError, NotFoundError } from "../daos/db-errors";
+import { RegularFlightDao } from "../daos/regular-flight.dao";
+import OperationSubscriber from "../entities/operation-subscriber";
+import { RegularFlight } from "../entities/regular-flight";
+import GeneralUtils from "../utils/general.utils";
 
 const MIN_MIN_ALTITUDE = -300;
 //const MAX_MIN_ALTITUDE = 0;
@@ -1532,7 +1531,7 @@ async function sendNotificationsToOperationSubscribers(
       subscriber.timeZone
     )}. RUTA: ${
       operation.name
-    }. Detalles de la operación: https://easy.cielum.eu:4000?operation=${
+    }. Detalles de la operación: https://easy.cielum.eu:4000/map?operation=${
       operation.gufi
     }`;
     if (subscriber.smsMobile) {
