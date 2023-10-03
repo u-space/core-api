@@ -1659,7 +1659,7 @@ async function sendNewOperationNotificationEmail(
       </div>
     </div>
     <p style="text-align:center">Para ver más información sobre dicha operación puede utilizar el siguiente link:</p>
-    <p style="text-align:center">https://cielum-public-map-f5d414dfec60.herokuapp.com?operation=${operation.gufi}
+    <p style="text-align:center">https://easy.cielum.eu:4000/map?operation=${operation.gufi}
     </p>
     </div>
     `,
