@@ -1,6 +1,6 @@
 {
   "name": "cielum-easy-core",
-  "version": "0.15.1",
+  "version": "0.16.0",
   "description": "Core API of the Cielum Easy solution",
   "devDependencies": {
     "@tsconfig/node16": "^1.0.3",
