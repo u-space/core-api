@@ -28,6 +28,7 @@ import { Tracker } from "../entities/trackers/tracker";
 import { logStateChange } from "../controllers/utils";
 import { UASVolumeReservationDao } from "./uas-volume-reservation.dao";
 import { RestrictedFlightVolumeDao } from "./restricted-flight-volume.dao";
+import { STRATEGIC_DECONFLICT_MODE_DISABLED } from "../utils/config.utils";
 // import { polygon, union } from 'turf';
 
 export class OperationDao {
@@ -473,16 +474,21 @@ export class OperationDao {
     // we have to execute a db transaction
     let opSaved: Operation | undefined = undefined;
     await getManager().transaction(async (entManager) => {
-      // check the operation intersects with rfvs, uvrs or with other operations
-      const res = await this.intersectWithOperationUvrOrRfv(entManager, op);
+      let pendingOperation = false;
+      if (!STRATEGIC_DECONFLICT_MODE_DISABLED) {
+        // check the operation intersects with rfvs, uvrs or with other operations
+        const res = await this.intersectWithOperationUvrOrRfv(entManager, op);
+        // define operation state depending on if it intersects or not with other entities
+        if (res !== undefined) {
+          // operation intersects with another entity, so we created in PENDING state
+          op.state = OperationState.PENDING;
+          op.flight_comments = `${res}\n\n${op.flight_comments}`;
+          pendingOperation = true;
+        }
+      }
 
-      // define operation state depending on if it intersects or not with other entities
-      if (res !== undefined) {
-        // operation intersects with another entity, so we created in PENDING state
-        op.state = OperationState.PENDING;
-        op.flight_comments = `${res}\n\n${op.flight_comments}`;
-      } else {
-        // operation does not intersect with another entity
+      if (!pendingOperation) {
+        // operation was not set as PENDING, so we still have to define the status of the operation
         if (end <= new Date()) {
           // it means operation already finished
           op.state = OperationState.CLOSED;

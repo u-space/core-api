@@ -24,6 +24,7 @@ import {
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
+  STRATEGIC_DECONFLICT_MODE_DISABLED,
 } from "../utils/config.utils";
 import { logError } from "./winston-logger.service";
 
@@ -91,59 +92,61 @@ export async function processOperations() {
  * If a operation is proposed we need to check ir intersects with an other operation volume or uvr
  * @param operation
  */
-async function processProposed(operation: Operation) {
+async function processProposed(operation: Operation): Promise<void> {
   try {
-    for (let index = 0; index < operation.operation_volumes.length; index++) {
-      const operationVolume = operation.operation_volumes[index];
+    if (!STRATEGIC_DECONFLICT_MODE_DISABLED) {
+      for (let index = 0; index < operation.operation_volumes.length; index++) {
+        const operationVolume = operation.operation_volumes[index];
 
-      const intersect = await checkIntersection(operation, operationVolume);
+        const intersect = await checkIntersection(operation, operationVolume);
 
-      if (intersect) {
-        const newState = await changeState(
-          operation,
-          OperationState.PENDING,
-          "pending because of intersection with other operation"
-        );
-        doSendMailForPendingOperation(
-          operationDao,
-          mailAPI,
-          {
-            receiverMail: operation.owner ? operation.owner.email : adminEmail,
-            gufi: operation.gufi,
-            bodyMail: `La operación ${operation.gufi} está pendiente de aprobación.`,
-          },
-          { role: Role.ADMIN }
-        );
-        return newState;
-      }
-      let changeToPending = false;
-      let reason = "";
-      if (
-        await intersectsWithRestrictedFlightVolume(operation, operationVolume)
-      ) {
-        changeToPending = true;
-        reason = `Intersect with a RFV. ${reason}`;
-      }
+        if (intersect) {
+          await changeState(
+            operation,
+            OperationState.PENDING,
+            "pending because of intersection with other operation"
+          );
+          doSendMailForPendingOperation(
+            operationDao,
+            mailAPI,
+            {
+              receiverMail: operation.owner
+                ? operation.owner.email
+                : adminEmail,
+              gufi: operation.gufi,
+              bodyMail: `La operación ${operation.gufi} está pendiente de aprobación.`,
+            },
+            { role: Role.ADMIN }
+          );
+          return;
+        }
+        let changeToPending = false;
+        let reason = "";
+        if (
+          await intersectsWithRestrictedFlightVolume(operation, operationVolume)
+        ) {
+          changeToPending = true;
+          reason = `Intersect with a RFV. ${reason}`;
+        }
 
-      if (changeToPending) {
-        operation.flight_comments = `${reason}\n${operation.flight_comments}`;
-        operationDao = new OperationDao();
-        const newState = await changeState(
-          operation,
-          OperationState.PENDING,
-          reason
-        );
-        doSendMailForPendingOperation(
-          operationDao,
-          mailAPI,
-          {
-            receiverMail: operation.owner ? operation.owner.email : adminEmail,
-            gufi: operation.gufi,
-            bodyMail: `La operación ${operation.gufi} está pendiente de aprobación.`,
-          },
-          { role: Role.ADMIN }
-        );
-        return newState;
+        if (changeToPending) {
+          operation.flight_comments = `${reason}\n${operation.flight_comments}`;
+          operationDao = new OperationDao();
+          await changeState(operation, OperationState.PENDING, reason);
+          doSendMailForPendingOperation(
+            operationDao,
+            mailAPI,
+            {
+              receiverMail: operation.owner
+                ? operation.owner.email
+                : adminEmail,
+              gufi: operation.gufi,
+              bodyMail: `La operación ${operation.gufi} está pendiente de aprobación.`,
+            },
+            { role: Role.ADMIN }
+          );
+          return;
+        }
       }
     }
 
