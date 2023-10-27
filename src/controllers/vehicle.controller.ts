@@ -6,37 +6,32 @@
 
 import { NextFunction, Request, Response } from "express";
 import { VehicleDao } from "../daos/vehicle.dao";
+import { Role, User } from "../entities/user";
 import {
-  parseVehicleAuthorizeStatus,
-  parseVehicleType,
   VehicleAuthorizeStatus,
   VehicleReg,
+  parseVehicleAuthorizeStatus,
+  parseVehicleType,
   vehicleRegSchema,
   vehicleType,
 } from "../entities/vehicle-reg";
-import { Role, User } from "../entities/user";
+import { multipleFiles } from "../services/upload-file.service";
 import { getPayloadFromResponse } from "../utils/auth.utils";
 import {
   generateAuthorizeVehicleMailHTML,
   generateAuthorizeVehicleMailText,
 } from "../utils/mail-content.utils";
-import { multipleFiles } from "../services/upload-file.service";
 
-import { IVehicleControllerExtension } from "./extensions/extensions-interfaces";
 import { GetVehicleControllerExtension } from "./extensions/extension-implementation-factory";
+import { IVehicleControllerExtension } from "./extensions/extensions-interfaces";
 
-import {
-  CustomError,
-  getPaginationParametersFromRequestQuery,
-  logAndRespond200,
-  logAndRespond400,
-  logAndRespond500,
-} from "./utils";
-import { InvalidDataError, NotFoundError } from "../daos/db-errors";
-import { filterOrderPageAndSkipCollection } from "../utils/entities.utils";
-import { Document, setExtraField, setFileName } from "../entities/document";
-import { getDocumentById } from "./document.controller";
+import { isArray, isObject, isString } from "util";
 import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
+import IMailAPI from "../apis/mail/imail-api";
+import MailAPIFactory from "../apis/mail/mail-api-factory";
+import { InvalidDataError, NotFoundError } from "../daos/db-errors";
+import { DocumentDao } from "../daos/document.dao";
+import { Document, setExtraField, setFileName } from "../entities/document";
 import {
   COMPANY_NAME,
   MOCK_AUTH_SERVER_API,
@@ -48,12 +43,17 @@ import {
   SMTP_USERNAME,
   VEHICLE_DOCUMENT_EXTRA_FIELDS_SCHEMA,
 } from "../utils/config.utils";
+import { filterOrderPageAndSkipCollection } from "../utils/entities.utils";
 import GeneralUtils from "../utils/general.utils";
-import IMailAPI from "../apis/mail/imail-api";
-import MailAPIFactory from "../apis/mail/mail-api-factory";
-import { isArray, isObject, isString } from "util";
-import { DocumentDao } from "../daos/document.dao";
 import { convertAnyToDocument } from "../utils/parse.utils";
+import { getDocumentById } from "./document.controller";
+import {
+  CustomError,
+  getPaginationParametersFromRequestQuery,
+  logAndRespond200,
+  logAndRespond400,
+  logAndRespond500,
+} from "./utils";
 
 export class VehicleController {
   private dao = new VehicleDao();
@@ -600,6 +600,7 @@ export class VehicleController {
   async updateDocument(request: Request, response: Response) {
     const { role, username } = getPayloadFromResponse(response);
     const dao = this.dao;
+    const documentDao = this.documentDao;
     const upload = multipleFiles(undefined, undefined);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     upload(request, response, async function (_err: unknown) {
@@ -641,8 +642,11 @@ export class VehicleController {
             valid: false,
           };
           documents.push(newDocument);
+          await documentDao.update(newDocument);
+          (vehicle.extra_fields as { documents: Array<any> }).documents =
+            documents;
           await dao.updateOnlyReceivedProperties(vehicle);
-          return logAndRespond200(response, vehicle, []);
+          return logAndRespond200(response, newDocument, []);
         } else {
           return logAndRespond400(
             response,
