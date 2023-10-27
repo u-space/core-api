@@ -44,7 +44,7 @@ export const getPublicOperationLink = (operation: any) => {
   return `${frontEndUrl}public/operation/${operation.gufi}`;
 };
 export const vehicleUrl = (uvin: any) => {
-  return `${frontEndUrl}dashboard/vehicles/${uvin}`;
+  return `${frontEndUrl}vehicles/${uvin}`;
 };
 export const getUrlRfv = (rfvid: any) => {
   return frontEndUrl + "rfv/" + rfvid;
