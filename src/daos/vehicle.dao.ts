@@ -52,7 +52,8 @@ export class VehicleDao {
         .createQueryBuilder("vehicle_reg")
         .leftJoinAndSelect("vehicle_reg.owner", "owner")
         .leftJoinAndSelect("vehicle_reg.registeredBy", "registeredBy")
-        .leftJoinAndSelect("vehicle_reg.operators", "operator");
+        .leftJoinAndSelect("vehicle_reg.operators", "operator")
+        .orderBy("vehicle_reg.date", "DESC");
       addPaginationParamsToQuery(
         qb,
         take,
