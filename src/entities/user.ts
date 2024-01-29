@@ -4,14 +4,16 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { Polygon } from "geojson";
 import {
   Column,
+  CreateDateColumn,
   DeleteDateColumn,
   Entity,
   PrimaryColumn,
   Unique,
+  UpdateDateColumn,
 } from "typeorm";
-import { Polygon } from "geojson";
 
 export enum Role {
   ADMIN = "ADMIN",
@@ -55,6 +57,19 @@ export class User {
   settings?: string;
 
   extra_fields?: any;
+
+  @CreateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP(6)",
+  })
+  createdAt?: Date;
+
+  @UpdateDateColumn({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP(6)",
+    onUpdate: "CURRENT_TIMESTAMP(6)",
+  })
+  updatedAt?: Date;
 
   @DeleteDateColumn()
   deletedAt?: Date;

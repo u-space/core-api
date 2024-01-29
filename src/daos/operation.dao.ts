@@ -9,26 +9,26 @@ import { EntityManager, getManager, getRepository, ILike, In } from "typeorm";
 import { Point, Polygon } from "geojson";
 import { Operation, OperationState } from "../entities/operation";
 import { OperationVolume } from "../entities/operation-volume";
-import { TypeOrmErrorType } from "./type-orm-error-type";
 import { DataBaseError, InvalidDataError, NotFoundError } from "./db-errors";
+import { TypeOrmErrorType } from "./type-orm-error-type";
 
-import { validatePaginationParams } from "./utils";
-import { VehicleReg } from "../entities/vehicle-reg";
 import {
   PriorityElements,
   PriorityStatus,
 } from "../entities/priority-elements";
+import { VehicleReg } from "../entities/vehicle-reg";
+import { validatePaginationParams } from "./utils";
 
-import { validateNumber } from "../utils/validation.utils";
-import { isNullOrUndefined } from "util";
-import { RegularFlight } from "../entities/regular-flight";
-import { User } from "../entities/user";
 import { buffer, circle, distance, lineString } from "@turf/turf";
-import { Tracker } from "../entities/trackers/tracker";
+import { isNullOrUndefined } from "util";
 import { logStateChange } from "../controllers/utils";
-import { UASVolumeReservationDao } from "./uas-volume-reservation.dao";
-import { RestrictedFlightVolumeDao } from "./restricted-flight-volume.dao";
+import { RegularFlight } from "../entities/regular-flight";
+import { Tracker } from "../entities/trackers/tracker";
+import { User } from "../entities/user";
 import { STRATEGIC_DECONFLICT_MODE_DISABLED } from "../utils/config.utils";
+import { validateNumber } from "../utils/validation.utils";
+import { RestrictedFlightVolumeDao } from "./restricted-flight-volume.dao";
+import { UASVolumeReservationDao } from "./uas-volume-reservation.dao";
 // import { polygon, union } from 'turf';
 
 export class OperationDao {
@@ -289,6 +289,16 @@ export class OperationDao {
           filter.where[filterProp] = ILike("%" + filterValue + "%");
         }
       }
+
+      console.log("states", states);
+      console.log("filter", filter);
+      console.log("orderProp", orderProp);
+      console.log("orderValue", orderValue);
+      console.log("take", take);
+      console.log("skip", skip);
+      console.log("filterProp", filterProp);
+      console.log("filterValue", filterValue);
+      console.log("timeRange", timeRange);
 
       if (timeRange) {
         if (!timeRange.start || !timeRange.end) {

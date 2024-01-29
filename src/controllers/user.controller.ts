@@ -5,42 +5,43 @@
  */
 
 import { Request, Response } from "express";
-import { Role, User } from "../entities/user";
 import { UserDao } from "../daos/user.dao";
+import { Role, User } from "../entities/user";
+import { multipleFiles } from "../services/upload-file.service";
+import { logInfo } from "../services/winston-logger.service";
 import {
   getPayloadFromResponse,
   parseErrorAndRespond,
 } from "../utils/auth.utils";
 import {
-  genericTextLenghtValidation,
   ObjectKeyType,
+  genericTextLenghtValidation,
   validateObjectKeys,
 } from "../utils/validation.utils";
-import { multipleFiles } from "../services/upload-file.service";
 import { GetUserControllerExtension } from "./extensions/extension-implementation-factory";
-import { logInfo } from "../services/winston-logger.service";
 import { IUserControllerExtension } from "./extensions/extensions-interfaces";
 
+import { InvalidDataError, NotFoundError } from "../daos/db-errors";
 import {
   CustomError,
   logAndRespond200,
   logAndRespond400,
   logAndRespond500,
 } from "./utils";
-import { InvalidDataError, NotFoundError } from "../daos/db-errors";
 
 import * as bcrypt from "bcryptjs";
 import * as _ from "lodash";
-import { getDocumentById } from "./document.controller";
-import { Document, setExtraField, setFileName } from "../entities/document";
 import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
+import { Document, setExtraField, setFileName } from "../entities/document";
+import { getDocumentById } from "./document.controller";
 
-import ConnectionError from "../apis/auth-server/errors/connection-error";
+import Joi from "joi";
 import { isNullOrUndefined, isObject, isString } from "util";
-import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
+import ConnectionError from "../apis/auth-server/errors/connection-error";
+import IMailAPI from "../apis/mail/imail-api";
+import MailAPIFactory from "../apis/mail/mail-api-factory";
 import { DocumentDao } from "../daos/document.dao";
 import {
-  adminEmail,
   APP_NAME,
   COMPANY_NAME,
   MOCK_AUTH_SERVER_API,
@@ -52,17 +53,16 @@ import {
   SMTP_USERNAME,
   USER_DOCUMENT_EXTRA_FIELDS_SCHEMA,
   USER_EXTRA_FIELDS_SCHEMA,
+  adminEmail,
 } from "../utils/config.utils";
 import GeneralUtils from "../utils/general.utils";
-import Joi from "joi";
 import {
   buildConfirmationHtmlMail,
   buildConfirmationLink,
   buildConfirmationTextMail,
   buildNewUserMail,
 } from "../utils/mail-content.utils";
-import IMailAPI from "../apis/mail/imail-api";
-import MailAPIFactory from "../apis/mail/mail-api-factory";
+import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
 
 export class UserController {
   private dao = new UserDao();
@@ -246,8 +246,9 @@ export class UserController {
         user.verified = false;
 
         let existing = false;
+        let dbUser: User | undefined;
         try {
-          await dao.one(user.username);
+          dbUser = await dao.one(user.username);
           existing = true;
         } catch (error) {
           if (!(error instanceof NotFoundError)) {
@@ -272,6 +273,12 @@ export class UserController {
               );
             }
           }
+
+          if (dbUser) {
+            user.createdAt = dbUser?.createdAt;
+            user.updatedAt = dbUser?.updatedAt;
+          }
+
           const insertedDetails = await dao.save(user);
           await this.authServer.createUserExternalAuth(
             insertedDetails,

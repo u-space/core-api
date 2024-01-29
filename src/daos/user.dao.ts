@@ -144,6 +144,8 @@ export class UserDao {
     if (user.settings === null || user.settings === undefined)
       user.settings = "EN";
     user.extra_fields_json = user.extra_fields;
+    if (!user.createdAt) user.createdAt = new Date();
+    user.updatedAt = new Date();
     const u = await this.userRepository.save(user);
     u.extra_fields = u.extra_fields_json;
     GeneralUtils.setDocumentsDownloadFileUrl(u);

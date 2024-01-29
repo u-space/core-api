@@ -6,9 +6,9 @@
 
 import { Response } from "express";
 import { Polygon } from "geojson";
-import { logger } from "../utils/logger/main.logger";
-import { isUTCDatetime } from "../utils/date.utils";
 import { isNullOrUndefined } from "util";
+import { isUTCDatetime } from "../utils/date.utils";
+import { logger } from "../utils/logger/main.logger";
 
 export const logAndRespond = (
   response: Response,
@@ -36,13 +36,13 @@ export const logAndRespond = (
     }
   }
   if (logLevel === "info") {
-    logger.info(`Request responded [HTTP ${statusCode}]`, {
+    /*logger.info(`Request responded [HTTP ${statusCode}]`, {
       response: responseBodyToLog,
-    });
+    });*/
   } else if (logLevel === "warn") {
-    logger.warn(`Request responded [HTTP ${statusCode}]`, {
+    /*logger.warn(`Request responded [HTTP ${statusCode}]`, {
       response: responseBodyToLog,
-    });
+    });*/
   } else if (logLevel === "error") {
     logger.error(error.message, { response: responseBodyToLog });
     console.log(error);

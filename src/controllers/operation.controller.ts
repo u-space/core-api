@@ -1202,6 +1202,7 @@ export class OperationController {
         const { fromDate, toDate } = request.query;
         const { take, skip, filterBy, filter, orderBy, order } =
           getPaginationParametersFromRequestQuery(request.query);
+
         try {
           if (states) {
             if (typeof states === "string") {
@@ -1250,6 +1251,7 @@ export class OperationController {
         }
         let count = 0;
         const owner = filterByOwner ? username : null;
+        console.log("take", take);
         const [_ops, _count] = await this.dao.all(
           states,
           orderBy,

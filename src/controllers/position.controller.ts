@@ -5,32 +5,32 @@
  */
 
 import { Request, Response } from "express";
-import { PositionDao } from "../daos/position.dao";
-import { PilotPositionDao } from "../daos/pilot-position.dao";
-import { OperationDao } from "../daos/operation.dao";
 import {
-  sendPositionToMonitor,
   sendOperationFlyStatus,
+  sendOperationStateChange,
+  sendPositionToMonitor,
   sendTrackerPosition,
   sendUpdateOperation,
-  sendOperationStateChange,
 } from "../apis/socket-io/async-browser-comunication";
-import { Position } from "../entities/position";
+import { OperationDao } from "../daos/operation.dao";
+import { PilotPositionDao } from "../daos/pilot-position.dao";
+import { PositionDao } from "../daos/position.dao";
 import { Operation, OperationState } from "../entities/operation";
+import { Position } from "../entities/position";
 
 import { validationResult } from "express-validator";
 
-import { logInfo, logError } from "../services/winston-logger.service";
 import { stringify } from "querystring";
+import { logError, logInfo } from "../services/winston-logger.service";
 
+import { TrackersDao } from "../daos/trackers/tracker.dao";
+import { logger } from "../utils/logger/main.logger";
 import {
+  getErrorMessageFromExpressValidatorErrors,
   logAndRespond200,
   logAndRespond400,
   logAndRespond500,
-  getErrorMessageFromExpressValidatorErrors,
 } from "./utils";
-import { TrackersDao } from "../daos/trackers/tracker.dao";
-import { logger } from "../utils/logger/main.logger";
 
 import uuidValidate from "uuid-validate";
 
@@ -74,7 +74,15 @@ export class PositionController {
         time_start,
         time_end
       );
-      return logAndRespond200(response, positions, []);
+      return logAndRespond200(
+        response,
+        positions.map((position) => ({
+          ...position,
+          gufi: position.gufi.gufi,
+          uvin: position.uvin?.uvin,
+        })),
+        []
+      );
     } catch (error: any) {
       logError(
         `There was an error trying to fetch positions by [gufi=${gufi},startDate=${time_start},endDate=${time_end}]`,

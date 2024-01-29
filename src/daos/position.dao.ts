@@ -5,8 +5,8 @@
  */
 
 import { getRepository } from "typeorm";
-import { Position } from "../entities/position";
 import { Operation } from "../entities/operation";
+import { Position } from "../entities/position";
 import { DataBaseError, NotFoundError } from "./db-errors";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 
@@ -49,6 +49,10 @@ export class PositionDao {
       .where("position.gufi = :gufi", { gufi })
       .andWhere("position.time_sent >= :startDate", { startDate })
       .andWhere("position.time_sent <= :endDate", { endDate })
+      // Include position gufi in the result, load eager relation
+      .leftJoinAndSelect("position.gufi", "operation")
+      // Include position uvin in the result, load eager relation
+      .leftJoinAndSelect("position.uvin", "uvin")
       .getMany();
   }
 
