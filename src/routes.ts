@@ -4,37 +4,37 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { UserController } from "./controllers/user.controller";
-import { VehicleController } from "./controllers/vehicle.controller";
-import { OperationController } from "./controllers/operation.controller";
-import { UTMMessageController } from "./controllers/utm-message.controller";
 import { AuthController } from "./controllers/auth.controller";
-import { PositionController } from "./controllers/position.controller";
-import { UASVolumeReservationController } from "./controllers/uas-volume-reservation.controller";
-import { NotamController } from "./controllers/notam.controller";
-import { RestrictedFlightVolumeController } from "./controllers/restricted-flight-volume.controller";
 import { MailController } from "./controllers/mail.controller";
+import { NotamController } from "./controllers/notam.controller";
+import { OperationController } from "./controllers/operation.controller";
+import { PositionController } from "./controllers/position.controller";
 import { RegularFlightController } from "./controllers/regular-flight.controller";
+import { RestrictedFlightVolumeController } from "./controllers/restricted-flight-volume.controller";
+import { UASVolumeReservationController } from "./controllers/uas-volume-reservation.controller";
+import { UserController } from "./controllers/user.controller";
+import { UTMMessageController } from "./controllers/utm-message.controller";
+import { VehicleController } from "./controllers/vehicle.controller";
 
 import {
   checkJwt,
   checkJwtButDoNotFail,
 } from "./middleware/check-jwt.middleware";
-import { isAdminUser, isAdminOrPilotUser } from "./middleware/other-middleware";
+import { isAdminOrPilotUser, isAdminUser } from "./middleware/other-middleware";
 
 import { body, query } from "express-validator";
-import { VersionController } from "./controllers/version.controller";
-import { SchemasController } from "./controllers/schema.controller";
-import { PilotPositionController } from "./controllers/pilot-position.controller";
-import { TrackersController } from "./controllers/tracker.controller";
-import { checkModuleEnabled } from "./middleware/check-module-enabled.middleware";
-import { VertiportController } from "./controllers/vertiport.controller";
 import { AircraftTypeController } from "./controllers/aircraft-type.controller";
 import { DocumentRestController } from "./controllers/document.controller";
-import TestController from "./controllers/test.controller";
-import { NODE_ENV } from "./utils/config.utils";
 import { MigrationController } from "./controllers/migration.controller";
+import { PilotPositionController } from "./controllers/pilot-position.controller";
+import { SchemasController } from "./controllers/schema.controller";
 import { TelemetryController } from "./controllers/telemetry.controller";
+import TestController from "./controllers/test.controller";
+import { TrackersController } from "./controllers/tracker.controller";
+import { VersionController } from "./controllers/version.controller";
+import { VertiportController } from "./controllers/vertiport.controller";
+import { checkModuleEnabled } from "./middleware/check-module-enabled.middleware";
+import { NODE_ENV } from "./utils/config.utils";
 
 interface CustomRoute {
   method: string;
