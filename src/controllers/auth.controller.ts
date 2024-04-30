@@ -21,6 +21,7 @@ import {
   frontEndUrl,
   frontEndUrlMobile,
   jwtResetPassSecret,
+  jwtSecret,
 } from "../utils/config.utils";
 import { logInfo } from "../services/winston-logger.service";
 import { TokenDao } from "../daos/token.dao";
@@ -45,6 +46,7 @@ import MailAPIFactory from "../apis/mail/mail-api-factory";
 import { NotFoundError } from "../daos/db-errors";
 import Joi from "joi";
 import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
+import { Role } from "../entities/user";
 
 export class AuthController {
   private dao = new UserDao();
@@ -60,7 +62,7 @@ export class AuthController {
 
   private axiosInstance = axios.create({
     baseURL: MICROUTM_AUTH_URL,
-    timeout: 10000,
+    timeout: 100000,
   });
 
   /**
@@ -312,20 +314,30 @@ export class AuthController {
         request.body.email
       );
     } catch (error) {
-      return logAndRespond400(response, 404, null);
+      return logAndRespond400(response, 404, "User not found on auth server");
     }
 
     // generate link
     const currentHashedPass = authServerResponse.data.data.password;
+
     const secret = `${jwtResetPassSecret}${currentHashedPass}`;
     const tokenPayload = {
+      username: request.body.email,
       email: request.body.email,
+      role: Role.PILOT, // TODO check if neccessary
     };
-    const token = jwt.sign(tokenPayload, secret, { expiresIn: "15m" });
+    const token = jwt.sign(tokenPayload, secret, { expiresIn: "30d" });
     const mobileClient = request.body.mobileClient === true;
     const link = `${
       mobileClient ? frontEndUrlMobile : frontEndUrl
     }reset-password?email=${request.body.email}&token=${token}`;
+
+    // console.log("*******************************************");
+    // console.log("jwtResetPassSecret: ", jwtResetPassSecret);
+    // console.log("currentHashedPass: ", currentHashedPass);
+    // console.log("secret: ", secret);
+    // console.log("link :", link);
+    // console.log("*******************************************");
 
     // send email with generated link
     this.mailAPI.sendMail(
@@ -349,8 +361,10 @@ export class AuthController {
       format: "json",
     });
     const validationResult = reqBodySchema.validate(request.body);
-    if (validationResult.error !== undefined)
+    if (validationResult.error !== undefined) {
+      console.log("Error al validar, ", validationResult.error);
       return logAndRespond400(response, 400, validationResult.error.message);
+    }
 
     // get auth server api
     const authServerApi = AuthServerAPIFactory.getAuthServerAPI(
@@ -364,17 +378,23 @@ export class AuthController {
         request.body.email
       );
     } catch (error) {
-      return logAndRespond400(response, 404, null);
+      return logAndRespond400(response, 404, "User not found on auth server");
     }
 
     // verify token
     const currentHashedPass = authServerResponse.data.data.password;
     const secret = `${jwtResetPassSecret}${currentHashedPass}`;
+    // console.log("*******************************************");
+    // console.log("jwtResetPassSecret: ", jwtResetPassSecret);
+    // console.log("currentHashedPass: ", currentHashedPass);
+    // console.log("secret: ", secret);
+    // console.log("*******************************************");
     let payload: any;
     try {
       payload = jwt.verify(request.body.token, secret);
     } catch (error) {
-      return logAndRespond400(response, 400, null);
+      console.log("Error verify token: ", error);
+      return logAndRespond400(response, 400, "Invalid token");
     }
 
     // update password
@@ -384,7 +404,8 @@ export class AuthController {
         request.body.password
       );
     } catch (error) {
-      return logAndRespond400(response, 400, null);
+      console.log("Error updating password: ", error);
+      return logAndRespond400(response, 400, "External auth password error.");
     }
 
     return logAndRespond200(response, null, [], 200);
