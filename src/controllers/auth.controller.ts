@@ -326,7 +326,7 @@ export class AuthController {
       email: request.body.email,
       role: Role.PILOT, // TODO check if neccessary
     };
-    const token = jwt.sign(tokenPayload, secret, { expiresIn: "30d" });
+    const token = jwt.sign(tokenPayload, secret, { expiresIn: "15m" });
     const mobileClient = request.body.mobileClient === true;
     const link = `${
       mobileClient ? frontEndUrlMobile : frontEndUrl
