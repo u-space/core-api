@@ -212,11 +212,20 @@ export class VehicleDao {
 
   async oneByUser(uvin: string, username: string) {
     try {
-      const v = await this.repository.findOneOrFail(uvin, {
-        where: {
-          owner: username,
-        },
-      });
+      const qb = await this.repository
+        .createQueryBuilder("vehicle_reg")
+        .leftJoinAndSelect("vehicle_reg.owner", "owner")
+        .innerJoinAndSelect("vehicle_reg.operators", "operator")
+        .where("vehicle_reg.uvin = :uvin")
+        .andWhere(
+          '(operator."username" = :username OR owner."username" = :username)'
+        )
+        .setParameters({
+          uvin: uvin,
+          username: username,
+        });
+      const v = await qb.getOneOrFail();
+
       v.extra_fields = v.extra_fields_json;
       await this.setVehicleDocuments(v);
       return v;
