@@ -2257,7 +2257,7 @@
     "/vehicle/{id}": {
       "get": {
         "tags": ["Vehicle"],
-        "summary": "For ADMIN and MONITOR users, this endpoint returns the vehicle with the id received by parameter. For PILOT users, this endpoint only returns the vehicle, if the vehicles owner is the logged user.",
+        "summary": "For ADMIN and MONITOR users, this endpoint returns the vehicle with the id received by parameter. For PILOT users, this endpoint only returns the vehicle, if the vehicles owner or one operator is the logged user.",
         "parameters": [
           {
             "in": "path",
