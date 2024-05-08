@@ -150,13 +150,12 @@ export class UserController {
       });
       if (status) {
         // If filtering to show only unconfirmed or confirmed
-        const verified = status === "confirmed";
-        const unverified = status === "unconfirmed";
-        users = _.filter(
-          users,
-          (user) =>
-            verified ? user.verified : unverified ? !user.verified : false // Show only matching users to flag
-        );
+        if (status === "notVerified") {
+          users = users.filter((u) => u.verified === false);
+        }
+        if (status === "verified") {
+          users = users.filter((u) => u.verified === true);
+        }
       }
       return logAndRespond200(response, { users, count }, []);
     } else {
