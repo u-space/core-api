@@ -42,7 +42,7 @@ export class UserDao {
     deleted?: boolean
   ): Promise<{ users: User[]; count: number }> {
     const filter: any = {};
-    filter.where = {};
+    filter.where = [];
     if (filterProp && filterValue) {
       // role is a enum, so we have to manually handle this case
       if (filterProp === "role") {
@@ -52,7 +52,7 @@ export class UserDao {
             undefined
           );
         }
-        filter.where.role = roleValueOf(filterValue);
+        filter.where.push({ role: roleValueOf(filterValue) });
       } else {
         const multiFilter = filterProp.split(",");
         if (multiFilter.length > 0) {
