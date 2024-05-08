@@ -54,7 +54,15 @@ export class UserDao {
         }
         filter.where.role = roleValueOf(filterValue);
       } else {
-        filter.where[filterProp] = ILike("%" + filterValue + "%");
+        const multiFilter = filterProp.split(",");
+        if (multiFilter.length > 0) {
+          filter.where = [];
+          for (const prop of multiFilter) {
+            filter.where.push({ [prop]: ILike("%" + filterValue + "%") });
+          }
+        } else {
+          filter.where[filterProp] = ILike("%" + filterValue + "%");
+        }
       }
     }
     if (orderProp && orderValue) {
