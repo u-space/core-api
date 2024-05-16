@@ -66,3 +66,23 @@ export function formatDateLong(
     utc ? date.getUTCDate() : date.getDate()
   } de ${monthName} de ${utc ? date.getUTCFullYear() : date.getFullYear()}`;
 }
+
+export function addDaysToCurrentDate(days: number): Date {
+  const currentDate = new Date(); // Gets today's date
+  currentDate.setHours(0, 0, 0, 0);
+  currentDate.setDate(currentDate.getDate() + days); // Adds the specified number of days
+  return currentDate;
+}
+
+export function daysBetween(dateIsoString: string): number {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Establece la hora de hoy a medianoche para ignorar las horas y minutos actuales
+
+  const givenDate = new Date(dateIsoString);
+  givenDate.setHours(0, 0, 0, 0); // Asegura que la hora en la fecha dada también esté a medianoche
+
+  const timeDifference = givenDate.getTime() - today.getTime(); // Calcula la diferencia en milisegundos
+  const daysDifference = timeDifference / (1000 * 60 * 60 * 24); // Convierte de milisegundos a días
+
+  return Math.floor(daysDifference); // Devuelve la diferencia en días como un número entero
+}
