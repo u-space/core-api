@@ -34,6 +34,14 @@ export const buildConfirmationLink = (
   return `${frontEndEndpoint}/verify/${username}?token=${token}`;
 };
 
+// export const buildRecoverLink = (
+//   username: any,
+//   token: any,
+//   frontEndEndpoint: any
+// ) => {
+//   return `${frontEndEndpoint}/recover/${username}?token=${token}`;
+// };
+
 export const buildMagicSignupLink = (username: any, token: any) =>
   `${frontEndUrl}password-reset/${username}?token=${token}`;
 
@@ -653,6 +661,95 @@ export function buildConfirmationHtmlMail(
       "Para finalizar el proceso de registro, haga click o copie el siguiente link en tu navegador."
     )}
     ${paragraph(`<a href="${link}">${link}</a>`)}
+    `;
+  const email = generateBaseMail(mjmlBody);
+  // console.log(email);
+  return email;
+}
+
+// export function buildRecoverTextMail(
+//   username: any,
+//   link: any,
+//   appName: string
+// ) {
+//   return `
+//     Hello ${username},
+//     We have received your request to change your password in${appName}!
+//     To make the change follow the following link
+
+//     ${link}
+//     `;
+// }
+
+// export function buildRecoverHtmlMail(
+//   username: any,
+//   link: any,
+//   appName: string
+// ) {
+//   const mjmlBody = `
+//     ${title(`Hola ${username}!`)}
+//     ${paragraph(
+//       `Hemos recibido tu pedido de cambio de contraseña en  ${appName}!`,
+//       "10px 10px 0px 10px"
+//     )}
+//     ${paragraph("Para realizar el cambio sigue el siguiente link:")}
+//     ${paragraph(`<a href="${link}">${link}</a>`)}
+//     `;
+//   const email = generateBaseMail(mjmlBody);
+//   // console.log(email);
+//   return email;
+// }
+
+export function buildExpiredDocumentationTextMail(
+  username: any,
+  document: Document,
+  appName: string
+) {
+  return `
+    Hello ${username},
+    Ha vencido el documento:
+    ${JSON.stringify(document, null, 2)}
+    `;
+}
+
+export function buildExpiredDocumentationHtmlMail(
+  username: any,
+  document: Document,
+  appName: string
+) {
+  const mjmlBody = `
+    ${title(`Hola ${username}!`)}
+    ${paragraph("Ha vencido el documento:")}
+    ${paragraph(`<pre>${JSON.stringify(document, null, 2)}</pre>`)}
+    `;
+  const email = generateBaseMail(mjmlBody);
+  // console.log(email);
+  return email;
+}
+
+export function buildNextToExpireDocumentTextMail(
+  username: any,
+  document: Document,
+  day: number,
+  appName: string
+) {
+  return `
+    Hello ${username},
+    El documento vence en menos de ${day}
+    ${JSON.stringify(document, null, 2)}
+    `;
+}
+
+export function buildNextToExpireDocumentHtmlMail(
+  username: any,
+  document: Document,
+  day: number,
+  appName: string
+) {
+  const mjmlBody = `
+    ${title(`Hola ${username}!`)}
+    ${paragraph(`Tienes un documento que vence en menos de ${day}:`)}
+    ${paragraph(`<pre>${JSON.stringify(document, null, 2)}</pre>`)}
     `;
   const email = generateBaseMail(mjmlBody);
   // console.log(email);
