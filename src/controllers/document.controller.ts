@@ -72,7 +72,10 @@ export class DocumentRestController {
         requestDocument.valid_until,
         requestDocument.observations,
         requestDocument.valid,
-        requestDocument.extra_fields
+        requestDocument.extra_fields,
+        requestDocument.notifications,
+        requestDocument.referenced_entity_id,
+        requestDocument.referenced_entity_type
       );
 
       const savedDoc = await saveDocument(doc);
