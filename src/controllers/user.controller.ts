@@ -32,7 +32,12 @@ import {
 import * as bcrypt from "bcryptjs";
 import * as _ from "lodash";
 import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
-import { Document, setExtraField, setFileName } from "../entities/document";
+import {
+  Document,
+  ReferencedEntityType,
+  setExtraField,
+  setFileName,
+} from "../entities/document";
 import { getDocumentById } from "./document.controller";
 
 import Joi from "joi";
@@ -61,6 +66,9 @@ import {
   buildConfirmationLink,
   buildConfirmationTextMail,
   buildNewUserMail,
+  // buildRecoverHtmlMail,
+  // buildRecoverLink,
+  // buildRecoverTextMail,
 } from "../utils/mail-content.utils";
 import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
 
@@ -434,13 +442,33 @@ export class UserController {
     }
   }
 
+  // /**
+  //  * Send recover mail to email with a new password
+  //  * @param request
+  //  * @param response
+  //  * @returns
+  //  */
+  // async recoverPassword(request: Request, response: Response) {
+  //   const origin = request.headers.origin;
+  //   const requestBody = request.body;
+  //   const { username } = requestBody;
+  //   const dao = this.dao;
+  //   const user = await dao.one(username);
+  //   if (!user) {
+  //     return logAndRespond400(response, 400, "User not found");
+  //   }
+
+  //   sendMailToRecover(user, origin, this.mailAPI);
+
+  //   return logAndRespond200(response, "ok", []);
+  // }
+
   async updateUser(request: Request, response: Response) {
     const { role, username: logged_username } =
       getPayloadFromResponse(response);
     const dao = this.dao;
-    // const axiosInstance = this.axiosInstance;
-
     const requestBody = request.body;
+
     if (!isString(requestBody.username)) {
       return logAndRespond400(response, 400, "Invalid username");
     }
@@ -742,6 +770,9 @@ export class UserController {
         requestBody["valid"] = false;
         requestBody["name"] = "";
         document = convertAnyToDocument(requestBody, documentSchemas);
+        document.referenced_entity_id = requestBody.referenced_entity_id =
+          request.params.username;
+        document.referenced_entity_type = ReferencedEntityType.USER;
       } catch (error) {
         return logAndRespond400(response, 400, `${(error as Error).message}`);
       }
@@ -784,6 +815,9 @@ export class UserController {
 
   async updateDocument(request: Request, response: Response) {
     const { role, username } = getPayloadFromResponse(response);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const documentSchemas = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
+    ``;
     const dao = this.dao;
     const upload = multipleFiles(undefined, undefined);
     const userControllerExtension = this.userControllerExtension;
@@ -811,8 +845,11 @@ export class UserController {
         setExtraField(document);
         setFileName(request, document);
         document.valid = false;
+        document.referenced_entity_id = usernameToUpdateDoc;
+        document.referenced_entity_type = ReferencedEntityType.USER;
+
         // validateDocument(document);
-        const doc = getDocumentById(documentId);
+        const doc = await getDocumentById(documentId);
         if (!doc) {
           return logAndRespond400(
             response,
@@ -820,6 +857,23 @@ export class UserController {
             `Docuemnt ${documentId} not exists`
           );
         }
+        console.log("******************************");
+        console.log("document", JSON.stringify(document, null, 2));
+        console.log("OldDocument", JSON.stringify(doc, null, 2));
+
+        if (
+          document.notifications &&
+          typeof document.notifications === "string"
+        ) {
+          try {
+            document.notifications = JSON.parse(document.notifications);
+          } catch (error) {
+            throw new Error(
+              `notifications must be a json (notifications=${document.notifications})`
+            );
+          }
+        }
+
         // update the document
         document = await new DocumentDao().update(document);
 
@@ -1053,7 +1107,10 @@ function getTypedDocument(document: any): Document {
     document["valid_until"],
     document["observations"],
     document["valid"],
-    document["extra_fields"]
+    document["extra_fields"],
+    document["notifications"],
+    document["referenced_entity_id"],
+    document["referenced_entity_type"]
   );
   return doc;
 }
@@ -1075,6 +1132,20 @@ function sendMailToConfirm(user: any, url: any, mailAPI: IMailAPI) {
     htmlContent
   );
 }
+
+// function sendMailToRecover(user: any, url: any, mailAPI: IMailAPI) {
+//   const subject = `${user.firstName}, haz click en el siguiente enlace para reestablecer tu password de ${APP_NAME}`;
+//   const link = buildRecoverLink(user.username, user.verification_token, url);
+//   const textContent = buildRecoverTextMail(user.username, link, APP_NAME!);
+//   const htmlContent = buildRecoverHtmlMail(user.username, link, APP_NAME!);
+//   mailAPI.sendMail(
+//     COMPANY_NAME!,
+//     [user.email],
+//     subject,
+//     textContent,
+//     htmlContent
+//   );
+// }
 function sendMailToAdmin(user: any, mailAPI: IMailAPI) {
   const adminSubject = `Nuevo usuario registrado en ${APP_NAME}`;
   const adminTextContent = `El usuario ${user.username} se ha registrado en ${APP_NAME}`;

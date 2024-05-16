@@ -31,7 +31,12 @@ import IMailAPI from "../apis/mail/imail-api";
 import MailAPIFactory from "../apis/mail/mail-api-factory";
 import { InvalidDataError, NotFoundError } from "../daos/db-errors";
 import { DocumentDao } from "../daos/document.dao";
-import { Document, setExtraField, setFileName } from "../entities/document";
+import {
+  Document,
+  ReferencedEntityType,
+  setExtraField,
+  setFileName,
+} from "../entities/document";
 import {
   COMPANY_NAME,
   MOCK_AUTH_SERVER_API,
@@ -558,6 +563,8 @@ export class VehicleController {
         requestBody["valid"] = false;
         requestBody["name"] = "";
         document = convertAnyToDocument(requestBody, documentSchemas);
+        document.referenced_entity_id = vehicleUvinToAdd;
+        document.referenced_entity_type = ReferencedEntityType.VEHICLE;
       } catch (error) {
         return logAndRespond400(response, 400, `${(error as Error).message}`);
       }
@@ -641,6 +648,22 @@ export class VehicleController {
             ...document,
             valid: false,
           };
+          newDocument.referenced_entity_id = uvinToUpdateDoc;
+          newDocument.referenced_entity_type = ReferencedEntityType.VEHICLE;
+
+          if (
+            newDocument.notifications &&
+            typeof newDocument.notifications === "string"
+          ) {
+            try {
+              newDocument.notifications = JSON.parse(newDocument.notifications);
+            } catch (error) {
+              throw new Error(
+                `notifications must be a json (notifications=${newDocument.notifications})`
+              );
+            }
+          }
+
           documents.push(newDocument);
           await documentDao.update(newDocument);
           (vehicle.extra_fields as { documents: Array<any> }).documents =
