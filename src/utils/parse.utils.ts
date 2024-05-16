@@ -328,7 +328,20 @@ export function convertAnyToDocument(obj: any, documentSchemas: any): Document {
     { name: "valid_until", type: ObjectKeyType.STRING },
     { name: "observations", type: ObjectKeyType.STRING },
     { name: "extra_fields_str", type: ObjectKeyType.STRING },
+    { name: "notifications", type: ObjectKeyType.OBJECT },
+    { name: "referenced_entity_id", type: ObjectKeyType.STRING },
+    { name: "referenced_entity_type", type: ObjectKeyType.STRING },
+    { name: "id", type: ObjectKeyType.STRING },
   ];
+  if (obj.notifications && typeof obj.notifications === "string") {
+    try {
+      obj.notifications = JSON.parse(obj.notifications);
+    } catch (error) {
+      throw new Error(
+        `notifications must be a json (notifications=${obj.notifications})`
+      );
+    }
+  }
   validateObjectKeys(obj, mandatoryKeys, optionalKeys);
   let extraFields = undefined;
   if (isString(obj.extra_fields_str)) {
@@ -382,7 +395,10 @@ export function convertAnyToDocument(obj: any, documentSchemas: any): Document {
     obj["valid_until"],
     obj["observations"],
     obj["valid"],
-    extraFields
+    extraFields,
+    obj["notifications"],
+    obj["referenced_entity_id"],
+    obj["referenced_entity_type"]
   );
   return result;
 }

@@ -16,8 +16,10 @@ import {
   VEHICLE_DOCUMENT_EXTRA_FIELDS_SCHEMA,
 } from "../utils/config.utils";
 
-// const uploadPath = uploadFolder;
-// const path = `${backendUrl}`;
+export enum ReferencedEntityType {
+  USER = "user",
+  VEHICLE = "vehicle",
+}
 
 @Entity()
 export class Document {
@@ -29,9 +31,6 @@ export class Document {
   @Column({ type: "varchar" })
   name: string;
 
-  // @Column({
-  // 	type: 'timestamp without time zone'
-  // })
   @CreateDateColumn({ type: "timestamp with time zone" })
   upload_time?: string;
 
@@ -53,10 +52,26 @@ export class Document {
   @Column({ type: "json", nullable: true })
   extra_fields_json?: object;
 
+  @Column({ type: "json", nullable: true })
+  notifications?: Record<number, boolean>;
+
+  @Column({ type: "varchar", nullable: true })
+  referenced_entity_id?: string;
+
+  @Column({ type: "varchar", nullable: true })
+  referenced_entity_type?: string;
+
   downloadFileUrl?: string;
 
   getFileName() {
     return this.name; //`${this.name}`;
+  }
+
+  setNotificationSended(day: number) {
+    if (!this.notifications) {
+      this.notifications = {};
+    }
+    this.notifications[day] = true;
   }
 
   constructor(
@@ -65,7 +80,10 @@ export class Document {
     valid_until: string,
     observations: string,
     valid: boolean,
-    extra_fields: ObjectLiteral
+    extra_fields: ObjectLiteral,
+    notifications: any,
+    referenced_entity_id: string,
+    referenced_entity_type: string
   ) {
     this.name = name;
     this.tag = tag;
@@ -73,6 +91,9 @@ export class Document {
     this.observations = observations;
     this.valid = valid;
     this.extra_fields = extra_fields;
+    this.notifications = notifications ? notifications : {};
+    this.referenced_entity_id = referenced_entity_id;
+    this.referenced_entity_type = referenced_entity_type;
   }
 
   //TODO EMI pasar a extra fields
