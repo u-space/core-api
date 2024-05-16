@@ -4,7 +4,13 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { getRepository, InsertResult } from "typeorm";
+import {
+  Between,
+  getRepository,
+  InsertResult,
+  LessThan,
+  MoreThan,
+} from "typeorm";
 import { Document } from "../entities/document";
 import { DataBaseError, NotFoundError } from "./db-errors";
 import { TypeOrmErrorType } from "./type-orm-error-type";
@@ -26,6 +32,38 @@ export class DocumentDao {
         error
       );
     }
+  }
+
+  async getExpiredDocuments(): Promise<Document[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const documents = await this.repository.find({
+      where: {
+        valid_until: LessThan(today),
+        valid: true,
+      },
+    });
+    return documents;
+  }
+
+  async getNextoToExpireDocuments(nextDate: Date): Promise<Document[]> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const documents = await this.getExpireDocumentsBetween(today, nextDate);
+    return documents;
+  }
+
+  async getExpireDocumentsBetween(
+    firstDate: Date,
+    secondDate: Date
+  ): Promise<Document[]> {
+    const documents = await this.repository.find({
+      where: {
+        valid_until: Between(firstDate, secondDate),
+        valid: true,
+      },
+    });
+    return documents;
   }
 
   async one(id: string): Promise<Document> {
