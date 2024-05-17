@@ -77,6 +77,14 @@ export class User {
   @Column({ type: "json", nullable: true })
   extra_fields_json?: object;
 
+  @Column({
+    type: "boolean",
+    nullable: false,
+    default: false,
+    name: "can_operate",
+  })
+  canOperate: boolean;
+
   verification_token?: string;
   verified?: boolean;
 
@@ -91,7 +99,8 @@ export class User {
     extra_fields?: unknown,
     deletedAt?: Date,
     verification_token?: string,
-    verified?: boolean
+    verified?: boolean,
+    canOperate?: boolean
   ) {
     this.username = username;
     this.firstName = firstName;
@@ -104,5 +113,6 @@ export class User {
     this.settings = settings;
     this.extra_fields = extra_fields;
     this.deletedAt = deletedAt;
+    this.canOperate = canOperate ? canOperate : false;
   }
 }

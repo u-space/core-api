@@ -188,6 +188,7 @@ export function parseAnyToUser(obj: any): User {
       { name: "deletedAt", type: ObjectKeyType.STRING },
       { name: "verification_token", type: ObjectKeyType.STRING },
       { name: "verified", type: ObjectKeyType.BOOLEAN },
+      { name: "canOperate", type: ObjectKeyType.BOOLEAN },
     ]
   );
   return new User(
@@ -201,7 +202,8 @@ export function parseAnyToUser(obj: any): User {
     obj["extra_fields"],
     obj["deletedAt"],
     obj["verification_token"],
-    obj["verified"]
+    obj["verified"],
+    obj["canOperate"]
   );
 }
 
