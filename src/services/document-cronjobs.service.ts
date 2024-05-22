@@ -6,44 +6,38 @@
 
 import { OperationDao } from "../daos/operation.dao";
 import { VehicleDao } from "../daos/vehicle.dao";
+import { UserDao } from "../daos/user.dao";
 
 import {
-  adminEmail,
   COMPANY_NAME,
   MOCK_MAIL_API,
-  OPERATION_DEFAULT_STATE,
   SMTP_PASSWORD,
   SMTP_PORT,
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
-  STRATEGIC_DECONFLICT_MODE_DISABLED,
 } from "../utils/config.utils";
-import { logError } from "./winston-logger.service";
 
 // import { OperationIntersections } from "../entities/OperationIntersection";
-import { Role } from "../entities/user";
 
-import { doSendMailForPendingOperation } from "../controllers/mail.controller";
+import IMailAPI from "../apis/mail/imail-api";
+import MailAPIFactory from "../apis/mail/mail-api-factory";
+import { DocumentDao } from "../daos/document.dao";
+import { Document, ReferencedEntityType } from "../entities/document";
+import { addDaysToCurrentDate, daysBetween } from "../utils/date.utils";
 import {
   buildExpiredDocumentationHtmlMail,
   buildExpiredDocumentationTextMail,
   buildNextToExpireDocumentHtmlMail,
   buildNextToExpireDocumentTextMail,
-  operationMailHtml,
 } from "../utils/mail-content.utils";
-import { logStateChange } from "../controllers/utils";
-import MailAPIFactory from "../apis/mail/mail-api-factory";
-import IMailAPI from "../apis/mail/imail-api";
-import { DocumentDao } from "../daos/document.dao";
-import { addDaysToCurrentDate, daysBetween } from "../utils/date.utils";
-import { Document, ReferencedEntityType } from "../entities/document";
 
 // list of notifications day befor the expiration
 const NOTIFICATION_DAYS = [1000, 60, 30, 10, 1];
 const ORDERED_NOTIFICATION_DAYS = NOTIFICATION_DAYS.sort((a, b) => b - a);
 
 let operationDao: OperationDao;
+let userDao: UserDao;
 let mailAPI: IMailAPI;
 let documentDao: DocumentDao;
 let vehicleDao: VehicleDao;
@@ -52,6 +46,7 @@ export async function processExpiredDocuments() {
   console.log('>>> CRON START: "processExpiredDocuments"');
   documentDao = new DocumentDao();
   vehicleDao = new VehicleDao();
+  userDao = new UserDao();
 
   mailAPI = MailAPIFactory.getMailAPI(
     MOCK_MAIL_API,
@@ -74,6 +69,15 @@ export async function processExpiredDocuments() {
     const emailToNotify = await getDocumentOwnerEmail(document);
 
     await documentDao.update(document);
+    try {
+      if (emailToNotify) {
+        const user = await userDao.one(emailToNotify);
+        user.canOperate = false;
+        await userDao.update(user);
+      }
+    } catch (e) {
+      console.error("Error when update user " + emailToNotify);
+    }
 
     if (emailToNotify) {
       mailAPI.sendMail(
