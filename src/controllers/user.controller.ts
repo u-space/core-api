@@ -665,6 +665,31 @@ export class UserController {
       return logAndRespond400(response, 404, null);
     }
   }
+  async updateCanOperate(request: Request, response: Response) {
+    const payload = getPayloadFromResponse(response);
+    let role;
+    if (payload) role = payload.role;
+    const dao = this.dao;
+
+    const canOperate = !!request.body.canOperate;
+    const username = request.body.username;
+
+    try {
+      const user = await dao.one(username);
+      if (role !== Role.ADMIN) {
+        return logAndRespond400(response, 401, "The token is invalid");
+      }
+      try {
+        user.canOperate = canOperate;
+        await dao.update(user);
+      } catch (error: any) {
+        return logAndRespond400(response, 404, null);
+      }
+    } catch (error) {
+      console.error(error);
+      return logAndRespond400(response, 404, null);
+    }
+  }
 
   /**
    * Return true if the user exists

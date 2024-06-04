@@ -196,6 +196,13 @@ const user = [
     middlewares: [checkJwt],
   },
   {
+    method: "post",
+    route: "/user/updateCanOperate",
+    controller: UserController,
+    action: "updateCanOperate",
+    middlewares: [checkJwt],
+  },
+  {
     method: "get",
     route: "/user/exists/:username",
     controller: UserController,
