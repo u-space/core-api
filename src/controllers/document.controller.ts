@@ -7,7 +7,7 @@
 import { Request, Response } from "express";
 import { extisFile, listDocumentFiles, removeFiles } from "../utils/file.utils";
 import { DocumentDao } from "../daos/document.dao";
-import { Document } from "../entities/document";
+import { Document, ReferencedEntityType } from "../entities/document";
 import { logAndRespond200, logAndRespond400, logAndRespond500 } from "./utils";
 import { getPayloadFromResponse } from "../utils/auth.utils";
 import { Role, User } from "../entities/user";
@@ -28,6 +28,7 @@ import {
 import { NotFoundError } from "../daos/db-errors";
 import { isString } from "lodash";
 import GeneralUtils from "./utils/general.utils";
+import { VehicleDao } from "../daos/vehicle.dao";
 
 export class DocumentRestController {
   private dao = new DocumentDao();
@@ -216,6 +217,43 @@ export class DocumentRestController {
         }
         return logAndRespond500(response, 500, error);
       }
+
+      const validUntil = new Date(document.valid_until || "");
+      const today = new Date();
+      if (
+        valid &&
+        validUntil &&
+        validUntil.toISOString() < today.toISOString()
+      ) {
+        console.log("expired");
+        return logAndRespond400(response, 400, "The document is expired");
+      }
+      const schema = document.getExtraFieldSchema();
+      if (
+        valid &&
+        schema &&
+        schema.__metadata &&
+        schema.__metadata.max_valid_documents == 1
+      ) {
+        const vehicleOrUser = await getReferencedEntity(document);
+        if (vehicleOrUser) {
+          const documents = vehicleOrUser.extra_fields["documents"];
+          for (let i = 0; i < documents.length; i++) {
+            if (
+              documents[i].id !== documentId &&
+              documents[i].valid &&
+              documents[i].tag == document.tag
+            ) {
+              console.log(
+                `Document ${documents[i].id} is valid, and change to invalid`
+              );
+              documents[i].valid = false;
+              await this.dao.update(documents[i]);
+            }
+          }
+        }
+      }
+
       document.valid = valid;
       document = await this.dao.update(document);
       return logAndRespond200(response, document, []);
@@ -253,4 +291,22 @@ export const getOrphanFiles = async () => {
 export const removeOrphanFiles = async () => {
   const orphanFiles = await getOrphanFiles();
   return removeFiles(orphanFiles);
+};
+
+export const getReferencedEntity = async (document: Document) => {
+  if (
+    document.referenced_entity_type === ReferencedEntityType.VEHICLE &&
+    document.referenced_entity_id
+  ) {
+    const vehicleDao = new VehicleDao();
+    const vehicle = await vehicleDao.one(document.referenced_entity_id);
+    return vehicle;
+  } else if (
+    document.referenced_entity_type === ReferencedEntityType.USER &&
+    document.referenced_entity_id
+  ) {
+    const userDao = new UserDao();
+    const user = await userDao.one(document.referenced_entity_id);
+    return user;
+  } else return null;
 };
