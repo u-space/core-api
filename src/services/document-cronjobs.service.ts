@@ -31,6 +31,7 @@ import {
   buildNextToExpireDocumentHtmlMail,
   buildNextToExpireDocumentTextMail,
 } from "../utils/mail-content.utils";
+import { VehicleAuthorizeStatus } from "../entities/vehicle-reg";
 
 // list of notifications day befor the expiration
 const NOTIFICATION_DAYS = [1000, 60, 30, 10, 1];
@@ -71,12 +72,21 @@ export async function processExpiredDocuments() {
     await documentDao.update(document);
     try {
       if (emailToNotify) {
-        const user = await userDao.one(emailToNotify);
-        user.canOperate = false;
-        await userDao.update(user);
+        if (document.referenced_entity_type === ReferencedEntityType.USER) {
+          const user = await userDao.one(emailToNotify);
+          user.canOperate = false;
+          await userDao.update(user);
+        } else if (
+          document.referenced_entity_type === ReferencedEntityType.VEHICLE &&
+          document.referenced_entity_id
+        ) {
+          const vehicle = await vehicleDao.one(document.referenced_entity_id);
+          vehicle.authorized = VehicleAuthorizeStatus.NOT_AUTHORIZED;
+          await vehicleDao.updateOnlyReceivedProperties(vehicle);
+        }
       }
     } catch (e) {
-      console.error("Error when update user " + emailToNotify);
+      console.error("Error when update user or vehicle " + emailToNotify);
     }
 
     if (emailToNotify) {
