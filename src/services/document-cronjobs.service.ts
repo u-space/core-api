@@ -59,9 +59,17 @@ export async function processExpiredDocuments() {
   );
 
   const expiredDocuments = await documentDao.getExpiredDocuments();
+
+  const expiredExpirableDocuments = expiredDocuments.filter(
+    (doc) =>
+      doc.extra_fields &&
+      "expirable" in doc.extra_fields &&
+      doc.extra_fields.expirable === false
+  );
+
   //change documents to invalid."invalid"
-  for (let index = 0; index < expiredDocuments.length; index++) {
-    const document = expiredDocuments[index];
+  for (let index = 0; index < expiredExpirableDocuments.length; index++) {
+    const document = expiredExpirableDocuments[index];
     document.valid = false;
     console.log(
       `El documento de nombre ${document.id} expiró (${document.valid_until}) `
@@ -132,18 +140,17 @@ export async function processNextToExpireDocuments() {
 
   const documents = await documentDao.getNextoToExpireDocuments(biggestDate);
 
-  // documents.forEach((document) => {
-  //   console.log(
-  //     `El documento ${document.id} expira en ${daysBetween(
-  //       document.valid_until ? document.valid_until : new Date().toISOString()
-  //     )} ${document.valid_until}`
-  //   );
-  // });
+  const expirableDocuments = documents.filter(
+    (doc) =>
+      doc.extra_fields &&
+      "expirable" in doc.extra_fields &&
+      doc.extra_fields.expirable === false
+  );
 
   const documentsToSendNotifications = [];
 
-  for (let iDoc = 0; iDoc < documents.length; iDoc++) {
-    const document = documents[iDoc];
+  for (let iDoc = 0; iDoc < expirableDocuments.length; iDoc++) {
+    const document = expirableDocuments[iDoc];
     const validUntil = new Date(
       document.valid_until || new Date().toISOString()
     );
