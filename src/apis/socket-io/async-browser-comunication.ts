@@ -95,7 +95,6 @@ export function sendPositionToMonitor(
 }
 
 export function sendHazardPositionToMonitor(position: any) {
-  // app.io.emit('new-position', position)
   return send("new-hazard-position", { ...position });
 }
 
@@ -118,7 +117,6 @@ export function sendUvr(uvrInfo: PublicUvr) {
 }
 
 export function sendAlgo(position: Position) {
-  // app.io.emit('new-position', position)
   return send("new-position", position);
 }
 

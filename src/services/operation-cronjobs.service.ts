@@ -43,6 +43,7 @@ let rfvDao: RestrictedFlightVolumeDao;
 let mailAPI: IMailAPI;
 
 export async function processOperations() {
+  console.log('>>> CRON START: "processOperations"');
   operationDao = new OperationDao();
   uvrDao = new UASVolumeReservationDao();
   rfvDao = new RestrictedFlightVolumeDao();
