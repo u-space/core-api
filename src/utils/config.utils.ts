@@ -67,6 +67,7 @@ export const frontEndUrlMobile =
   process.env.FRONT_END_URL_MOBILE || "http://localhost/";
 export const backendUrl = process.env.BACKEND_URL || "http://localhost:4000/";
 export const fileServerUrl = backendUrl; // process.env.BACKEND_URL || 'http://localhost:4000/';
+export const fileMaxSize = Number(process.env.FILE_MAX_SIZE) || 1024 * 1024 * 5;
 
 export const adminEmail = process.env.ADMIN_EMAIL
   ? process.env.ADMIN_EMAIL.split(",")

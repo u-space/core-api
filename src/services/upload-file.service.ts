@@ -6,17 +6,14 @@
 
 // import * as multer from 'multer'
 import multer from "multer";
-import { uploadFolder } from "../utils/config.utils";
+import { uploadFolder, fileMaxSize } from "../utils/config.utils";
 
 const uploadPath = uploadFolder;
 
 const MAX_FILE_SIZE_MB = 15;
 
-// export const getUrl = (filename:string) => `${backendUrl}uploads/${filename}`
 //save relative url path
 export const getUrl = (filename: string) => `/uploads/${filename}`;
-
-// File: {"fieldname":"file","originalname":"prueba.txt","encoding":"7bit","mimetype":"text/plain"}
 
 const mimeTypes = [
   "image/jpeg",
@@ -47,19 +44,13 @@ function fileFilter(req: any, file: any, cb: any) {
   } else {
     cb(null, true);
   }
-
-  //     // To reject this file pass `false`, like so:
-  //     cb(null, false)
-
-  // // To accept the file pass `true`, like so:
-  // cb(null, true)
-
-  // // You can always pass an error if something goes wrong:
-  // cb(new Error('I don\'t have a clue!'))
 }
 
 const upload = multer({
   storage: storage,
+  limits: {
+    fileSize: fileMaxSize * 1024 * 1024,
+  },
 });
 
 const uploadFilteringImages = multer({
