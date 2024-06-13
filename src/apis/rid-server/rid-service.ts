@@ -10,6 +10,7 @@ import { sendPositionToMonitor } from "../socket-io/async-browser-comunication";
 import { IResponseRidPosition } from "./IResponseRidPosition";
 import { Position } from "../../entities/position";
 import { VehicleReg } from "../../entities/vehicle-reg";
+import { Operation } from "../../entities/operation";
 
 const RID_URL = "https://localhost:3030/";
 
@@ -29,28 +30,39 @@ export class RidService {
   async startPooling() {
     console.log("Start pooling position");
     const responsePositions = await this.axiosInstance.get(getAllPositionsPath);
+
     const positions = responsePositions.data as IResponseRidPosition[];
     let lastPosition = positions[positions.length - 1];
     console.log("Fisrt time get positions, the las is: " + lastPosition.id);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
-      const responsePositions = await this.axiosInstance.get(
-        getAllPositionsAfterIdPath + lastPosition.id
-      );
-      const positions = responsePositions.data as IResponseRidPosition[];
-      if (positions.length > 0) {
-        lastPosition = positions[positions.length - 1];
-        for (const position of positions) {
-          console.log("----->Process position: " + JSON.stringify(position));
-          const positionEntity: Position = transformToEntityPosition(position);
-          sendPositionToMonitor(
-            positionEntity,
-            position.operator_location,
-            true
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+        .then(async () => {
+          console.log("Pooling: obteniendo posiciones");
+          const responsePositions = await this.axiosInstance.get(
+            getAllPositionsAfterIdPath + lastPosition.id
           );
-        }
-      }
+          const positions = responsePositions.data as IResponseRidPosition[];
+          if (positions.length > 0) {
+            lastPosition = positions[positions.length - 1];
+            for (const position of positions) {
+              console.log(
+                "----->Process position: " + JSON.stringify(position)
+              );
+              const positionEntity: Position =
+                transformToEntityPosition(position);
+              sendPositionToMonitor(
+                positionEntity,
+                position.operator_location,
+                true
+              );
+            }
+          }
+        })
+        .catch((error) => {
+          console.log("error: " + error);
+        });
     }
   }
 }
@@ -59,7 +71,9 @@ function transformToEntityPosition(
 ): Position {
   console.log();
   const position = new Position();
-  // position.gufi = { gufi: respPosition.operation_id || "" };
+  const o = new Operation();
+  o.gufi = respPosition.operation_id || ":)";
+  position.gufi = o;
   position.operationId = respPosition.operation_id || "";
   position.added_from_dat_file = false;
   position.altitude_gps = respPosition.geodetic_altitude || 0;
@@ -73,7 +87,7 @@ function transformToEntityPosition(
     coordinates: [0, 0],
     type: "Point",
   };
-  position.time_sent = respPosition.timestamp?.toISOString() || "";
+  position.time_sent = new Date().toISOString(); //respPosition.timestamp?.toISOString() || "";
   const v = new VehicleReg();
   v.uvin = respPosition.uas_id;
   position.uvin = v;
