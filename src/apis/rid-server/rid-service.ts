@@ -16,6 +16,8 @@ const RID_URL = "https://localhost:3030/";
 
 const getAllPositionsPath = "/position";
 const getAllPositionsAfterIdPath = "/position/after/";
+const getLastPositionPath = "/position/last";
+const getPositionsById = "/position/operation/";
 
 export class RidService {
   private axiosInstance = axios.create({
@@ -27,12 +29,42 @@ export class RidService {
     console.log("RidService::Constructor");
   }
 
+  private async getPositionsAfterPosition(lastPosition: IResponseRidPosition) {
+    const responsePositions = await this.axiosInstance.get(
+      getAllPositionsAfterIdPath + lastPosition.id
+    );
+    const positions = responsePositions.data as IResponseRidPosition[];
+    return positions;
+  }
+
+  private async getAllPositions() {
+    const responsePositions = await this.axiosInstance.get(getAllPositionsPath);
+    const positions = responsePositions.data as IResponseRidPosition[];
+    return positions;
+  }
+
+  private async getLastPosition() {
+    const responsePositions = await this.axiosInstance.get(getLastPositionPath);
+    console.log("Last position: ", responsePositions);
+    const position = responsePositions.data as IResponseRidPosition;
+    return position;
+  }
+
+  private async getPositionsByOperationId(operationId: string) {
+    const responsePositions = await this.axiosInstance.get(
+      getPositionsById + operationId
+    );
+    const positions = responsePositions.data as IResponseRidPosition[];
+    return positions;
+  }
+
   async startPooling() {
     console.log("Start pooling position");
-    const responsePositions = await this.axiosInstance.get(getAllPositionsPath);
 
-    const positions = responsePositions.data as IResponseRidPosition[];
-    let lastPosition = positions[positions.length - 1];
+    // const positions = await this.getAllPositions();
+    // let lastPosition = positions[positions.length - 1];
+    let lastPosition = await this.getLastPosition();
+
     console.log("Fisrt time get positions, the las is: " + lastPosition.id);
 
     // eslint-disable-next-line no-constant-condition
@@ -40,10 +72,7 @@ export class RidService {
       await new Promise((resolve) => setTimeout(resolve, 1000))
         .then(async () => {
           console.log("Pooling: obteniendo posiciones");
-          const responsePositions = await this.axiosInstance.get(
-            getAllPositionsAfterIdPath + lastPosition.id
-          );
-          const positions = responsePositions.data as IResponseRidPosition[];
+          const positions = await this.getPositionsAfterPosition(lastPosition);
           if (positions.length > 0) {
             lastPosition = positions[positions.length - 1];
             for (const position of positions) {
@@ -66,7 +95,8 @@ export class RidService {
     }
   }
 }
-function transformToEntityPosition(
+
+export function transformToEntityPosition(
   respPosition: IResponseRidPosition
 ): Position {
   console.log();
