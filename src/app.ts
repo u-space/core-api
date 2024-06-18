@@ -44,6 +44,7 @@ import { logAndRespond400 } from "./controllers/utils";
 import { MQTT } from "./apis/mqtt/mqtt";
 
 import swaggerUi from "swagger-ui-express";
+import { RidService } from "./apis/rid-server/rid-service";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const swaggerDocument = require("../swagger.json");
 
@@ -232,6 +233,9 @@ class App {
     this.app.use((request: Request, response: Response) => {
       return logAndRespond400(response, 404, "The endpoint does not exist");
     });
+
+    const ridService = new RidService();
+    ridService.startPooling();
   }
 
   public stop(callback: () => void) {
