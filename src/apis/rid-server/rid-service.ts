@@ -11,8 +11,7 @@ import { IResponseRidPosition } from "./IResponseRidPosition";
 import { Position } from "../../entities/position";
 import { VehicleReg } from "../../entities/vehicle-reg";
 import { Operation } from "../../entities/operation";
-
-const RID_URL = "https://localhost:3030/";
+import { REMOTE_ID_URL } from "../../utils/config.utils";
 
 const getAllPositionsPath = "/position";
 const getAllPositionsAfterIdPath = "/position/after/";
@@ -21,15 +20,13 @@ const getPositionsById = "/position/operation/";
 
 export class RidService {
   private axiosInstance = axios.create({
-    baseURL: RID_URL,
-    timeout: 50000,
+    baseURL: REMOTE_ID_URL,
+    timeout: 500000,
   });
 
-  constructor() {
-    console.log("RidService::Constructor");
-  }
+  constructor() {}
 
-  private async getPositionsAfterPosition(lastPosition: IResponseRidPosition) {
+  public async getPositionsAfterPosition(lastPosition: IResponseRidPosition) {
     const responsePositions = await this.axiosInstance.get(
       getAllPositionsAfterIdPath + lastPosition.id
     );
@@ -37,48 +34,43 @@ export class RidService {
     return positions;
   }
 
-  private async getAllPositions() {
+  public async getAllPositions() {
     const responsePositions = await this.axiosInstance.get(getAllPositionsPath);
     const positions = responsePositions.data as IResponseRidPosition[];
     return positions;
   }
 
-  private async getLastPosition() {
+  public async getLastPosition() {
     const responsePositions = await this.axiosInstance.get(getLastPositionPath);
-    console.log("Last position: ", responsePositions);
     const position = responsePositions.data as IResponseRidPosition;
     return position;
   }
 
-  private async getPositionsByOperationId(operationId: string) {
-    const responsePositions = await this.axiosInstance.get(
-      getPositionsById + operationId
-    );
-    const positions = responsePositions.data as IResponseRidPosition[];
-    return positions;
+  public async getPositionsByOperationId(operationId: string) {
+    try {
+      const responsePositions = await this.axiosInstance.get(
+        getPositionsById + operationId
+      );
+      const positions = responsePositions.data as IResponseRidPosition[];
+      return positions;
+    } catch (error) {
+      return [];
+    }
   }
 
   async startPooling() {
     console.log("Start pooling position");
-
-    // const positions = await this.getAllPositions();
-    // let lastPosition = positions[positions.length - 1];
     let lastPosition = await this.getLastPosition();
-
     console.log("Fisrt time get positions, the las is: " + lastPosition.id);
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
       await new Promise((resolve) => setTimeout(resolve, 1000))
         .then(async () => {
-          console.log("Pooling: obteniendo posiciones");
           const positions = await this.getPositionsAfterPosition(lastPosition);
           if (positions.length > 0) {
             lastPosition = positions[positions.length - 1];
             for (const position of positions) {
-              console.log(
-                "----->Process position: " + JSON.stringify(position)
-              );
               const positionEntity: Position =
                 transformToEntityPosition(position);
               sendPositionToMonitor(
@@ -99,10 +91,9 @@ export class RidService {
 export function transformToEntityPosition(
   respPosition: IResponseRidPosition
 ): Position {
-  console.log();
   const position = new Position();
   const o = new Operation();
-  o.gufi = respPosition.operation_id || ":)";
+  o.gufi = respPosition.operation_id || "";
   position.gufi = o;
   position.operationId = respPosition.operation_id || "";
   position.added_from_dat_file = false;
@@ -117,7 +108,7 @@ export function transformToEntityPosition(
     coordinates: [0, 0],
     type: "Point",
   };
-  position.time_sent = new Date().toISOString(); //respPosition.timestamp?.toISOString() || "";
+  position.time_sent = respPosition.timestamp || new Date().toISOString();
   const v = new VehicleReg();
   v.uvin = respPosition.uas_id;
   position.uvin = v;
