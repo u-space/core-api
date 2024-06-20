@@ -35,6 +35,7 @@ import { VersionController } from "./controllers/version.controller";
 import { VertiportController } from "./controllers/vertiport.controller";
 import { checkModuleEnabled } from "./middleware/check-module-enabled.middleware";
 import { NODE_ENV } from "./utils/config.utils";
+import { PositionRidController } from "./controllers/position.rid.controller";
 
 interface CustomRoute {
   method: string;
@@ -330,68 +331,23 @@ const mail = [
 
 const positions = [
   {
-    method: "post",
-    route: "/position/drone",
-    controller: PositionController,
-    action: "savePositionWithDrone",
-    middlewares: [
-      checkJwt,
-      isAdminOrPilotUser,
-      // input request validations
-      body("heading").optional().isNumeric(),
-      body("location.type")
-        .trim()
-        .toLowerCase()
-        .matches(/^point$/),
-      body("location.coordinates").isArray({ min: 2, max: 2 }),
-      body("altitude_gps").isNumeric(),
-      body("time_sent")
-        .optional()
-        .matches(
-          /^(19|20)\d\d-(0[1-9]|1[012])-([012]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d).(\d)(\d)(\d)Z$|^(19|20)\d\d-(0[1-9]|1[012])-([012]\d|3[01])T([01]\d|2[0-3]):([0-5]\d):([0-5]\d)Z/
-        ),
-    ],
-  },
-  {
     method: "get",
     route: "/position/date",
-    controller: PositionController,
+    controller: PositionRidController,
     action: "oneByGufiWithDates",
     middlewares: [
       checkJwt,
-      // input request validations
       query("gufi").isString().trim().not().isEmpty(),
       query("time_start").isISO8601().not().isEmpty(),
       query("time_end").isISO8601().not().isEmpty(),
     ],
   },
   {
-    method: "post",
-    route: "/position/tracker",
-    controller: PositionController,
-    action: "savePositionWithDroneTrackerIdWebService",
-    middlewares: [checkJwt, isAdminOrPilotUser],
-  },
-  {
     method: "get",
     route: "/position/:id",
-    controller: PositionController,
+    controller: PositionRidController,
     action: "one",
     middlewares: [checkJwt],
-  },
-  {
-    method: "post",
-    route: "/position",
-    controller: PositionController,
-    action: "save",
-    middlewares: [checkJwt, isAdminOrPilotUser],
-  },
-  {
-    method: "delete",
-    route: "/position/:id",
-    controller: PositionController,
-    action: "remove",
-    middlewares: [checkJwt, isAdminOrPilotUser],
   },
 ];
 
