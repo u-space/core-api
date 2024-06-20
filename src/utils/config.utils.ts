@@ -80,6 +80,9 @@ export const MOCK_AUTH_SERVER_API = process.env.MOCK_AUTH_SERVER_API;
 export const MICROUTM_AUTH_URL =
   process.env.MICROUTM_AUTH_URL || "https://localhost:1737/";
 
+export const REMOTE_ID_URL =
+  process.env.REMOTE_ID_URL || "https://localhost:3030/";
+
 export const THEME = process.env.THEME;
 export const INSTANCE = process.env.INSTANCE;
 export const USER_CONTROLLER_EXTENSION = process.env.USER_CONTROLLER_EXTENSION;
