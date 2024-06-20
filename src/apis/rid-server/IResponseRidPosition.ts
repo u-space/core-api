@@ -6,7 +6,7 @@ export interface IResponseRidPosition {
   uas_id?: string;
   operation_id?: string;
   ua_type?: number;
-  timestamp?: Date;
+  timestamp?: string;
   operational_status?: number;
   position?: Point;
   geodetic_altitude?: number;
