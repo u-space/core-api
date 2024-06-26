@@ -7,6 +7,40 @@
 import { createLogger, format, transports } from "winston";
 const { combine, timestamp, printf } = format;
 
+const colors = {
+  Reset: "\x1b[0m",
+  FgBlue: "\x1b[34m",
+  Bright: "\x1b[1m",
+  Dim: "\x1b[2m",
+  Underscore: "\x1b[4m",
+  Blink: "\x1b[5m",
+  Reverse: "\x1b[7m",
+  Hidden: "\x1b[8m",
+};
+
+function colorizeKeys(obj: any, depth = 0) {
+  if (typeof obj !== "object" || obj === null) {
+    return JSON.stringify(obj);
+  }
+
+  const indent = "  ".repeat(depth);
+  const braceIndent = depth > 0 ? "  ".repeat(depth - 1) : "";
+  const isArray = Array.isArray(obj);
+  let result = isArray ? "[\n" : "{\n";
+
+  for (const [key, value] of Object.entries(obj)) {
+    const formattedKey = isArray
+      ? ""
+      : `${colors.Bright}"${key}"${colors.Reset}: `;
+    const formattedValue = colorizeKeys(value, depth + 1);
+    result += `${indent}${formattedKey}${formattedValue},\n`;
+  }
+
+  result = result.slice(0, -2) + "\n"; // Remove the last comma and add a newline
+  result += isArray ? `${braceIndent}]` : `${braceIndent}}`;
+  return result;
+}
+
 const customFormat = printf((info) => {
   const infoKeys = Object.keys(info);
   const metadata: any = {};
@@ -17,9 +51,11 @@ const customFormat = printf((info) => {
     }
   }
   const { timestamp, level, stack, message } = info;
-  return `[${timestamp}] ${level}: ${
-    stack || message
-  }\nmetadata: ${JSON.stringify(metadata)}\n`;
+  console.log(level);
+  return `[${timestamp}] ${level}: ${stack || message}\n${colorizeKeys(
+    metadata,
+    0
+  )}\n`;
 });
 
 export function createDevLogger() {
