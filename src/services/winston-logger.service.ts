@@ -30,6 +30,10 @@ export const logInfo = (message: string) => {
   logger.log({ timestamp: new Date(), level: "info", message: message });
 };
 
+export const logDebug = (message: string) => {
+  logger.log({ timestamp: new Date(), level: "debug", message: message });
+};
+
 export const logError = (message: string, error: Error) => {
   let logText = message;
   if (error !== null) {
