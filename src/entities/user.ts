@@ -19,6 +19,8 @@ export enum Role {
   ADMIN = "ADMIN",
   PILOT = "PILOT",
   MONITOR = "MONITOR",
+  COA = "COA",
+  REMOTE_SENSOR = "REMOTE_SENSOR",
 }
 
 export function roleValueOf(strRole: string) {
@@ -28,6 +30,10 @@ export function roleValueOf(strRole: string) {
     return Role.PILOT;
   } else if (strRole.toUpperCase() === "MONITOR") {
     return Role.MONITOR;
+  } else if (strRole.toUpperCase() === "COA") {
+    return Role.COA;
+  } else if (strRole.toUpperCase() === "REMOTE_SENSOR") {
+    return Role.REMOTE_SENSOR;
   }
   return undefined;
 }
