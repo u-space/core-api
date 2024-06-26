@@ -88,7 +88,11 @@ export class VehicleController {
     try {
       const { take, skip, filterBy, filter, orderBy, order } =
         getPaginationParametersFromRequestQuery(request.query);
-      if (role == Role.ADMIN || role == Role.MONITOR) {
+      if (
+        role == Role.ADMIN ||
+        role == Role.MONITOR ||
+        role == Role.REMOTE_SENSOR
+      ) {
         return logAndRespond200(
           response,
           await this.dao.all(orderBy, order, take, skip, filterBy, filter),
