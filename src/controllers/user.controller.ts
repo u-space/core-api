@@ -6,9 +6,9 @@
 
 import { Request, Response } from "express";
 import { UserDao } from "../daos/user.dao";
-import { Role, User } from "../entities/user";
+import { Role, User, roleValueOf } from "../entities/user";
 import { multipleFiles } from "../services/upload-file.service";
-import { logInfo } from "../services/winston-logger.service";
+import { logDebug, logInfo } from "../services/winston-logger.service";
 import {
   getPayloadFromResponse,
   parseErrorAndRespond,
@@ -66,9 +66,6 @@ import {
   buildConfirmationLink,
   buildConfirmationTextMail,
   buildNewUserMail,
-  // buildRecoverHtmlMail,
-  // buildRecoverLink,
-  // buildRecoverTextMail,
 } from "../utils/mail-content.utils";
 import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
 
@@ -97,10 +94,11 @@ export class UserController {
    */
   async all(request: Request, response: Response) {
     const { role } = getPayloadFromResponse(response);
+
     if (role == Role.ADMIN || role == Role.MONITOR) {
       const { status, take, skip, filterBy, filter, orderBy, order, deleted } =
         request.query;
-      //}
+
       const parsedTake = parseInt(take as string);
       const parsedSkip = parseInt(skip as string);
       const parsedDeleted = deleted === "true";
@@ -231,17 +229,8 @@ export class UserController {
             "password must be at least 8 characters long"
           );
         }
-        let userRole: Role;
-        switch (userParams.role.toLowerCase()) {
-          case "admin":
-            userRole = Role.ADMIN;
-            break;
-          case "monitor":
-            userRole = Role.MONITOR;
-            break;
-          case "pilot":
-            userRole = Role.PILOT;
-        }
+        const userRole: Role = roleValueOf(userParams.role) || Role.PILOT;
+
         const user: User = new User(
           userParams.username,
           userParams.firstName,
@@ -307,9 +296,6 @@ export class UserController {
         return logAndRespond500(response, 500, error);
       }
     }
-    // } catch (err) {
-    // 	return logAndRespond400(response, 400, err.message);
-    // }
   }
 
   /**
@@ -401,8 +387,6 @@ export class UserController {
       user.verified = false;
       user.settings = "EN";
 
-      // console.log('Register request', request.headers.origin);
-
       const errors = validateUser(user);
       if (errors.length == 0) {
         const insertedDetails = await dao.save(user);
@@ -441,27 +425,6 @@ export class UserController {
       }
     }
   }
-
-  // /**
-  //  * Send recover mail to email with a new password
-  //  * @param request
-  //  * @param response
-  //  * @returns
-  //  */
-  // async recoverPassword(request: Request, response: Response) {
-  //   const origin = request.headers.origin;
-  //   const requestBody = request.body;
-  //   const { username } = requestBody;
-  //   const dao = this.dao;
-  //   const user = await dao.one(username);
-  //   if (!user) {
-  //     return logAndRespond400(response, 400, "User not found");
-  //   }
-
-  //   sendMailToRecover(user, origin, this.mailAPI);
-
-  //   return logAndRespond200(response, "ok", []);
-  // }
 
   async updateUser(request: Request, response: Response) {
     const { role, username: logged_username } =
@@ -536,16 +499,7 @@ export class UserController {
           }
         } else {
           if (user.role) {
-            switch (user.role.toLowerCase()) {
-              case "admin":
-                user.role = Role.ADMIN;
-                break;
-              case "monitor":
-                user.role = Role.MONITOR;
-                break;
-              case "pilot":
-                user.role = Role.PILOT;
-            }
+            user.role = roleValueOf(user.role);
           }
         }
 
@@ -626,13 +580,16 @@ export class UserController {
     if (payload) role = payload.role;
     const dao = this.dao;
 
-    const verified = !!request.body.verified;
+    const verified = request.body.verified;
     const username = request.body.username;
     const token = request.body.token;
 
+    logDebug(
+      `UserController.updateUserStatus: username: ${username}(${role}), update to verified: ${verified}`
+    );
     try {
       const user = await dao.one(username);
-      if (role !== Role.ADMIN)
+      if (role !== Role.ADMIN) {
         if (!bcrypt.compareSync(user.email, token)) {
           console.log(
             "bcrypt",
@@ -642,6 +599,7 @@ export class UserController {
           );
           return logAndRespond400(response, 401, "The token is invalid");
         }
+      }
       try {
         await this.authServer.externalAuthUpdateUser({
           username: user.username,
