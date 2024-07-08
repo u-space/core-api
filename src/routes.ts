@@ -385,7 +385,8 @@ const vehicles = [
     route: "/vehicle",
     controller: VehicleController,
     action: "save",
-    middlewares: [checkJwt, isAdminOrPilotUser],
+    // middlewares: [checkJwt, isAdminOrPilotUser],
+    middlewares: [checkJwt],
   },
   {
     method: "post",
