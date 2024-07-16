@@ -81,7 +81,6 @@ export class DocumentRestController {
 
       const savedDoc = await saveDocument(doc);
 
-      // console.log(JSON.stringify(one, null, 2))
       return logAndRespond200(response, savedDoc, []);
     } catch (error) {
       return logAndRespond400(response, 400, null);
@@ -202,7 +201,9 @@ export class DocumentRestController {
   ) {
     try {
       const { role } = getPayloadFromResponse(response);
-      if (role !== Role.ADMIN) return logAndRespond400(response, 403, null);
+      if (!(role == Role.ADMIN || role == Role.REMOTE_SENSOR)) {
+        return logAndRespond400(response, 403, null);
+      }
       const documentId = request.params.id;
       let document: Document;
       try {
