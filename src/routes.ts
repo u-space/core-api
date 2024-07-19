@@ -20,7 +20,11 @@ import {
   checkJwt,
   checkJwtButDoNotFail,
 } from "./middleware/check-jwt.middleware";
-import { isAdminOrPilotUser, isAdminUser } from "./middleware/other-middleware";
+import {
+  checkUserRole,
+  isAdminOrPilotUser,
+  isAdminUser,
+} from "./middleware/other-middleware";
 
 import { body, query } from "express-validator";
 import { AircraftTypeController } from "./controllers/aircraft-type.controller";
@@ -36,6 +40,7 @@ import { VertiportController } from "./controllers/vertiport.controller";
 import { checkModuleEnabled } from "./middleware/check-module-enabled.middleware";
 import { NODE_ENV } from "./utils/config.utils";
 import { PositionRidController } from "./controllers/position.rid.controller";
+import { Role } from "./entities/user";
 
 interface CustomRoute {
   method: string;
@@ -510,7 +515,7 @@ const uasVolumeReservation = [
     route: "/uasvolume",
     controller: UASVolumeReservationController,
     action: "save",
-    middlewares: [checkJwt, isAdminUser],
+    middlewares: [checkJwt, checkUserRole([Role.ADMIN, Role.COA])],
   },
   {
     method: "delete",
