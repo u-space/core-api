@@ -290,15 +290,26 @@ export class OperationDao {
         }
       }
 
-      console.log("states", states);
-      console.log("filter", filter);
-      console.log("orderProp", orderProp);
-      console.log("orderValue", orderValue);
-      console.log("take", take);
-      console.log("skip", skip);
-      console.log("filterProp", filterProp);
-      console.log("filterValue", filterValue);
-      console.log("timeRange", timeRange);
+      console.log(
+        "states:",
+        states,
+        ", filter:",
+        filter,
+        ", orderProp:",
+        orderProp,
+        ", orderValue:",
+        orderValue,
+        ", take:",
+        take,
+        ", skip:",
+        skip,
+        ", filterProp:",
+        filterProp,
+        ", filterValue:",
+        filterValue,
+        ", timeRange:",
+        timeRange
+      );
 
       if (timeRange) {
         if (!timeRange.start || !timeRange.end) {
