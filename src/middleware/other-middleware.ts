@@ -23,6 +23,26 @@ export const isAdminUser = (
   next();
 };
 
+export const checkUserRole = (allowedRoles: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const { role } = getPayloadFromResponse(res);
+
+    if (!allowedRoles.includes(role)) {
+      console.error(
+        'Unauthorized: role "' + role + '", valids: ' + allowedRoles
+      );
+      return logAndRespond400(
+        res,
+        403,
+        'Unauthorized: role "' + role + '", valids: ' + allowedRoles
+      );
+    }
+
+    // Call the next middleware or controller
+    next();
+  };
+};
+
 export const isAdminOrPilotUser = (
   req: Request,
   res: Response,
