@@ -1191,12 +1191,19 @@ export class OperationController {
     filterByOwner: boolean
   ) => {
     const responsePayload = getPayloadFromResponse(response);
+    console.log(`responsePayload:${JSON.stringify(responsePayload, null, 2)}`);
+
     if (!responsePayload) {
       return getOperationsForNoAuthenticatedUser(response, this.dao);
     }
     const { username, role } = responsePayload;
     let ops;
-    if (filterByOwner || role == Role.ADMIN || role == Role.MONITOR) {
+    if (
+      filterByOwner ||
+      role == Role.ADMIN ||
+      role == Role.MONITOR ||
+      role == Role.COA
+    ) {
       try {
         let { states } = request.query;
         const { fromDate, toDate } = request.query;
@@ -1329,6 +1336,7 @@ async function getOperationsForNoAuthenticatedUser(
   response: Response,
   operationDao: OperationDao
 ): Promise<void> {
+  console.log("getOperationsForNoAuthenticatedUser");
   // Get all operations
   let daoResult: [Operation[], number];
   try {
