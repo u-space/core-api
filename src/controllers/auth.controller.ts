@@ -116,7 +116,7 @@ export class AuthController {
         password,
         extraData: { role: userFromDB.role },
       };
-      console.log(`POST auth/login body=${authLoginBody}`);
+      console.log(`POST auth/login body=${JSON.stringify(authLoginBody)}`);
       res = await this.axiosInstance.post("auth/login", authLoginBody);
     } catch (error: any) {
       const message =
@@ -332,13 +332,6 @@ export class AuthController {
       mobileClient ? frontEndUrlMobile : frontEndUrl
     }reset-password?email=${request.body.email}&token=${token}`;
 
-    // console.log("*******************************************");
-    // console.log("jwtResetPassSecret: ", jwtResetPassSecret);
-    // console.log("currentHashedPass: ", currentHashedPass);
-    // console.log("secret: ", secret);
-    // console.log("link :", link);
-    // console.log("*******************************************");
-
     // send email with generated link
     this.mailAPI.sendMail(
       COMPANY_NAME!,
@@ -384,11 +377,6 @@ export class AuthController {
     // verify token
     const currentHashedPass = authServerResponse.data.data.password;
     const secret = `${jwtResetPassSecret}${currentHashedPass}`;
-    // console.log("*******************************************");
-    // console.log("jwtResetPassSecret: ", jwtResetPassSecret);
-    // console.log("currentHashedPass: ", currentHashedPass);
-    // console.log("secret: ", secret);
-    // console.log("*******************************************");
     let payload: any;
     try {
       payload = jwt.verify(request.body.token, secret);
