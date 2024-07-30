@@ -4,11 +4,24 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import axios from "axios";
 import { Request, Response } from "express";
+import Joi from "joi";
 import * as jwt from "jsonwebtoken";
+import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
+import IMailAPI from "../apis/mail/imail-api";
+import MailAPIFactory from "../apis/mail/mail-api-factory";
+import { NotFoundError } from "../daos/db-errors";
+import { TokenDao } from "../daos/token.dao";
 import { UserDao } from "../daos/user.dao";
+import { Role } from "../entities/user";
+import { logInfo } from "../services/winston-logger.service";
+import { parseErrorAndRespond } from "../utils/auth.utils";
 import {
   COMPANY_NAME,
+  frontEndUrl,
+  frontEndUrlMobile,
+  jwtResetPassSecret,
   MICROUTM_AUTH_URL,
   MOCK_AUTH_SERVER_API,
   MOCK_MAIL_API,
@@ -18,21 +31,7 @@ import {
   SMTP_SECURE,
   SMTP_URL,
   SMTP_USERNAME,
-  frontEndUrl,
-  frontEndUrlMobile,
-  jwtResetPassSecret,
-  jwtSecret,
 } from "../utils/config.utils";
-import { logInfo } from "../services/winston-logger.service";
-import { TokenDao } from "../daos/token.dao";
-import {
-  getErrorMessageFromExpressValidatorErrors,
-  logAndRespond,
-  logAndRespond200,
-  logAndRespond400,
-  logAndRespond500,
-} from "./utils";
-import axios from "axios";
 import {
   buildMagicSignUpHtml,
   buildMagicSignupLink,
@@ -40,13 +39,12 @@ import {
   buildResetPasswordHtml,
   buildResetPasswordText,
 } from "../utils/mail-content.utils";
-import { parseErrorAndRespond } from "../utils/auth.utils";
-import IMailAPI from "../apis/mail/imail-api";
-import MailAPIFactory from "../apis/mail/mail-api-factory";
-import { NotFoundError } from "../daos/db-errors";
-import Joi from "joi";
-import AuthServerAPIFactory from "../apis/auth-server/auth-server-api-factory";
-import { Role } from "../entities/user";
+import {
+  logAndRespond,
+  logAndRespond200,
+  logAndRespond400,
+  logAndRespond500,
+} from "./utils";
 
 export class AuthController {
   private dao = new UserDao();
