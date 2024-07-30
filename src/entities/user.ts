@@ -35,7 +35,10 @@ export function roleValueOf(strRole: string) {
     return Role.COA;
   } else if (strRole.toUpperCase() === "REMOTE_SENSOR") {
     return Role.REMOTE_SENSOR;
+  } else if (strRole.toUpperCase() === "AIR_TRAFIC") {
+    return Role.AIR_TRAFIC;
   }
+
   return undefined;
 }
 
