@@ -21,6 +21,7 @@ export enum Role {
   MONITOR = "MONITOR",
   COA = "COA",
   REMOTE_SENSOR = "REMOTE_SENSOR",
+  AIR_TRAFIC = "AIR_TRAFIC",
 }
 
 export function roleValueOf(strRole: string) {
