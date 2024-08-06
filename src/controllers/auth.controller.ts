@@ -45,6 +45,9 @@ import {
   logAndRespond400,
   logAndRespond500,
 } from "./utils";
+import { readFileSync } from "fs";
+
+const publicKey = readFileSync("./public.key", "utf8");
 
 export class AuthController {
   private dao = new UserDao();
@@ -117,6 +120,7 @@ export class AuthController {
       console.log(`POST auth/login body=${JSON.stringify(authLoginBody)}`);
       res = await this.axiosInstance.post("auth/login", authLoginBody);
     } catch (error: any) {
+      console.log("Login error: ", error);
       const message =
         error &&
         error.response &&
@@ -377,7 +381,9 @@ export class AuthController {
     const secret = `${jwtResetPassSecret}${currentHashedPass}`;
     let payload: any;
     try {
-      payload = jwt.verify(request.body.token, secret);
+      payload = jwt.verify(request.body.token, publicKey, {
+        algorithms: ["RS256"],
+      });
     } catch (error) {
       console.log("Error verify token: ", error);
       return logAndRespond400(response, 400, "Invalid token");
@@ -386,7 +392,7 @@ export class AuthController {
     // update password
     try {
       await authServerApi.externalAuthUpdatePassword(
-        payload.email,
+        request.body.email,
         request.body.password
       );
     } catch (error) {
