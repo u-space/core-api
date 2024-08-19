@@ -75,6 +75,9 @@ import { RegularFlightDao } from "../daos/regular-flight.dao";
 import OperationSubscriber from "../entities/operation-subscriber";
 import { RegularFlight } from "../entities/regular-flight";
 import GeneralUtils from "../utils/general.utils";
+import { FraService } from "../apis/fra-server/fra-service";
+
+const CHECK_FLIGHT_REQUESTS = true;
 
 const MIN_MIN_ALTITUDE = -300;
 //const MAX_MIN_ALTITUDE = 0;
@@ -437,6 +440,66 @@ export class OperationController {
     if (errors.length == 0) {
       try {
         let operation: Operation;
+        if (CHECK_FLIGHT_REQUESTS) {
+          const token: string = (request.headers["auth"] ||
+            request.headers.authorization) as string;
+          const fraService = new FraService();
+
+          // check if the operation can be created, if need FR and if has FR
+          const fraOperationCheckResult =
+            await fraService.checkOperationConditions(operationToSave, token);
+
+          if (fraOperationCheckResult.validflightRequests.length > 0) {
+            console.log("todo bien bro");
+          } else {
+            const unsatifacedCoordinations = [];
+            if (
+              fraOperationCheckResult.needAltitude &&
+              !fraOperationCheckResult.hasAlitude
+            ) {
+              unsatifacedCoordinations.push(
+                "Need coordination for altitude flight."
+              );
+            }
+            if (
+              fraOperationCheckResult.needNight &&
+              !fraOperationCheckResult.hasNight
+            ) {
+              unsatifacedCoordinations.push(
+                "Need coordination for night flight."
+              );
+            }
+            if (
+              fraOperationCheckResult.needVlos &&
+              !fraOperationCheckResult.hasVlos
+            ) {
+              unsatifacedCoordinations.push(
+                "Need coordination for vlos flight."
+              );
+            }
+
+            const geozoneNames = fraOperationCheckResult.needGeozones
+              .filter((geozone) => {
+                return !fraOperationCheckResult.hasCoordination.some(
+                  (coordination) => {
+                    return (
+                      coordination.coordinator?.geographical_zone?.id ===
+                      geozone.id
+                    );
+                  }
+                );
+              })
+              .map((geozone) => geozone.name);
+
+            geozoneNames.forEach((geozoneName) => {
+              unsatifacedCoordinations.push(
+                `Need coordination for ${geozoneName}.`
+              );
+            });
+
+            return res400(res, 400, unsatifacedCoordinations.join("\n"));
+          }
+        }
         if (isCreating && TRY_TO_ACTIVATE_NEW_OPERATIONS) {
           operation = await this.dao.saveOverridingState(operationToSave);
         } else {
