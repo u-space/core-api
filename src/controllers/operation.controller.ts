@@ -493,11 +493,11 @@ export class OperationController {
 
             geozoneNames.forEach((geozoneName) => {
               unsatifacedCoordinations.push(
-                `Need coordination for ${geozoneName}.`
+                `Need coordination for zone ${geozoneName}.`
               );
             });
 
-            return res400(res, 400, unsatifacedCoordinations.join("\n"));
+            return res400(res, 400, unsatifacedCoordinations.join(","));
           }
         }
         if (isCreating && TRY_TO_ACTIVATE_NEW_OPERATIONS) {
