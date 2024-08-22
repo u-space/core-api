@@ -11,7 +11,7 @@ import ConnectionError from "./errors/connection-error";
 import IAuthServerAPI from "./iauth-server-api";
 
 export default class AuthServerAPIImp implements IAuthServerAPI {
-  axiosInstance = axios.create({ baseURL: MICROUTM_AUTH_URL, timeout: 10000 });
+  axiosInstance = axios.create({ baseURL: MICROUTM_AUTH_URL, timeout: 60000 });
 
   async externalAuthUpdateUser(userToUpdate: any) {
     await this.axiosInstance.put("auth/update", userToUpdate);

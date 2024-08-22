@@ -38,7 +38,7 @@ export const getElevation = async (locs: any) => {
       locations: locs,
       key: GOOGLE_API!,
     },
-    timeout: 1000, // milliseconds
+    timeout: 10000, // milliseconds
   });
   return r.data;
 };
@@ -52,7 +52,7 @@ export const getElevation2 = async (
       locations: [{ lat, lng }],
       key: GOOGLE_API!,
     },
-    timeout: 1000, // milliseconds
+    timeout: 10000, // milliseconds
   });
   return {
     elevation: r.data.results[0].elevation,

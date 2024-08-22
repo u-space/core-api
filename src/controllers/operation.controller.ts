@@ -449,8 +449,15 @@ export class OperationController {
           const fraOperationCheckResult =
             await fraService.checkOperationConditions(operationToSave, token);
 
+          console.log(
+            "fraOperationCheckResult",
+            JSON.stringify(fraOperationCheckResult, null, 2)
+          );
+
           if (fraOperationCheckResult.validflightRequests.length > 0) {
-            console.log("todo bien bro");
+            console.log(
+              "fraOperationCheckResult.validflightRequests.length > 0"
+            );
           } else {
             const unsatifacedCoordinations = [];
             if (

@@ -405,7 +405,6 @@ export function generateNewVehicleMailHTML(vehicle: VehicleReg) {
   const email = generateBaseMail(mjmlBody);
   return email;
 }
-
 export function generateUpdateVehicleMailHTML(vehicle: VehicleReg) {
   const mjmlBody = `
   ${title("Se ha actualizado una aeronave")}
@@ -667,39 +666,6 @@ export function buildConfirmationHtmlMail(
   return email;
 }
 
-// export function buildRecoverTextMail(
-//   username: any,
-//   link: any,
-//   appName: string
-// ) {
-//   return `
-//     Hello ${username},
-//     We have received your request to change your password in${appName}!
-//     To make the change follow the following link
-
-//     ${link}
-//     `;
-// }
-
-// export function buildRecoverHtmlMail(
-//   username: any,
-//   link: any,
-//   appName: string
-// ) {
-//   const mjmlBody = `
-//     ${title(`Hola ${username}!`)}
-//     ${paragraph(
-//       `Hemos recibido tu pedido de cambio de contraseña en  ${appName}!`,
-//       "10px 10px 0px 10px"
-//     )}
-//     ${paragraph("Para realizar el cambio sigue el siguiente link:")}
-//     ${paragraph(`<a href="${link}">${link}</a>`)}
-//     `;
-//   const email = generateBaseMail(mjmlBody);
-//   // console.log(email);
-//   return email;
-// }
-
 export function buildExpiredDocumentationTextMail(
   username: any,
   document: Document,
@@ -726,6 +692,32 @@ export function buildExpiredDocumentationHtmlMail(
   // console.log(email);
   return email;
 }
+
+// export function buildVehicleChangeTextMail(
+//   username: any,
+//   vehicle: Vehicle,
+//   appName: string
+// ) {
+//   return `
+//     Datos del vehículo:
+//     ${JSON.stringify(vehicle, null, 2)}
+//     `;
+// }
+
+// export function buildVehicleChangeHtmlMail(
+//   username: any,
+//   vehicle: Vehicle,
+//   appName: string
+// ) {
+//   const mjmlBody = `
+//     ${paragraph("Datos del vehículo:")}
+//     ${vehicle}
+//     ${paragraph(`<pre>${JSON.stringify(vehicle, null, 2)}</pre>`)}
+//     `;
+//   const email = generateBaseMail(mjmlBody);
+//   // console.log(email);
+//   return email;
+// }
 
 export function buildNextToExpireDocumentTextMail(
   username: any,
