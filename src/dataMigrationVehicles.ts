@@ -73,6 +73,12 @@ const processRoles = (role: string) => {
       return Role.MONITOR;
     case "pilot":
       return Role.PILOT;
+    case "coa":
+      return Role.COA;
+    case "remote_sensor":
+      return Role.REMOTE_SENSOR;
+    case "air_traffic":
+      return Role.AIR_TRAFIC;
     default:
       return Role.PILOT;
   }
