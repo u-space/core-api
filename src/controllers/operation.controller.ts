@@ -485,20 +485,17 @@ export class OperationController {
               );
             }
 
-            const geozoneNames = fraOperationCheckResult.needGeozones
-              .filter((geozone) => {
+            const coordinatorNames = fraOperationCheckResult.needCoordinators
+              .filter((coordinator) => {
                 return !fraOperationCheckResult.hasCoordination.some(
                   (coordination) => {
-                    return (
-                      coordination.coordinator?.geographical_zone?.id ===
-                      geozone.id
-                    );
+                    return coordination.coordinator?.id === coordinator.id;
                   }
                 );
               })
-              .map((geozone) => geozone.name);
+              .map((coordinator) => coordinator.infrastructure);
 
-            geozoneNames.forEach((geozoneName) => {
+            coordinatorNames.forEach((geozoneName) => {
               unsatifacedCoordinations.push(
                 `Need coordination for zone ${geozoneName}.`
               );

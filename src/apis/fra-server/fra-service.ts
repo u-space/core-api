@@ -16,6 +16,7 @@ export interface IFlightRequestOperationChecks {
   needNight: boolean;
   needVlos: boolean;
   needGeozones: any[];
+  needCoordinators: any[];
   hasAlitude: boolean;
   hasNight: boolean;
   hasVlos: boolean;
