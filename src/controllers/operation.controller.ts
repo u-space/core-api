@@ -501,7 +501,9 @@ export class OperationController {
               );
             });
 
-            return res400(res, 400, unsatifacedCoordinations.join(","));
+            if (unsatifacedCoordinations.length > 0) {
+              return res400(res, 400, unsatifacedCoordinations.join(","));
+            }
           }
         }
         if (isCreating && TRY_TO_ACTIVATE_NEW_OPERATIONS) {
@@ -1431,16 +1433,16 @@ async function getOperationsForNoAuthenticatedUser(
     const uas_registrations = !operation.uas_registrations
       ? []
       : operation.uas_registrations.map((uas) => {
-          return {
-            uvin: uas.uvin,
-            vehicleName: uas.vehicleName,
-            manufacturer: uas.manufacturer,
-            model: uas.model,
-            registrationNumber: uas.extra_fields_json
-              ? (uas.extra_fields_json as any).serial_number
-              : "",
-          };
-        });
+        return {
+          uvin: uas.uvin,
+          vehicleName: uas.vehicleName,
+          manufacturer: uas.manufacturer,
+          model: uas.model,
+          registrationNumber: uas.extra_fields_json
+            ? (uas.extra_fields_json as any).serial_number
+            : "",
+        };
+      });
     return {
       gufi: operation.gufi,
       name: operation.name,
@@ -1519,7 +1521,7 @@ function validateOperation(operation: any, checkVolumesHaveId?: boolean) {
       const firstVertex = element.operation_geography.coordinates[0][0];
       const lastVertex =
         element.operation_geography.coordinates[0][
-          element.operation_geography.coordinates[0].length - 1
+        element.operation_geography.coordinates[0].length - 1
         ];
       if (
         firstVertex[0] !== lastVertex[0] ||
@@ -1563,8 +1565,7 @@ function validateOperation(operation: any, checkVolumesHaveId?: boolean) {
         );
       } else if (difference < MIN_TIME_INTERVAL) {
         errors.push(
-          `The time interval must be greater than ${
-            MIN_TIME_INTERVAL / 60 / 1000
+          `The time interval must be greater than ${MIN_TIME_INTERVAL / 60 / 1000
           } min and is ${difference / 60 / 1000} min`
         );
       }
@@ -1606,11 +1607,9 @@ async function sendNotificationsToOperationSubscribers(
     const mobileMessage = `AVISO DE VUELO NO TRIPULADO ${vehicleRegId} Operación prevista ${formatOperationPeriod(
       operation,
       subscriber.timeZone
-    )}. RUTA: ${
-      operation.name
-    }. Detalles de la operación: https://easy.cielum.eu:4000/map?operation=${
-      operation.gufi
-    }`;
+    )}. RUTA: ${operation.name
+      }. Detalles de la operación: https://easy.cielum.eu:4000/map?operation=${operation.gufi
+      }`;
     if (subscriber.smsMobile) {
       smsApi.sendSms(subscriber.smsMobile, mobileMessage);
     }
@@ -1663,9 +1662,8 @@ function formatOperationPeriod(
     hour: "2-digit",
     minute: "2-digit",
   });
-  return `${fromDate} ${fromTime} a ${
-    fromDate === toDate ? "" : `${toDate} `
-  }${toTime}${timeZone ? "" : " (UTC)"}`;
+  return `${fromDate} ${fromTime} a ${fromDate === toDate ? "" : `${toDate} `
+    }${toTime}${timeZone ? "" : " (UTC)"}`;
 }
 
 async function sendNewOperationNotificationEmail(
