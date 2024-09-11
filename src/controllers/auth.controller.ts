@@ -123,9 +123,9 @@ export class AuthController {
       console.log("Login error: ", error);
       const message =
         error &&
-        error.response &&
-        error.response.data &&
-        error.response.data.message
+          error.response &&
+          error.response.data &&
+          error.response.data.message
           ? error.response.data.message
           : error;
       if (message === "Username is incorrect") {
@@ -330,9 +330,8 @@ export class AuthController {
     };
     const token = jwt.sign(tokenPayload, secret, { expiresIn: "15m" });
     const mobileClient = request.body.mobileClient === true;
-    const link = `${
-      mobileClient ? frontEndUrlMobile : frontEndUrl
-    }reset-password?email=${request.body.email}&token=${token}`;
+    const link = `${mobileClient ? frontEndUrlMobile : frontEndUrl
+      }reset-password?email=${request.body.email}&token=${token}`;
 
     // send email with generated link
     this.mailAPI.sendMail(
@@ -349,6 +348,7 @@ export class AuthController {
 
   async resetPassword(request: Request, response: Response) {
     // validate request body
+
     const reqBodySchema = Joi.object({
       email: Joi.string().min(3).max(255).required(),
       token: Joi.string().required(),
@@ -381,8 +381,8 @@ export class AuthController {
     const secret = `${jwtResetPassSecret}${currentHashedPass}`;
     let payload: any;
     try {
-      payload = jwt.verify(request.body.token, publicKey, {
-        algorithms: ["RS256"],
+      payload = jwt.verify(request.body.token, secret, {
+        algorithms: ["HS256"],
       });
     } catch (error) {
       console.log("Error verify token: ", error);
