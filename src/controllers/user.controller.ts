@@ -640,6 +640,7 @@ export class UserController {
       try {
         user.canOperate = canOperate;
         await dao.update(user);
+        return logAndRespond200(response, { message: "Status updated" }, []);
       } catch (error: any) {
         return logAndRespond400(response, 404, null);
       }
