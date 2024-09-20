@@ -215,7 +215,7 @@ export class VehicleDao {
       const qb = await this.repository
         .createQueryBuilder("vehicle_reg")
         .leftJoinAndSelect("vehicle_reg.owner", "owner")
-        .innerJoinAndSelect("vehicle_reg.operators", "operator")
+        .leftJoinAndSelect("vehicle_reg.operators", "operator")
         .where("vehicle_reg.uvin = :uvin")
         .andWhere(
           '(operator."username" = :username OR owner."username" = :username)'
