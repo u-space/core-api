@@ -372,6 +372,9 @@ export class OperationController {
     if (!Array.isArray(volumes) || volumes.length === 0) {
       return res400(res, 400, "operation_volumes must be a non empty array");
     }
+    if (!request.body.name) {
+      return res400(res, 400, "operation must have a name");
+    }
     // check ordinals were not receive, or if they were received, they are valid
     try {
       validateVolumesOrdinals(volumes);
