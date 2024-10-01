@@ -91,7 +91,8 @@ export class VehicleController {
       if (
         role == Role.ADMIN ||
         role == Role.MONITOR ||
-        role == Role.REMOTE_SENSOR
+        role == Role.REMOTE_SENSOR ||
+        role == Role.AIR_TRAFIC
       ) {
         return logAndRespond200(
           response,
@@ -185,7 +186,9 @@ export class VehicleController {
     const { role, username } = getPayloadFromResponse(response);
     const uvinReceived = request.params.id;
     try {
-      if (role == Role.ADMIN || role == Role.MONITOR) {
+      if (role == Role.ADMIN
+        || role == Role.MONITOR
+        || role == Role.AIR_TRAFIC) {
         const v = await this.dao.one(uvinReceived);
         return logAndRespond200(response, v, []);
       } else {
@@ -510,8 +513,7 @@ export class VehicleController {
           parseVehicleType(vehicleData[key]);
         } catch (error) {
           throw new CustomError(
-            `The received "class" is not valid (receivedClass="${
-              vehicleData["class"]
+            `The received "class" is not valid (receivedClass="${vehicleData["class"]
             }", validClasses="${Object.keys(vehicleType)}")`,
             null
           );
@@ -521,8 +523,7 @@ export class VehicleController {
           parseVehicleAuthorizeStatus(vehicleData[key]);
         } catch (error) {
           throw new CustomError(
-            `The received "authorized" is not valid (receivedAuthorized="${
-              vehicleData["authorized"]
+            `The received "authorized" is not valid (receivedAuthorized="${vehicleData["authorized"]
             }", validValues="${Object.keys(VehicleAuthorizeStatus)}")`,
             null
           );
