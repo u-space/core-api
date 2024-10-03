@@ -30,7 +30,7 @@ export class CronService {
       processNextToExpireDocuments();
     });
 
-    const operationCron = schedule("*/10 * * * *", function () {
+    const operationCron = schedule("*/1 * * * *", function () {
       processOperations();
       // if (DRONETATG_INTEGRATION) {
       // 	dts.overview();
