@@ -31,7 +31,7 @@ export class SchemasController {
       userExtraFields: userExtraFieldsSchema,
       vehicleExtraFields: vehicleExtraFieldsSchema,
       documentExtraFields: docSchemas,
-      vehicleDoocumentExtraFields: vehicleDocSchemas,
+      vehicleDocumentExtraFields: vehicleDocSchemas,
     };
     return logAndRespond200(response, responseJson, []);
   }
