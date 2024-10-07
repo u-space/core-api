@@ -400,7 +400,7 @@ export class OperationController {
 
     // validate operation did not finish
     const [from, to] = getFromTo(operationReceived);
-    if (to <= new Date()) errors.push(`Operation finished`);
+    if (to <= new Date()) errors.push(`You cannot create operations that end before the current date`);
 
     try {
       for (
@@ -452,15 +452,15 @@ export class OperationController {
           const fraOperationCheckResult =
             await fraService.checkOperationConditions(operationToSave, token);
 
-          console.log(
-            "fraOperationCheckResult",
-            JSON.stringify(fraOperationCheckResult, null, 2)
-          );
+          // console.log(
+          //   "fraOperationCheckResult",
+          //   JSON.stringify(fraOperationCheckResult, null, 2)
+          // );
 
           if (fraOperationCheckResult.validflightRequests.length > 0) {
-            console.log(
-              "fraOperationCheckResult.validflightRequests.length > 0"
-            );
+            // console.log(
+            //   "fraOperationCheckResult.validflightRequests.length > 0"
+            // );
           } else {
             const unsatifacedCoordinations = [];
             if (
