@@ -142,7 +142,7 @@ export class UASVolumeReservationController {
                 operation.gufi,
                 newState,
                 oldState,
-                "UVR intersected with operation"
+                `UVR ${entitie.message_id} intersected with operation`
               );
               sendOperationStateChange(
                 operation.gufi,
