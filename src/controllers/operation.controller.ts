@@ -1262,6 +1262,7 @@ export class OperationController {
     next: NextFunction,
     filterByOwner: boolean
   ) => {
+    console.log(' ************************************************ ')
     const responsePayload = getPayloadFromResponse(response);
     console.log(`responsePayload:${JSON.stringify(responsePayload, null, 2)}`);
 
@@ -1438,11 +1439,11 @@ async function getOperationsForNoAuthenticatedUser(
       : operation.uas_registrations.map((uas) => {
         return {
           uvin: uas.uvin,
-          vehicleName: uas.vehicleName,
-          manufacturer: uas.manufacturer,
-          model: uas.model,
+          vehicleName: "", //uas.vehicleName,
+          manufacturer: "private info", //uas.manufacturer,
+          model: "private info", //model: uas.model,
           registrationNumber: uas.extra_fields_json
-            ? (uas.extra_fields_json as any).serial_number
+            ? (uas.extra_fields_json as any).plate
             : "",
         };
       });
@@ -1453,8 +1454,8 @@ async function getOperationsForNoAuthenticatedUser(
       operation_volumes: operation.operation_volumes,
       uas_registrations: uas_registrations,
       operators: [],
-      contact: operation.contact,
-      contact_phone: operation.contact_phone,
+      contact: "private", //operation.contact,
+      contact_phone: "private", //operation.contact_phone,
     };
   });
 
