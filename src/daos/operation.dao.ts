@@ -141,7 +141,7 @@ export class OperationDao {
 
         .where(
           '(numrange(operation_volume."min_altitude", operation_volume."max_altitude") && numrange(:min_altitude, :max_altitude)) ' +
-            ' AND (ST_Intersects(operation_volume."operation_geography" ,ST_GeomFromGeoJSON(:geom)))'
+          ' AND (ST_Intersects(operation_volume."operation_geography" ,ST_GeomFromGeoJSON(:geom)))'
         )
         .setParameters({
           min_altitude: minAltitude,
@@ -171,7 +171,7 @@ export class OperationDao {
       .leftJoinAndSelect("operation.owner", "owner")
       .innerJoinAndSelect("operation.operation_volumes", "operation_volume")
       .where(
-        "\"state\" in ('ACCEPTED', 'ACTIVATED', 'ROGUE', 'PENDING', 'PROPOSED')"
+        "\"state\" in ('ACCEPTED', 'ACTIVATED', 'ROGUE', 'PENDING')"
       )
       .andWhere(
         '(tstzrange(operation_volume."effective_time_begin", operation_volume."effective_time_end") && tstzrange(:date_begin, :date_end))'
@@ -198,6 +198,49 @@ export class OperationDao {
 
     qBuilder = qBuilder.setParameters(params);
     return await qBuilder.getCount();
+  }
+
+  async intersectingOperations(
+    volume: OperationVolume,
+    entManager?: EntityManager,
+    gufi?: string
+  ) {
+    let qBuilder = this.repository.createQueryBuilder("operation");
+    if (entManager !== undefined) {
+      qBuilder = entManager.createQueryBuilder(Operation, "operation");
+    }
+    qBuilder = qBuilder
+      .leftJoinAndSelect("operation.creator", "creator")
+      .leftJoinAndSelect("operation.owner", "owner")
+      .innerJoinAndSelect("operation.operation_volumes", "operation_volume")
+      .where(
+        "\"state\" in ('ACCEPTED', 'ACTIVATED', 'ROGUE', 'PENDING')"
+      )
+      .andWhere(
+        '(tstzrange(operation_volume."effective_time_begin", operation_volume."effective_time_end") && tstzrange(:date_begin, :date_end))'
+      )
+      .andWhere(
+        '(numrange(operation_volume."min_altitude", operation_volume."max_altitude") && numrange(:min_altitude, :max_altitude))'
+      )
+      .andWhere(
+        '(ST_Intersects(operation_volume."operation_geography" ,ST_GeomFromGeoJSON(:geom)))'
+      );
+
+    const params: any = {
+      date_begin: volume.effective_time_begin,
+      date_end: volume.effective_time_end,
+      min_altitude: volume.min_altitude,
+      max_altitude: volume.max_altitude,
+      geom: JSON.stringify(volume.operation_geography),
+    };
+
+    if (gufi !== undefined) {
+      params.gufi = gufi;
+      qBuilder = qBuilder.andWhere('operation_volume."operationGufi" != :gufi');
+    }
+
+    qBuilder = qBuilder.setParameters(params);
+    return await qBuilder.getMany();
   }
 
   async getOperationVolumeByVolumeCountExcludingOneOperation(
@@ -541,7 +584,7 @@ export class OperationDao {
     oldState: OperationState,
     reason: string
   ) {
-    const res = await this.repository.update(gufi, { state: state });
+    const res = await this.repository.update(gufi, { state: state, aircraft_comments: reason });
     logStateChange(gufi, state, oldState, reason);
     return res;
   }
@@ -814,9 +857,9 @@ export class OperationDao {
     //sets the end time  to the beggining time plus a number of seconds
     operation_volume_start.effective_time_end = new Date(
       new Date(effective_time_begin).getTime() +
-        (regularFlight.getPath()[0].getStart().getAltitude() /
-          regularFlight.getVerticalSpeed()) *
-          1000
+      (regularFlight.getPath()[0].getStart().getAltitude() /
+        regularFlight.getVerticalSpeed()) *
+      1000
     ).toISOString();
     operation_volume_start.min_altitude = 0;
     operation_volume_start.max_altitude =
@@ -847,13 +890,13 @@ export class OperationDao {
       //less the buffer
       operation_volume.effective_time_begin = new Date(
         new Date(operation_volumes[i].effective_time_end).getTime() -
-          path.getTimeBuffer() * 1000
+        path.getTimeBuffer() * 1000
       ).toISOString();
       //ending time is the beggining time plus the segment time plus the buffer
       operation_volume.effective_time_end = new Date(
         new Date(operation_volume.effective_time_begin).getTime() +
-          (segmentDistance / path.getGroundSpeed()) * 1000 +
-          path.getTimeBuffer() * 1000
+        (segmentDistance / path.getGroundSpeed()) * 1000 +
+        path.getTimeBuffer() * 1000
       ).toISOString();
       operation_volume.min_altitude =
         (path.getStart().getAltitude() < path.getEnd().getAltitude()
@@ -887,9 +930,9 @@ export class OperationDao {
     const regFlightPath = regularFlight.getPath();
     operation_volume_end.effective_time_end = new Date(
       timeBeginMillis +
-        (regFlightPath[regFlightPath.length - 1].getEnd().getAltitude() /
-          regularFlight.getVerticalSpeed()) *
-          1000
+      (regFlightPath[regFlightPath.length - 1].getEnd().getAltitude() /
+        regularFlight.getVerticalSpeed()) *
+      1000
     ).toISOString();
     operation_volume_end.min_altitude = 0;
     operation_volume_end.max_altitude =
@@ -953,8 +996,7 @@ export class OperationDao {
       );
     if ((point as { type: unknown }).type !== "Point")
       throw new InvalidDataError(
-        `Point type must be 'Point' (type=${
-          (point as { type: unknown }).type
+        `Point type must be 'Point' (type=${(point as { type: unknown }).type
         })`,
         undefined
       );
@@ -965,8 +1007,7 @@ export class OperationDao {
       );
     if ((point as { coordinates: Array<unknown> }).coordinates.length !== 2)
       throw new InvalidDataError(
-        `Point must have 2 coordinates (coordinates=${
-          (point as { coordinates: Array<unknown> }).coordinates.length
+        `Point must have 2 coordinates (coordinates=${(point as { coordinates: Array<unknown> }).coordinates.length
         })`,
         undefined
       );
