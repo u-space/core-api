@@ -94,9 +94,10 @@ export class VehicleController {
         role == Role.REMOTE_SENSOR ||
         role == Role.AIR_TRAFIC
       ) {
+        const showPendingVehicles = request.query.showFullAuthorized === undefined ? undefined : request.query.showPendingVehicles === 'true';
         return logAndRespond200(
           response,
-          await this.dao.all(orderBy, order, take, skip, filterBy, filter),
+          await this.dao.all(orderBy, order, take, skip, filterBy, filter, showPendingVehicles),
           []
         );
       } else {

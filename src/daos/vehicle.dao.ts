@@ -4,8 +4,8 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { getRepository } from "typeorm";
-import { VehicleReg } from "../entities/vehicle-reg";
+import { getRepository, NotBrackets, SelectQueryBuilder } from "typeorm";
+import { VehicleAuthorizeStatus, VehicleReg } from "../entities/vehicle-reg";
 import { Role, User } from "../entities/user";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 import { UserDao } from "./user.dao";
@@ -28,16 +28,66 @@ import { isArray, isObject, isString } from "util";
 import { DocumentDao } from "./document.dao";
 import { Document } from "../entities/document";
 
+function addDocumentsAndCheckPending(qb: SelectQueryBuilder<VehicleReg>, showPending?: boolean) {
+  qb
+    .addSelect("json_agg(d.*)", "documents")
+    .leftJoin("document", "d", "d.id::text = ANY (ARRAY(SELECT json_array_elements_text(vehicle_reg.extra_fields_json->'documents')))")
+    .groupBy("vehicle_reg.uvin")
+    .addGroupBy("registeredBy.username")
+    .addGroupBy("owner.username")
+    .addGroupBy("operator.username");
+  if (showPending) {
+    showPendingQuery(qb, "remote_sensor_id");
+  }
+}
+
+function showPendingQuery(qb: SelectQueryBuilder<VehicleReg>, documentType: string) {
+  qb.andWhere(
+    new NotBrackets((qb) => {
+      qb.where(`TRUE`);
+      qb.andWhere(`vehicle_reg.authorized = '${VehicleAuthorizeStatus.AUTHORIZED}'`);
+      qb.andWhere(
+        "EXISTS ( " +
+        "SELECT 1 " +
+        "FROM document d2 " +
+        "WHERE d2.id::text = ANY (ARRAY(SELECT json_array_elements_text(vehicle_reg.extra_fields_json->'documents')))" +
+        "AND (d2.tag = :documentType) AND (d2.valid = true)" +
+        ")",
+        { documentType }
+      );
+    }),
+  )
+}
+
+
 export class VehicleDao {
   private repository = getRepository(VehicleReg);
 
+
+  //   SELECT 
+  //     v.*, 
+  //     v.extra_fields_json->>'documents' AS docs, 
+  //     json_agg(d.*) AS document_data
+  // FROM 
+  //     vehicle_reg v
+  // LEFT JOIN "document" d ON d.id::text = ANY (ARRAY(SELECT json_array_elements_text(v.extra_fields_json->'documents')))
+  // WHERE 
+  //     EXISTS (
+  //         SELECT 1 
+  //         FROM "document" d2 
+  //         WHERE d2.id::text = ANY (ARRAY(SELECT json_array_elements_text(v.extra_fields_json->'documents')))
+  //           AND d2.tag = 'remote_sensor_id'
+  //     )
+  // GROUP BY 
+  //     v.uvin;
   async all(
     orderProp?: string,
     orderValue?: string,
     take?: number,
     skip?: number,
     filterProp?: string,
-    filterValue?: string
+    filterValue?: string,
+    showPending?: boolean
   ): Promise<any> {
     validatePaginationParams(
       take,
@@ -53,7 +103,8 @@ export class VehicleDao {
         .leftJoinAndSelect("vehicle_reg.owner", "owner")
         .leftJoinAndSelect("vehicle_reg.registeredBy", "registeredBy")
         .leftJoinAndSelect("vehicle_reg.operators", "operator")
-        .orderBy("vehicle_reg.date", "DESC");
+        .orderBy("vehicle_reg.date", "DESC")
+
       addPaginationParamsToQuery(
         qb,
         take,
@@ -64,14 +115,30 @@ export class VehicleDao {
         orderValue,
         "vehicle_reg"
       );
-      const [vehicles, count] = await qb.getManyAndCount();
+
+      addDocumentsAndCheckPending(qb, showPending)
+
+      const vehicles = await qb.getMany();
+      const count = await qb.getCount();
+      const rawQuery = await qb.getRawMany();
+
       for (let i = 0; i < vehicles.length; i++) {
         const vehicle = vehicles[i];
         vehicle.extra_fields = vehicle.extra_fields_json;
-        await this.setVehicleDocuments(vehicle);
+        vehicle.extra_fields.documents = rawQuery[i].documents;
       }
+
+      for (let i = 0; i < vehicles.length; i++) {
+        const vehicle = vehicles[i];
+        vehicle.extra_fields = vehicle.extra_fields_json;
+        // await this.setVehicleDocuments(vehicle); <<-- remove lots of consultas
+        GeneralUtils.setDocumentsDownloadFileUrl(vehicle);
+      }
+
+      // console.log("vehicles", JSON.stringify(vehicles[0], null, 2));
       return { vehicles, count };
     } catch (error) {
+      console.log("error", error);
       handleTypeORMError(error, "vehicle", filterProp, orderProp);
     }
   }
@@ -466,3 +533,6 @@ export class VehicleDao {
     GeneralUtils.setDocumentsDownloadFileUrl(vehicle);
   }
 }
+
+
+
