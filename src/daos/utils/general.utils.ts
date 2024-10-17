@@ -13,9 +13,14 @@ export default class GeneralUtils {
     if (documents && Array.isArray(documents)) {
       for (let i = 0; i < documents.length; i++) {
         const document = documents[i];
-        if (document.name) {
-          documents[i]["downloadFileUrl"] =
-            GeneralUtilsFromUtils.getDownloadFileUrl(document.name);
+        console.log('docuemnt:', document);
+        if (document) {
+          // document.extra_fields = document.extra_fields_json
+          if (document.name) {
+            documents[i]["downloadFileUrl"] =
+              GeneralUtilsFromUtils.getDownloadFileUrl(document.name);
+          }
+
         }
       }
     }
