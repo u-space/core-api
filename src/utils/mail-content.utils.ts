@@ -144,9 +144,8 @@ function paragraph(
   // </mj-text>`
   return `<mj-text
 	${italic ? 'font-style= "italic"' : ""}
-	font-size=${'"' + `${fontSize}` + '"'} color=${color} align="left" padding=${
-    '"' + `${padding}` + '"'
-  }>
+	font-size=${'"' + `${fontSize}` + '"'} color=${color} align="left" padding=${'"' + `${padding}` + '"'
+    }>
   ${text}
   </mj-text>`;
 }
@@ -211,17 +210,17 @@ function bodyVehicleMail(vehicle: VehicleReg) {
         </mj-text>
         <mj-table border="solid 1px" padding="10px" mj-class="celdita">
         ${labelsAndFields
-          .map(([label, field]) => {
-            if (field && field != "null") {
-              return `<tr>
+      .map(([label, field]) => {
+        if (field && field != "null") {
+          return `<tr>
             <td style="padding: 0 0px 0 5px;border:solid 1px;width:40%">${label}</td>
             <td style="padding: 0 0px 0 5px;border:solid 1px">${field}</td>
           </tr>`;
-            } else {
-              return "";
-            }
-          })
-          .join("")}
+        } else {
+          return "";
+        }
+      })
+      .join("")}
         </mj-table>
     `;
   return vehicleBody;
@@ -238,13 +237,13 @@ function bodyUserMail(user: any) {
 
      <mj-table border="solid 1px" padding="10px" mj-class="celdita">
      ${labelsAndFields
-       .map(([label, field]) => {
-         return `<tr>
+      .map(([label, field]) => {
+        return `<tr>
          <td style="padding: 0 0px 0 5px;border:solid 1px;width:40%">${label}</td>
          <td style="padding: 0 0px 0 5px;border:solid 1px">${field}</td>
        </tr>`;
-       })
-       .join("")}
+      })
+      .join("")}
      </mj-table>`;
   return userBody;
 }
@@ -267,7 +266,7 @@ function bodyOperationMail(operation: Operation) {
       operation.operation_volumes[0].effective_time_begin
     );
     // eslint-disable-next-line no-empty
-  } catch (error) {}
+  } catch (error) { }
   labelsAndFields.push(["Comienzo ", effectiveTimeBegin]);
   let effectiveTimeEnd = "<NOT DEFINED>";
   try {
@@ -276,17 +275,16 @@ function bodyOperationMail(operation: Operation) {
         .effective_time_end
     );
     // eslint-disable-next-line no-empty
-  } catch (error) {}
+  } catch (error) { }
   labelsAndFields.push(["Fin", effectiveTimeEnd]);
   let maxAltitude = "<NOT DEFINED>";
   try {
-    maxAltitude = `${
-      operation.operation_volumes.reduce(function (prev, current) {
-        return prev.max_altitude > current.max_altitude ? prev : current;
-      }).max_altitude
-    }`;
+    maxAltitude = `${operation.operation_volumes.reduce(function (prev, current) {
+      return prev.max_altitude > current.max_altitude ? prev : current;
+    }).max_altitude
+      }`;
     // eslint-disable-next-line no-empty
-  } catch (error) {}
+  } catch (error) { }
   labelsAndFields.push(["Altitud máxima (m) ", maxAltitude]);
   labelsAndFields.push([
     "Comentarios de la aeronave ",
@@ -299,42 +297,38 @@ function bodyOperationMail(operation: Operation) {
   // labelsAndFields.push(['Polígono', `${JSON.stringify(operation.operation_volumes)}`]);
   const operationBody = `
       ${title(`Información sobre la operación: <i>${operation.name}</i>`)}
-      ${
-        OPERATION_PAYMENT_THROW_THE_APP
-          ? paragraph(
-              operation.state === "PROPOSED"
-                ? "Nos contactaremos con usted para proceder al pago de la operación"
-                : operation.state === "PENDING"
-                ? 'Puede realizar el pago de la operación en el enlace que aparece bajo "comentarios del vuelo". Una vez hecho nos contactaremos con usted'
-                : "Pago realizado correctamente"
-            )
-          : ""
-      }
+      ${OPERATION_PAYMENT_THROW_THE_APP
+      ? paragraph(
+        operation.state === "PROPOSED"
+          ? "Nos contactaremos con usted para proceder al pago de la operación"
+          : operation.state === "PENDING"
+            ? 'Puede realizar el pago de la operación en el enlace que aparece bajo "comentarios del vuelo". Una vez hecho nos contactaremos con usted'
+            : "Pago realizado correctamente"
+      )
+      : ""
+    }
       <mj-table border="solid 1px" padding="10px" mj-class="celdita">
       ${labelsAndFields
-        .map(([label, field]) => {
-          return `<tr>
+      .map(([label, field]) => {
+        return `<tr>
           <td style="padding: 0 0px 0 5px;border:solid 1px;width:40%">${label}</td>
-          <td style="padding: 0 0px 0 5px;border:solid 1px">${
-            field == "null" ? "" : field
+          <td style="padding: 0 0px 0 5px;border:solid 1px">${field == "null" ? "" : field
           }</td>
         </tr>`;
-        })
-        .join("")}
+      })
+      .join("")}
       </mj-table>
       ${title("Información sobre operador")}
-      ${
-        operation.owner && operation.owner.username
-          ? bodyUserMail(operation.owner)
-          : operation.owner
-          ? paragraph("Nombre de usuario: " + operation.owner)
-          : ""
-      }
-      ${
-        operation.uas_registrations
-          ? bodyOperationVehiclesBodyMail(operation)
-          : ""
-      }
+      ${operation.owner && operation.owner.username
+      ? bodyUserMail(operation.owner)
+      : operation.owner
+        ? paragraph("Nombre de usuario: " + operation.owner)
+        : ""
+    }
+      ${operation.uas_registrations
+      ? bodyOperationVehiclesBodyMail(operation)
+      : ""
+    }
     `;
   return operationBody;
 }
@@ -355,8 +349,8 @@ export function buildResetPasswordHtml(username: string, link: string) {
   const mjmlBody = `
     ${title(`Hola ${username}`)}
     ${paragraph(
-      "Para poder cambiar la contraseña haz click en el siguiente link, el cual es válido por 15 minutos."
-    )}
+    "Para poder cambiar la contraseña haz click en el siguiente link, el cual es válido por 15 minutos."
+  )}
     ${paragraph("Deberá establecer una nueva contraseña.")}
     ${paragraph(`<a href="${link}">${link}</a>`)}
     `;
@@ -378,8 +372,8 @@ export function buildMagicSignUpHtml(username: any, link: any) {
   const mjmlBody = `
     ${title(`Hola ${username}`)}
     ${paragraph(
-      "Para poder volver a iniciar sesión en el sistema, haz click en el siguiente link, el cual es válido por 1 hora."
-    )}
+    "Para poder volver a iniciar sesión en el sistema, haz click en el siguiente link, el cual es válido por 1 hora."
+  )}
     ${paragraph("Deberá establecer una nueva contraseña.")}
     ${paragraph(`<a href="${link}">${link}</a>`)}
     `;
@@ -392,12 +386,11 @@ export function buildMagicSignUpHtml(username: any, link: any) {
 export function generateNewVehicleMailHTML(vehicle: VehicleReg) {
   const mjmlBody = `
   ${title("Se ha registrado una nueva aeronave")}
-  ${paragraph(`El usuario <b><i>${
-    vehicle.owner!.username
-  }</i></b>, ha registrado una aeronave con identificador ${vehicle.uvin},
+  ${paragraph(`El usuario <b><i>${vehicle.owner!.username
+    }</i></b>, ha registrado una aeronave con identificador ${vehicle.uvin},
   para más detalles y autorizar la aeronave haga click o copie el siguiente enlace <a href="${vehicleUrl(
-    vehicle.uvin
-  )}">${vehicleUrl(vehicle.uvin)}</a>`)}
+      vehicle.uvin
+    )}">${vehicleUrl(vehicle.uvin)}</a>`)}
   <mj-button color="white" href="${vehicleUrl(vehicle.uvin)}">
     Ver aeronave
   </mj-button>
@@ -408,12 +401,11 @@ export function generateNewVehicleMailHTML(vehicle: VehicleReg) {
 export function generateUpdateVehicleMailHTML(vehicle: VehicleReg) {
   const mjmlBody = `
   ${title("Se ha actualizado una aeronave")}
-  ${paragraph(`El usuario <b><i>${
-    vehicle.owner!.username
-  }</i></b>, ha actualizado la aeronave con identificador ${vehicle.uvin},
+  ${paragraph(`El usuario <b><i>${vehicle.owner!.username
+    }</i></b>, ha actualizado la aeronave con identificador ${vehicle.uvin},
   para más detalles haga click o copie el siguiente enlace <a href="${vehicleUrl(
-    vehicle.uvin
-  )}">${vehicleUrl(vehicle.uvin)}</a>`)}
+      vehicle.uvin
+    )}">${vehicleUrl(vehicle.uvin)}</a>`)}
   <mj-button color="white" href="${vehicleUrl(vehicle.uvin)}">
     Ver aeronave
   </mj-button>
@@ -425,8 +417,7 @@ export function generateUpdateVehicleMailHTML(vehicle: VehicleReg) {
 export function generateNewVehicleMailText(vehicle: any) {
   return `
     Se ha registrado una nueva aeronave.
-    El usuario ${
-      vehicle.owner.username
+    El usuario ${vehicle.owner.username
     }, ha registrado una aeronave con identificador ${vehicle.uvin},
     para más detalles y autorizar la aeronave utilice el siguiente enlace ${vehicleUrl(
       vehicle.uvin
@@ -437,8 +428,7 @@ export function generateNewVehicleMailText(vehicle: any) {
 export function generateUpdateVehicleMailText(vehicle: any) {
   return `
     Se ha actualizado la informacion de una aeronave.
-    El usuario ${
-      vehicle.owner.username
+    El usuario ${vehicle.owner.username
     }, ha actualizado la aeronave con identificador ${vehicle.uvin},
     para más detalles utilice el siguiente enlace ${vehicleUrl(vehicle.uvin)}
      `;
@@ -448,10 +438,9 @@ export function generateUpdateVehicleMailText(vehicle: any) {
 export function generateAuthorizeVehicleMailHTML(vehicle: VehicleReg) {
   const mjmlBody = `
   ${paragraph(
-    `La aeronave <b><i>${vehicle.vehicleName}</i></b> ${
-      vehicle.authorized == VehicleAuthorizeStatus.AUTHORIZED
-        ? "ha sido"
-        : "no ha sido"
+    `La aeronave <b><i>${vehicle.vehicleName}</i></b> ${vehicle.authorized == VehicleAuthorizeStatus.AUTHORIZED
+      ? "ha sido"
+      : "no ha sido"
     } autorizado.`
   )}
   ${paragraph(
@@ -466,11 +455,10 @@ export function generateAuthorizeVehicleMailHTML(vehicle: VehicleReg) {
 
 export function generateAuthorizeVehicleMailText(vehicle: VehicleReg) {
   return `
-    La aeronave ${vehicle.vehicleName} ${
-    vehicle.authorized == VehicleAuthorizeStatus.AUTHORIZED
+    La aeronave ${vehicle.vehicleName} ${vehicle.authorized == VehicleAuthorizeStatus.AUTHORIZED
       ? "ha sido"
       : "no ha sido"
-  } autorizada.
+    } autorizada.
     Para más detalles utilice el siguiente enlace ${vehicleUrl(vehicle.uvin)}
      `;
 }
@@ -497,24 +485,22 @@ export const makeBodyForPendingOpeartionMailText = (
   Identificador ${operation.gufi}
   Conteacto ${operation.contact}
   Comienzo ${operation.operation_volumes[0].effective_time_begin}
-  Fin ${
-    operation.operation_volumes[operation.operation_volumes.length - 1]
+  Fin ${operation.operation_volumes[operation.operation_volumes.length - 1]
       .effective_time_end
-  }
-  Altitud máxima (in meters) ${
-    operation.operation_volumes.reduce(function (prev: any, current: any) {
+    }
+  Altitud máxima (in meters) ${operation.operation_volumes.reduce(function (prev: any, current: any) {
       return prev.max_altitude > current.max_altitude ? prev : current;
     }).max_altitude
-  }}
+    }}
   Comentarios de aeronave ${operation.aircraft_comments}
   Comentarios del vuelo ${operation.flight_comments}
 
   La misión está a la espera de ser aprobada porque vuela en las siguientes zonas reestringidas:
   ${rfvs
-    .map((rfv: any) => {
-      return `${rfv.comments} más inforamción en ${getUrlRfv(rfv.id)}`;
-    })
-    .join("\n")}
+      .map((rfv: any) => {
+        return `${rfv.comments} más inforamción en ${getUrlRfv(rfv.id)}`;
+      })
+      .join("\n")}
 `;
 };
 
@@ -530,14 +516,14 @@ export const makeBodyForPendingOperationMailHtml = (
     "La misión está a la espera de ser aprobada porque vuela en las siguientes zonas reestringidas:"
   )}
   ${rfvs
-    .map((rfv: any) => {
-      return paragraph(
-        `<a href="${getUrlRfv(rfv.id)}">${rfv.comments}</a> <small>(${getUrlRfv(
-          rfv.id
-        )})</small>`
-      );
-    })
-    .join("")}
+      .map((rfv: any) => {
+        return paragraph(
+          `<a href="${getUrlRfv(rfv.id)}">${rfv.comments}</a> <small>(${getUrlRfv(
+            rfv.id
+          )})</small>`
+        );
+      })
+      .join("")}
   ${bodyOperationMail(operation)}
   `;
   return generateBaseMail(mjmlBody);
@@ -547,12 +533,13 @@ export function buildGenericActionMail(action: any, operation: any) {
   const mjmlBody = `
     ${title(`Se ejecutó la acción ${action.name}`)}
     ${paragraph(
-      `Se ejecutó la acción ${action.name} sobre la operación ${operation.name} con gufi ${operation.gufi}`
-    )}
+    `Se ejecutó la acción ${action.name} sobre la operación ${operation.name} con gufi ${operation.gufi}`
+  )}
     `;
   const email = generateBaseMail(mjmlBody);
   return email;
 }
+
 
 export function buildNewObservationMail(document: Document) {
   const mjmlBody = `
@@ -560,12 +547,10 @@ export function buildNewObservationMail(document: Document) {
 	  ${paragraph("Se ha creado una nueva observación:")}
 	  ${paragraph(document.observations, "10px", "18px", true, "red")}
 	  ${paragraph(
-      `Para ver mas información ingrese a ${GeneralUtils.getDownloadFileUrl(
-        document.getFileName()
-      )}`,
-      "10px",
-      "18px"
-    )}	`;
+    `Para ver mas información ingrese a ${frontEndUrl}`,
+    "10px",
+    "18px"
+  )}	`;
   const email = generateBaseMail(mjmlBody);
   return email;
 }
@@ -578,12 +563,12 @@ export function buildNewUserMail(user: User) {
     ${paragraph(user.email, "10px", "18px", true, "red")}
     ${paragraph("Para ver mas información ingrese a: ", "10px", "18px")}
     ${paragraph(
-      `<a href="${link}">Ver ${user.username}</a>`,
-      "10px",
-      "18px",
-      true,
-      "red"
-    )}
+    `<a href="${link}">Ver ${user.username}</a>`,
+    "10px",
+    "18px",
+    true,
+    "red"
+  )}
 
   `;
   const email = generateBaseMail(mjmlBody);
@@ -597,14 +582,14 @@ export function buildNewDocumentMail(username: string, document: Document) {
 		${paragraph(`${document.name} || ${document.tag}`, "10px", "18px", true, "red")}
 		${paragraph("Para ver mas información ingrese a: ", "10px", "18px")}
 		${paragraph(
-      `<a href="${GeneralUtils.getDownloadFileUrl(
-        document.getFileName()
-      )}">Ver ${document.name}</a>`,
-      "10px",
-      "18px",
-      true,
-      "red"
-    )}
+    `<a href="${GeneralUtils.getDownloadFileUrl(
+      document.getFileName()
+    )}">Ver ${document.name}</a>`,
+    "10px",
+    "18px",
+    true,
+    "red"
+  )}
 
 	`;
   const email = generateBaseMail(mjmlBody);
@@ -653,12 +638,12 @@ export function buildConfirmationHtmlMail(
     ${title(`Bienvenido a bordo ${username}!`)}
     ${paragraph(`Gracias por registrarte en ${appName}!`, "10px 10px 0px 10px")}
     ${paragraph(
-      "La forma más rápida de gestionar tus operaciones con drones.",
-      "0px 10px 10px 10px"
-    )}
+    "La forma más rápida de gestionar tus operaciones con drones.",
+    "0px 10px 10px 10px"
+  )}
     ${paragraph(
-      "Para finalizar el proceso de registro, haga click o copie el siguiente link en tu navegador."
-    )}
+    "Para finalizar el proceso de registro, haga click o copie el siguiente link en tu navegador."
+  )}
     ${paragraph(`<a href="${link}">${link}</a>`)}
     `;
   const email = generateBaseMail(mjmlBody);
