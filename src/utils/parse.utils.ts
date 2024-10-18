@@ -71,8 +71,7 @@ export function parseRegularFlight(
 
   if (!validateNumber((obj as { verticalSpeed: any }).verticalSpeed, 0, 1000))
     throw new Error(
-      `'verticalSpeed' must be a number between 0 and 1000 [verticalSpeed=${
-        (obj as { verticalSpeed: any }).verticalSpeed
+      `'verticalSpeed' must be a number between 0 and 1000 [verticalSpeed=${(obj as { verticalSpeed: any }).verticalSpeed
       }]`
     );
   const verticalSpeed: number = (obj as { verticalSpeed: number })
@@ -136,8 +135,7 @@ export function parseVertiport(
   const point: GeoPoint = parseGeoPoint((obj as { point: any }).point);
   if (!validateNumber((obj as { buffer: any }).buffer, 0, 100000))
     throw new Error(
-      `'buffer' must be a number between 0 and 100.000 [buffer=${
-        (obj as { buffer: any }).buffer
+      `'buffer' must be a number between 0 and 100.000 [buffer=${(obj as { buffer: any }).buffer
       }]`
     );
   const buffer: number = (obj as { buffer: number }).buffer;
@@ -153,8 +151,7 @@ export function parseVertiport(
     )
   )
     throw new Error(
-      `'timeBetweenFlights' must be a number between 0 and 100.000 [timeBetweenFlights=${
-        (obj as { timeBetweenFlights: any }).timeBetweenFlights
+      `'timeBetweenFlights' must be a number between 0 and 100.000 [timeBetweenFlights=${(obj as { timeBetweenFlights: any }).timeBetweenFlights
       }]`
     );
   const timeBetweenFlights: number = (obj as { timeBetweenFlights: number })
@@ -363,7 +360,7 @@ export function convertAnyToDocument(obj: any, documentSchemas: any): Document {
   }
 
   const schema = documentSchemas[tag];
-  const fieldsNames = Object.keys(schema);
+  const fieldsNames = Object.keys(schema).filter((key) => key !== "__metadata");
   const extraFieldsKeys = extraFields ? Object.keys(extraFields) : [];
   for (const fieldName of fieldsNames) {
     const field = schema[fieldName];
