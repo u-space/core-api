@@ -268,7 +268,11 @@ export class OperationController {
     // console.log(` ---> request.params.gufi:${request.params.id}`)
     try {
       const { role, username } = getPayloadFromResponse(response);
-      if (role == Role.ADMIN || role == Role.MONITOR) {
+      if (role == Role.ADMIN ||
+        role == Role.MONITOR ||
+        role == Role.COA ||
+        role == Role.AIR_TRAFIC ||
+        role == Role.REMOTE_SENSOR) {
         const operation = this.normalizeOperation(
           await this.dao.one(request.params.id)
         );
@@ -1275,7 +1279,9 @@ export class OperationController {
       filterByOwner ||
       role == Role.ADMIN ||
       role == Role.MONITOR ||
-      role == Role.COA
+      role == Role.COA ||
+      role == Role.AIR_TRAFIC ||
+      role == Role.REMOTE_SENSOR
     ) {
       try {
         let { states } = request.query;
