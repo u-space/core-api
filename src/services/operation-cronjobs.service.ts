@@ -180,18 +180,24 @@ async function checkIntersection(
       undefined,
       operation.gufi
     );
+    const operations = await operationDao.intersectingOperations(
+      operationVolume,
+      undefined,
+      operation.gufi
+    );
     const uvrCount = await uvrDao.intersectingUvrsCount(operationVolume);
+    const uvr = await uvrDao.getUvrIntersections(operationVolume);
     let msg = "";
     if (operationsCount > 0 || uvrCount > 0) {
       msg = "Operation overlaps: ";
       if (operationsCount > 0) {
-        msg += `${operationsCount} operation(s)`;
+        msg += `${operationsCount} operation(s): ${operations.map((o) => o.gufi).join(", ")}`;
         if (uvrCount > 0) {
           msg += ", ";
         }
       }
       if (uvrCount > 0) {
-        msg += `${uvrCount} UVR(s)`;
+        msg += `${uvrCount} UVR(s): ${uvr.map((u) => u.message_id).join(", ")}`;
       }
     }
     operation.flight_comments = `${msg}\n\n\n${operation.flight_comments}`;
@@ -388,8 +394,7 @@ function processPending(operation: Operation) {
 async function errorOnOperation(operation: any, error: string) {
   // console.error(`Error on operation: ${operation ? operation.gufi : "Operation sin GUFI"}`)
   logError(
-    `Error on operation: ${
-      operation ? operation.gufi : "Operation sin GUFI"
+    `Error on operation: ${operation ? operation.gufi : "Operation sin GUFI"
     }\n${error}`,
     new Error()
   );
