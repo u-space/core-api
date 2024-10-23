@@ -92,7 +92,8 @@ export class VehicleController {
         role == Role.ADMIN ||
         role == Role.MONITOR ||
         role == Role.REMOTE_SENSOR ||
-        role == Role.AIR_TRAFIC
+        role == Role.AIR_TRAFIC ||
+        role == Role.COA
       ) {
         const showPendingVehicles = request.query.showFullAuthorized === undefined ? undefined : request.query.showPendingVehicles === 'true';
         return logAndRespond200(
@@ -187,9 +188,11 @@ export class VehicleController {
     const { role, username } = getPayloadFromResponse(response);
     const uvinReceived = request.params.id;
     try {
-      if (role == Role.ADMIN
-        || role == Role.MONITOR
-        || role == Role.AIR_TRAFIC) {
+      if (role == Role.ADMIN ||
+        role == Role.MONITOR ||
+        role == Role.REMOTE_SENSOR ||
+        role == Role.AIR_TRAFIC ||
+        role == Role.COA) {
         const v = await this.dao.one(uvinReceived);
         return logAndRespond200(response, v, []);
       } else {
