@@ -130,7 +130,8 @@ export const doSendMailForPendingOperation = async (
       rfvs
     );
 
-    mailAPI.sendMail(receiverMail, subject, body, htmlBody).catch(() => {
+    mailAPI.sendMail(receiverMail, subject, body, htmlBody).catch((e: any) => {
+      console.log(e)
       console.error("Email was not send");
     });
     return false;
