@@ -484,11 +484,11 @@ export class OperationController {
             //   );
             // }
             if (
-              fraOperationCheckResult.needVlos &&
-              !fraOperationCheckResult.hasVlos
+              fraOperationCheckResult.needBvlos &&
+              !fraOperationCheckResult.hasBvlos
             ) {
               unsatifacedCoordinations.push(
-                "Need coordination for vlos flight."
+                "Need coordination for bvlos flight."
               );
             }
 
