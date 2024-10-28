@@ -14,12 +14,12 @@ const postCheckOperationPath = "/flightRequest/operationCheck";
 export interface IFlightRequestOperationChecks {
   needAltitude: boolean;
   needNight: boolean;
-  needVlos: boolean;
+  needBvlos: boolean;
   needGeozones: any[];
   needCoordinators: any[];
   hasAlitude: boolean;
   hasNight: boolean;
-  hasVlos: boolean;
+  hasBvlos: boolean;
   hasCoordination: any[];
   validflightRequests: any[];
 }
