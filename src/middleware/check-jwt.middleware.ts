@@ -29,6 +29,27 @@ export const checkJwtButDoNotFail = async (
   checkJwtAux(req, res, next, false);
 };
 
+export const checkJwtLocalhost = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const clientIp = req.ip;
+  // Permitimos solo las IPs localhost (IPv4 e IPv6)
+  if (clientIp.endsWith('127.0.0.1') || clientIp.endsWith('::1')) {
+    const jwtPayload = {
+      username: "admin",
+      email: "admin@dronfies.com",
+      role: Role.ADMIN, //'admin'
+    };
+    res.locals.jwtPayload = jwtPayload;
+    return next();
+  } else {
+    res.status(403).send('Forbidden');
+  }
+
+};
+
 // ---------------------------------------------------------------
 // ---------------------- PRIVATE FUNCTIONS ----------------------
 // ---------------------------------------------------------------

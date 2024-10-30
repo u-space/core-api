@@ -19,6 +19,7 @@ import { VehicleController } from "./controllers/vehicle.controller";
 import {
   checkJwt,
   checkJwtButDoNotFail,
+  checkJwtLocalhost,
 } from "./middleware/check-jwt.middleware";
 import {
   checkUserRole,
@@ -221,6 +222,13 @@ const user = [
     controller: UserController,
     action: "enable",
     middlewares: [checkJwt],
+  },
+  {
+    method: "get",
+    route: "/user/allLocal",
+    controller: UserController,
+    action: "all",
+    middlewares: [checkJwtLocalhost],
   },
   {
     method: "post",
