@@ -35,8 +35,9 @@ export const checkJwtLocalhost = async (
   next: NextFunction
 ) => {
   const clientIp = req.ip;
-  // Permitimos solo las IPs localhost (IPv4 e IPv6)
-  if (clientIp.endsWith('127.0.0.1') || clientIp.endsWith('::1')) {
+  // Permitimos solo las IPs localhost (IPv4 e IPv6) 
+  // TODO remove hardcoded production ip, add permited ip on configuration files, or make new service to get emails by roles
+  if (clientIp.endsWith('127.0.0.1') || clientIp.endsWith('::1') || clientIp.endsWith('179.27.99.25')) {
     const jwtPayload = {
       username: "admin",
       email: "admin@dronfies.com",
