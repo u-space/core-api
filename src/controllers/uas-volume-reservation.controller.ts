@@ -6,7 +6,7 @@
 
 import { Request, Response } from "express";
 import { UASVolumeReservationDao } from "../daos/uas-volume-reservation.dao";
-import { UASVolumeReservation } from "../entities/uas-volume-reservation";
+import { UASVolumeReservation, UASVolumeReservationType } from "../entities/uas-volume-reservation";
 import { OperationDao } from "../daos/operation.dao";
 import { Operation, OperationState } from "../entities/operation";
 import { validateObjectKeys, ObjectKeyType } from "../utils/validation.utils";
@@ -117,53 +117,54 @@ export class UASVolumeReservationController {
     }
     try {
       const entitie = await this.dao.save(uvr);
-      // entitie = await this.dao.save(request.body)
-      // console.log(`New uvr ${entitie.message_id}`)
       //get operations that need to chage the state
-      try {
-        const operations = await this.operationDao.getOperationByVolume(
-          new Date(uvr.effective_time_begin!),
-          new Date(uvr.effective_time_end!),
-          uvr.min_altitude!,
-          uvr.max_altitude!,
-          uvr.geography!
-        );
-        // console.log(JSON.stringify(operations, null, 2))
-        for (let index = 0; index < operations.length; index++) {
-          try {
-            const operation: Operation = operations[index];
-            // console.log(`The operation ${op.gufi} intersect with this uvr`)
-            const newState: OperationState = getNextOperationState(operation);
-            // console.log(`The opertion ${op.gufi} chage the state from ${op.state} to ${newState}`)
-            if (newState != operation.state) {
-              const oldState = operation.state;
-              operation.state = newState;
-              this.operationDao.updateState(
-                operation.gufi,
-                newState,
-                oldState,
-                `UVR ${entitie.message_id} intersected with operation`
-              );
-              sendOperationStateChange(
-                operation.gufi,
-                operation.state,
-                `UVR_INTERSECT;uvrId=${entitie.message_id}`
-              );
-              sendUpdateOperation({
-                gufi: operation.gufi,
-                name: operation.name,
-                state: operation.state,
-                previousState: oldState,
-                owner: operation.owner,
-              });
+      if (uvr.type === UASVolumeReservationType.DYNAMIC_RESTRICTION) {
+        try {
+          const operations = await this.operationDao.getOperationByVolume(
+            new Date(uvr.effective_time_begin!),
+            new Date(uvr.effective_time_end!),
+            uvr.min_altitude!,
+            uvr.max_altitude!,
+            uvr.geography!
+          );
+          // console.log(JSON.stringify(operations, null, 2))
+          for (let index = 0; index < operations.length; index++) {
+            try {
+              const operation: Operation = operations[index];
+              // console.log(`The operation ${op.gufi} intersect with this uvr`)
+              const newState: OperationState = getNextOperationState(operation);
+              // console.log(`The opertion ${op.gufi} chage the state from ${op.state} to ${newState}`)
+              if (newState != operation.state) {
+                const oldState = operation.state;
+                operation.state = newState;
+                this.operationDao.updateState(
+                  operation.gufi,
+                  newState,
+                  oldState,
+                  `UVR ${entitie.message_id} intersected with operation`
+                );
+                sendOperationStateChange(
+                  operation.gufi,
+                  operation.state,
+                  `UVR_INTERSECT;uvrId=${entitie.message_id}`
+                );
+                sendUpdateOperation({
+                  gufi: operation.gufi,
+                  name: operation.name,
+                  state: operation.state,
+                  previousState: oldState,
+                  owner: operation.owner,
+                });
+              }
+            } catch (error) {
+              return logAndRespond500(response, 500, error);
             }
-          } catch (error) {
-            return logAndRespond500(response, 500, error);
           }
+        } catch (error) {
+          console.log(error);
+          return logAndRespond500(response, 500, error);
         }
-      } catch (error) {
-        console.log(error);
-        return logAndRespond500(response, 500, error);
+
       }
       sendUvr({ message_id: entitie.message_id! });
       return logAndRespond200(response, entitie, []);
