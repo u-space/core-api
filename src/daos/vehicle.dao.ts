@@ -116,22 +116,30 @@ export class VehicleDao {
         "vehicle_reg"
       );
 
-      addDocumentsAndCheckPending(qb, showPending)
+      // if (showPending) {
+      // addDocumentsAndCheckPending(qb, showPending)
+      // }
 
       const vehicles = await qb.getMany();
+      console.log(`vehicles ${JSON.stringify(vehicles, null, 2)}`);
       const count = await qb.getCount();
-      const rawQuery = await qb.getRawMany();
+      console.log(`count ${JSON.stringify(count, null, 2)}`);
+      // const rawQuery = await qb.getRawMany();
+      // console.log(`rawQuery ${JSON.stringify(rawQuery, null, 2)}`);
+
+
+
+
+      // for (let i = 0; i < vehicles.length; i++) {
+      //   const vehicle = vehicles[i];
+      //   vehicle.extra_fields = vehicle.extra_fields_json;
+      //   vehicle.extra_fields.documents = rawQuery[i].documents;
+      // }
 
       for (let i = 0; i < vehicles.length; i++) {
         const vehicle = vehicles[i];
         vehicle.extra_fields = vehicle.extra_fields_json;
-        vehicle.extra_fields.documents = rawQuery[i].documents;
-      }
-
-      for (let i = 0; i < vehicles.length; i++) {
-        const vehicle = vehicles[i];
-        vehicle.extra_fields = vehicle.extra_fields_json;
-        // await this.setVehicleDocuments(vehicle); <<-- remove lots of consultas
+        await this.setVehicleDocuments(vehicle);
         GeneralUtils.setDocumentsDownloadFileUrl(vehicle);
       }
 
