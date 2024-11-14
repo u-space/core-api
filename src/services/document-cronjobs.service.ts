@@ -60,12 +60,12 @@ export async function processExpiredDocuments() {
 
   const expiredDocuments = await documentDao.getExpiredDocuments();
 
-  const expiredExpirableDocuments = expiredDocuments.filter(
-    (doc) =>
-      doc.extra_fields &&
-      "expirable" in doc.extra_fields &&
-      doc.extra_fields.expirable === false
-  );
+  const expiredExpirableDocuments = expiredDocuments //.filter(
+  //   (doc) =>
+  //     doc.extra_fields &&
+  //     "expirable" in doc.extra_fields &&
+  //     doc.extra_fields.expirable === false
+  // );
 
   //change documents to invalid."invalid"
   for (let index = 0; index < expiredExpirableDocuments.length; index++) {
@@ -77,31 +77,32 @@ export async function processExpiredDocuments() {
 
     const emailToNotify = await getDocumentOwnerEmail(document);
 
-    await documentDao.update(document);
+    // await documentDao.update(document);
     try {
       if (emailToNotify) {
         if (document.referenced_entity_type === ReferencedEntityType.USER) {
           const user = await userDao.one(emailToNotify);
           user.canOperate = false;
-          await userDao.update(user);
+          // await userDao.update(user);
         } else if (
           document.referenced_entity_type === ReferencedEntityType.VEHICLE &&
           document.referenced_entity_id
         ) {
           const vehicle = await vehicleDao.one(document.referenced_entity_id);
           vehicle.authorized = VehicleAuthorizeStatus.NOT_AUTHORIZED;
-          await vehicleDao.updateOnlyReceivedProperties(vehicle);
+          // await vehicleDao.updateOnlyReceivedProperties(vehicle);
         }
       }
     } catch (e) {
       console.error("Error when update user or vehicle " + emailToNotify);
     }
 
-    if (emailToNotify) {
+    if (emailToNotify &&
+      (emailToNotify.includes('emialonzo') || emailToNotify.includes('macias') || emailToNotify.includes('sferrando89'))) {
       mailAPI.sendMail(
         COMPANY_NAME!,
         [emailToNotify],
-        "Document expired",
+        "Espiró un documento",
         buildExpiredDocumentationTextMail(
           emailToNotify,
           document,
