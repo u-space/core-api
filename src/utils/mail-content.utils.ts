@@ -19,6 +19,28 @@ import {
 import { getLocalTime } from "./date.utils";
 import GeneralUtils from "./general.utils";
 
+
+function simpleTranslate(str: string | undefined) {
+  if (str == undefined) return ''
+  if (str === "vehicle") return "Vehículo";
+  if (str === "user") return "Usuario";
+  if (str === "serial") return "Serial"
+  if (str === "serial_number") return "Número de serie"
+  if (str === "insurance") return "Seguro"
+  if (str === "insurance_carrier") return "Compañía de seguros"
+  if (str === "description") return "Descripción"
+  if (str === "remote_sensor_id") return "Registro de sensor remoto"
+  if (str === "remote_sensor_id_desc") return "Número de registro de sensor remoto"
+  if (str === "vehicle_photo") return "Foto de veículo"
+  if (str === "userDocument") return "Cédula"
+  if (str === "document_number") return "Número de cédula"
+  if (str === "pilotLicense") return "Licencia de piloto"
+  if (str === "pilotLicenseType") return "Tipo de licencia de piloto"
+  if (str === "aerialWorkPermitResolution") return "Resolución de permiso de trabajo aéreo"
+  if (str === "resolutionNumber") return "Número de resolución"
+  return str
+}
+
 export function mjml2htmlCompleto(str: any, opt: { validationLevel: string }) {
   const optionsPreset: any = { ...opt };
   return mjml(str, optionsPreset);
@@ -224,6 +246,58 @@ function bodyVehicleMail(vehicle: VehicleReg) {
         </mj-table>
     `;
   return vehicleBody;
+}
+
+function bodyDocumentMail(document: Document) {
+  const labelsAndFields = [];
+  labelsAndFields.push(["Nombre", `${document.name}`]);
+  labelsAndFields.push(["Etiqueta", `${simpleTranslate(document.tag)}`]);
+  labelsAndFields.push(["Fecha de subida", `${new Date(document.upload_time || '').toLocaleString()}`]);
+  labelsAndFields.push(["Observaciones", `${document.observations}`]);
+  labelsAndFields.push(["Referencia a ", `${simpleTranslate(document.referenced_entity_type)}`]);
+  labelsAndFields.push(["Id referenciado", `${document.referenced_entity_id}`]);
+  labelsAndFields.push(["Válido hasta", `${document.valid_until}`]);
+  labelsAndFields.push(["Válido", `${document.valid ? "Si" : "No"}`]);
+
+  const extreaLabelsAndFields: any = [];
+  const extraFields = document.extra_fields
+  if (extraFields) {
+    Object.entries(extraFields).forEach(([key, value]) => {
+      extreaLabelsAndFields.push([simpleTranslate(key), value])
+
+    })
+    // for (const key in extraFields) {
+    //   if (typeof extraFields[key] === 'string') {
+    //     extreaLabelsAndFields.push([key, extraFields[key].toString()])
+    //   }
+    // }
+  }
+
+  const documentBody = `
+
+     <mj-table border="solid 1px" padding="10px" mj-class="celdita">
+     ${labelsAndFields
+      .map(([label, field]) => {
+        return `<tr>
+         <td style="padding: 0 0px 0 5px;border:solid 1px;width:40%">${label}</td>
+         <td style="padding: 0 0px 0 5px;border:solid 1px">${field}</td>
+       </tr>`;
+      })
+      .join("")}
+      ${`<tr>
+           <td colspan="2" style="padding: 0 0px 0 5px;border:solid 1px;width:40%">Campos extra</td>
+         </tr>`}
+      ${extreaLabelsAndFields
+      .map(([label, field]: any) => {
+        return `<tr>
+           <td style="padding: 0 0px 0 5px;border:solid 1px;width:40%">${label}</td>
+           <td style="padding: 0 0px 0 5px;border:solid 1px">${field}</td>
+         </tr>`;
+      })
+      .join("")}
+     </mj-table>`;
+  return documentBody;
+
 }
 
 function bodyUserMail(user: any) {
@@ -671,7 +745,7 @@ export function buildExpiredDocumentationHtmlMail(
   const mjmlBody = `
     ${title(`Hola ${username}!`)}
     ${paragraph("Ha vencido el documento:")}
-    ${paragraph(`<pre>${JSON.stringify(document, null, 2)}</pre>`)}
+    ${bodyDocumentMail(document)}
     `;
   const email = generateBaseMail(mjmlBody);
   // console.log(email);
