@@ -96,7 +96,7 @@ export async function processExpiredDocuments() {
       mailAPI.sendMail(
         COMPANY_NAME!,
         [emailToNotify],
-        "Espiró un documento",
+        "Expiró un documento",
         buildExpiredDocumentationTextMail(
           emailToNotify,
           document,
