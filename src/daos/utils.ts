@@ -148,7 +148,13 @@ export const addPaginationParamsToQuery = (
     }
   }
   if (filterBy && filter) {
-    if (filterBy === "uvin" || filterBy === "id") {
+    if (filterBy === "operator" && alias === 'vehicle_reg') { // this is a patch for the vehicle_reg table, will no work if change the alias outisde the query
+      query
+        .andWhere(
+          `operator.username ILIKE :filter`
+        )
+        .setParameters({ filter: `%${filter}%` });
+    } else if (filterBy === "uvin" || filterBy === "id") {
       query
         .andWhere(
           `${alias ? alias + "." + filterBy : filterBy}::VARCHAR ILIKE :filter`
