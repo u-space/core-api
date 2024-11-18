@@ -475,14 +475,6 @@ export class OperationController {
                 "Need coordination for altitude flight."
               );
             }
-            // if (
-            //   fraOperationCheckResult.needNight &&
-            //   !fraOperationCheckResult.hasNight
-            // ) {
-            //   unsatifacedCoordinations.push(
-            //     "Need coordination for night flight."
-            //   );
-            // }
             if (
               fraOperationCheckResult.needBvlos &&
               !fraOperationCheckResult.hasBvlos
