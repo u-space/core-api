@@ -1591,7 +1591,7 @@ async function sendNotificationsToOperationSubscribers(
   if (operation.uas_registrations && operation.uas_registrations.length > 0) {
     const uas = operation.uas_registrations[0];
     vehicle = `${uas.vehicleName} (${uas.manufacturer} ${uas.model})`;
-    vehicleRegId = uas.faaNumber ? uas.faaNumber : vehicleRegId;
+    vehicleRegId = uas.extra_fields.plate || uas.faaNumber;
   }
 
   // Send SMS, whatsapp messages and emails
