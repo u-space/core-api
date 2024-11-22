@@ -308,6 +308,7 @@ export class OperationDao {
     timeRange?: { start: string; end: string },
     owner?: string
   ): Promise<[Operation[], number]> {
+    console.log("all(), states:", states, ", ownwer:", owner);
     validatePaginationParams(
       take,
       skip,
@@ -320,39 +321,32 @@ export class OperationDao {
       take = take ? take : 10;
       skip = skip ? skip : 0;
 
-      const filter: any = {};
+      const findOptions: any = { where: {} };
       if (states) {
-        filter.where = { state: In(states) };
-      }
-      if (filterProp && filterValue) {
-        if (!filter.where) filter.where = {};
-        if (filterProp === "gufi") {
-          filter.where = `gufi::text ilike '${filterValue}'`;
-        } else {
-          filter.where[filterProp] = ILike("%" + filterValue + "%");
-        }
+        findOptions.where = { state: In(states) };
       }
 
-      console.log(
-        "states:",
-        states,
-        ", filter:",
-        filter,
-        ", orderProp:",
-        orderProp,
-        ", orderValue:",
-        orderValue,
-        ", take:",
-        take,
-        ", skip:",
-        skip,
-        ", filterProp:",
-        filterProp,
-        ", filterValue:",
-        filterValue,
-        ", timeRange:",
-        timeRange
-      );
+
+      // console.log(
+      //   "states:",
+      //   states,
+      //   ", filter:",
+      //   filter,
+      //   ", orderProp:",
+      //   orderProp,
+      //   ", orderValue:",
+      //   orderValue,
+      //   ", take:",
+      //   take,
+      //   ", skip:",
+      //   skip,
+      //   ", filterProp:",
+      //   filterProp,
+      //   ", filterValue:",
+      //   filterValue,
+      //   ", timeRange:",
+      //   timeRange
+      // );
 
       if (timeRange) {
         if (!timeRange.start || !timeRange.end) {
@@ -360,6 +354,14 @@ export class OperationDao {
             '"start" and "end" are mandatory fields',
             undefined
           );
+        }
+        if (filterProp && filterValue) {
+          if (!findOptions.where) findOptions.where = {};
+          if (filterProp === "gufi") {
+            findOptions.where = `gufi::text ilike '${filterValue}'`;
+          } else {
+            findOptions.where[filterProp] = ILike("%" + filterValue + "%");
+          }
         }
         const qb = this.repository
           .createQueryBuilder("operation")
@@ -386,7 +388,7 @@ export class OperationDao {
         if (orderProp && orderValue) {
           qb.orderBy("operation." + orderProp, orderValue);
         }
-        qb.where(filter.where);
+        qb.where(findOptions.where);
 
         qb.andWhere(
           '(tstzrange(operation_volumes."effective_time_begin", operation_volumes."effective_time_end") && tstzrange(:date_begin, :date_end))'
@@ -400,18 +402,29 @@ export class OperationDao {
         });
         return await qb.getManyAndCount();
       } else {
+        if (filterProp && filterValue) {
+          if (!findOptions.where) findOptions.where = {};
+          if (filterProp === "gufi") {
+            findOptions.where.gufi = filterValue;
+          } else {
+            findOptions.where[filterProp] = ILike("%" + filterValue + "%");
+          }
+        }
         if (orderProp && orderValue) {
-          filter.order = {};
-          filter.order[orderProp] = orderValue;
+          findOptions.order = {};
+          findOptions.order[orderProp] = orderValue;
         }
-        filter.take = take;
-        filter.skip = skip;
+        findOptions.take = take;
+        findOptions.skip = skip;
         if (owner) {
-          filter.where["owner"] = owner;
+          findOptions.where.owner = owner;
         }
-        return await this.repository.findAndCount(filter);
+        console.log('filter::', JSON.stringify(findOptions, null, 2))
+        // return await this.repository.findAndCount(filter);
+        return await this.repository.findAndCount(findOptions);
       }
     } catch (error: any) {
+      console.log(error);
       throw new DataBaseError(
         "There was an error trying to execute OperationDaos.all()",
         error
