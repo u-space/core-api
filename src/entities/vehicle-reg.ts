@@ -106,6 +106,9 @@ export class VehicleReg {
   @Column({ type: "varchar", default: VehicleAuthorizeStatus.PENDING })
   authorized?: VehicleAuthorizeStatus;
 
+  @Column({ type: "bool", default: false, name: "remotesensorvalid" })
+  remoteSensorValid?: boolean;
+
   extra_fields?: any;
 
   @Column({ type: "json", nullable: true })
@@ -129,4 +132,5 @@ export const vehicleRegSchema: any = {
   trackerId: "string",
   authorized: "VehicleAuthorizeStatus",
   extra_fields: "IVehicleExtraFields",
+  remoteSensorValid: "boolean",
 };

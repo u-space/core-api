@@ -29,6 +29,7 @@ import { NotFoundError } from "../daos/db-errors";
 import { isString } from "lodash";
 import GeneralUtils from "./utils/general.utils";
 import { VehicleDao } from "../daos/vehicle.dao";
+import { VehicleReg } from "../entities/vehicle-reg";
 
 export class DocumentRestController {
   private dao = new DocumentDao();
@@ -230,15 +231,16 @@ export class DocumentRestController {
         return logAndRespond400(response, 400, "The document is expired");
       }
       const schema = document.getExtraFieldSchema();
+      const vehicleOrUser = await getReferencedEntity(document);
       if (
         valid &&
         schema &&
         schema.__metadata &&
         schema.__metadata.max_valid_documents == 1
       ) {
-        const vehicleOrUser = await getReferencedEntity(document);
         if (vehicleOrUser) {
           const documents = vehicleOrUser.extra_fields["documents"];
+          // check other documents with the same tag and change to invalid
           for (let i = 0; i < documents.length; i++) {
             if (
               documents[i].id !== documentId &&
@@ -255,8 +257,16 @@ export class DocumentRestController {
         }
       }
 
+
       document.valid = valid;
       document = await this.dao.update(document);
+      if (document.tag === "remote_sensor_id" && vehicleOrUser && vehicleOrUser instanceof VehicleReg) {
+        const vehicle = vehicleOrUser;
+        vehicle.remoteSensorValid = valid;
+        const vehicleDao = new VehicleDao()
+        const updatedVehicle = await vehicleDao.updateOnlyReceivedProperties(vehicle);
+        console.log("updated vehicle", updatedVehicle);
+      }
       return logAndRespond200(response, document, []);
     } catch (error) {
       return logAndRespond500(response, 500, error);

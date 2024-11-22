@@ -5,7 +5,7 @@
  */
 
 import { DataBaseError, InvalidDataError, NotFoundError } from "./db-errors";
-import { ILike } from "typeorm";
+import { ILike, SelectQueryBuilder } from "typeorm";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 import { VehicleDao } from "./vehicle.dao";
 import { UserDao } from "./user.dao";
@@ -129,7 +129,7 @@ export type Query = {
 };
 
 export const addPaginationParamsToQuery = (
-  query: any,
+  query: SelectQueryBuilder<any>,
   take: any,
   skip: any,
   filterBy: any,
@@ -147,7 +147,7 @@ export const addPaginationParamsToQuery = (
       query.orderBy(alias ? alias + "." + orderBy : orderBy, "ASC");
     }
   }
-  if (filterBy && filter) {
+  if (filterBy && filter && filter !== "") {
     if (filterBy === "operator" && alias === 'vehicle_reg') { // this is a patch for the vehicle_reg table, will no work if change the alias outisde the query
       query
         .andWhere(
@@ -160,11 +160,20 @@ export const addPaginationParamsToQuery = (
           `${alias ? alias + "." + filterBy : filterBy}::VARCHAR ILIKE :filter`
         )
         .setParameters({ filter: `%${filter}%` });
+    } else if (filterBy === "remotesensorvalid") {
+      query
+        .andWhere(
+          `${alias ? alias + "." + filterBy : filterBy} = :filter`
+        )
+        .setParameters({ filter: `${filter}` });
     } else {
       query
         .andWhere(`${alias ? alias + "." + filterBy : filterBy} ILIKE :filter`)
         .setParameters({ filter: `%${filter}%` });
     }
+  } else {
+    console.log('piripiiii')
+    console.log(query.getSql())
   }
 };
 

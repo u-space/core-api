@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { getRepository, NotBrackets, SelectQueryBuilder } from "typeorm";
+import { Brackets, getRepository, NotBrackets, SelectQueryBuilder } from "typeorm";
 import { VehicleAuthorizeStatus, VehicleReg } from "../entities/vehicle-reg";
 import { Role, User } from "../entities/user";
 import { TypeOrmErrorType } from "./type-orm-error-type";
@@ -87,7 +87,7 @@ export class VehicleDao {
     skip?: number,
     filterProp?: string,
     filterValue?: string,
-    showPending?: boolean
+    showOnlyPending?: boolean
   ): Promise<any> {
     validatePaginationParams(
       take,
@@ -105,6 +105,12 @@ export class VehicleDao {
         .leftJoinAndSelect("vehicle_reg.operators", "operator")
         .orderBy("vehicle_reg.date", "DESC")
 
+      if (showOnlyPending) {
+        filterValue = ''
+      }
+
+
+
       addPaginationParamsToQuery(
         qb,
         take,
@@ -116,14 +122,20 @@ export class VehicleDao {
         "vehicle_reg"
       );
 
-      // if (showPending) {
-      // addDocumentsAndCheckPending(qb, showPending)
-      // }
+      if (showOnlyPending) {
+        qb.andWhere(new Brackets((qb) => {
+          qb
+            .where('vehicle_reg.authorized != :authorized', { authorized: VehicleAuthorizeStatus.AUTHORIZED })
+            .orWhere('vehicle_reg.remotesensorvalid = :remotesensorvalid', { remotesensorvalid: false })
+        }));
+      }
+
+
 
       const vehicles = await qb.getMany();
-      console.log(`vehicles ${JSON.stringify(vehicles, null, 2)}`);
+      // console.log(`vehicles ${JSON.stringify(vehicles, null, 2)}`);
       const count = await qb.getCount();
-      console.log(`count ${JSON.stringify(count, null, 2)}`);
+      // console.log(`count ${JSON.stringify(count, null, 2)}`);
       // const rawQuery = await qb.getRawMany();
       // console.log(`rawQuery ${JSON.stringify(rawQuery, null, 2)}`);
 

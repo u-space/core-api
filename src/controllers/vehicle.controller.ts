@@ -95,10 +95,10 @@ export class VehicleController {
         role == Role.AIR_TRAFIC ||
         role == Role.COA
       ) {
-        const showPendingVehicles = request.query.showFullAuthorized === undefined ? undefined : request.query.showPendingVehicles === 'true';
+        const showOnlyPending = request.query.showOnlyPending === undefined ? undefined : request.query.showOnlyPending === 'true';
         return logAndRespond200(
           response,
-          await this.dao.all(orderBy, order, take, skip, filterBy, filter, showPendingVehicles),
+          await this.dao.all(orderBy, order, take, skip, filterBy, filter, showOnlyPending),
           []
         );
       } else {
