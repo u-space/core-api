@@ -40,13 +40,15 @@ export class UASVolumeReservationController {
     try {
       const { take, skip, filterBy, filter, orderBy, order } =
         getPaginationParametersFromRequestQuery(request.query);
+      const showPast = request.query.showPast === 'true';
       const list = await this.dao.all(
         take,
         skip,
         filterBy,
         filter,
         orderBy,
-        order
+        order,
+        showPast
       );
       list.uvrs = list.uvrs.map((uvr) => removeNullProperties(uvr, false));
       return logAndRespond200(response, list, []);

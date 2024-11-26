@@ -4,7 +4,7 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { EntityManager, getRepository, QueryFailedError } from "typeorm";
+import { EntityManager, getRepository, MoreThanOrEqual, QueryFailedError } from "typeorm";
 import { UASVolumeReservation } from "../entities/uas-volume-reservation";
 import { OperationVolume } from "../entities/operation-volume";
 import {
@@ -26,7 +26,8 @@ export class UASVolumeReservationDao {
     filterProp?: string,
     filterValue?: string,
     orderProp?: string,
-    orderValue?: string
+    orderValue?: string,
+    showPast?: boolean
   ) {
     validatePaginationParams(
       take,
@@ -48,6 +49,11 @@ export class UASVolumeReservationDao {
         filterValue
       );
 
+      if (!showPast) {
+        filter.where = { ...filter.where, effective_time_end: MoreThanOrEqual((new Date()).toISOString()) };
+      }
+
+      // const [uvrs, count] = await this.repo.findAndCount(filter);
       const [uvrs, count] = await this.repo.findAndCount(filter);
 
       return { uvrs, count };
@@ -157,8 +163,8 @@ export class UASVolumeReservationDao {
     return qBuilder
       .where(
         '(tsrange(effective_time_begin, "effective_time_end") && tsrange(:date_begin, :date_end) ) ' +
-          ' AND (numrange("min_altitude", "max_altitude") && numrange(:min_altitude, :max_altitude)) ' +
-          ' AND (ST_Intersects("geography" ,ST_GeomFromGeoJSON(:geom)))'
+        ' AND (numrange("min_altitude", "max_altitude") && numrange(:min_altitude, :max_altitude)) ' +
+        ' AND (ST_Intersects("geography" ,ST_GeomFromGeoJSON(:geom)))'
       )
       .setParameters({
         date_begin: volume.effective_time_begin,
@@ -175,8 +181,8 @@ export class UASVolumeReservationDao {
       .createQueryBuilder("uas_volume_reservation")
       .where(
         '(tsrange(effective_time_begin, "effective_time_end") && tsrange(:date_begin, :date_end) ) ' +
-          ' AND (numrange("min_altitude", "max_altitude") && numrange(:min_altitude, :max_altitude)) ' +
-          ' AND (ST_Intersects("geography" ,ST_GeomFromGeoJSON(:geom)))'
+        ' AND (numrange("min_altitude", "max_altitude") && numrange(:min_altitude, :max_altitude)) ' +
+        ' AND (ST_Intersects("geography" ,ST_GeomFromGeoJSON(:geom)))'
       )
       .setParameters({
         date_begin: volume.effective_time_begin,
