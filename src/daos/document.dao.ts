@@ -91,7 +91,7 @@ export class DocumentDao {
     }
   }
 
-  async save(document: Document): Promise<void> {
+  async save(document: Document): Promise<Document> {
     try {
       document.extra_fields_json = document.extra_fields;
       const dbResult: InsertResult = await this.repository.insert(document);
@@ -100,6 +100,7 @@ export class DocumentDao {
       document.valid = dbResult.raw[0]["valid"];
       document.extra_fields = dbResult.raw[0]["extra_fields_json"];
       delete document.extra_fields_json;
+      return document;
     } catch (error: any) {
       throw new DataBaseError(
         "There was an error trying to execute DocumentDao.save(entity)",

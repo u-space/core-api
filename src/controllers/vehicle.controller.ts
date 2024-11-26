@@ -18,6 +18,8 @@ import {
 import { multipleFiles } from "../services/upload-file.service";
 import { getPayloadFromResponse } from "../utils/auth.utils";
 import {
+  buildNewDocumentMailHTML,
+  buildNewDocumentMailText,
   generateAuthorizeVehicleMailHTML,
   generateAuthorizeVehicleMailText,
 } from "../utils/mail-content.utils";
@@ -38,6 +40,7 @@ import {
   setFileName,
 } from "../entities/document";
 import {
+  adminEmail,
   COMPANY_NAME,
   MOCK_AUTH_SERVER_API,
   MOCK_MAIL_API,
@@ -559,6 +562,7 @@ export class VehicleController {
     const documentDao = this.documentDao;
     const upload = multipleFiles(undefined, undefined);
     const vehicleControllerExtension = this.vehicleControllerExtension;
+    const mailAPI = this.mailAPI;
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     upload(request, response, async function (_err: unknown) {
       if (!Array.isArray(request.files)) {
@@ -589,7 +593,7 @@ export class VehicleController {
             `Pilot ${username} can't edit vehicle ${vehicleUvinToAdd}`
           );
         }
-        await documentDao.save(doccc);
+        const savedDoc = await documentDao.save(doccc);
         if (!isObject(vehicle.extra_fields)) vehicle.extra_fields = {};
         if (!isArray(vehicle.extra_fields["documents"]))
           vehicle.extra_fields["documents"] = [];
@@ -597,6 +601,26 @@ export class VehicleController {
           doccc
         );
         await dao.updateOnlyReceivedProperties(vehicle);
+        // evitar que se manden documentos si se crean el díá que se creo la aeronave
+        if (vehicle.date) {
+          const today = new Date();
+          const nextCreateDay = new Date(vehicle.date);
+          nextCreateDay.setDate(nextCreateDay.getDate() + 1);
+          nextCreateDay.setHours(0, 0, 0, 0);
+          if (today > nextCreateDay) {
+            mailAPI
+              .sendMail(
+                COMPANY_NAME!,
+                adminEmail,
+                "Nuevo documento para el vehiculo " + vehicle.uvin,
+                buildNewDocumentMailText(savedDoc),
+                buildNewDocumentMailHTML(savedDoc)
+              )
+              .catch(() => {
+                console.error("Email was not send");
+              });
+          }
+        }
         vehicleControllerExtension.postProcessAddDocument(
           username,
           vehicle,

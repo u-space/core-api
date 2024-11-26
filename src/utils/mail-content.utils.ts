@@ -31,7 +31,7 @@ function simpleTranslate(str: string | undefined) {
   if (str === "description") return "Descripción"
   if (str === "remote_sensor_id") return "Registro de sensor remoto"
   if (str === "remote_sensor_id_desc") return "Número de registro de sensor remoto"
-  if (str === "vehicle_photo") return "Foto de veículo"
+  if (str === "vehicle_photo") return "Foto de vehículo"
   if (str === "userDocument") return "Cédula"
   if (str === "document_number") return "Número de cédula"
   if (str === "pilotLicense") return "Licencia de piloto"
@@ -649,23 +649,20 @@ export function buildNewUserMail(user: User) {
   return email;
 }
 
-export function buildNewDocumentMail(username: string, document: Document) {
-  const mjmlBody = `
-		${title("Nuevo documento")}
-		${paragraph(`El usuario ${username} ha creado un nuevo documento:`)}
-		${paragraph(`${document.name} || ${document.tag}`, "10px", "18px", true, "red")}
-		${paragraph("Para ver mas información ingrese a: ", "10px", "18px")}
-		${paragraph(
-    `<a href="${GeneralUtils.getDownloadFileUrl(
-      document.getFileName()
-    )}">Ver ${document.name}</a>`,
-    "10px",
-    "18px",
-    true,
-    "red"
-  )}
+export function buildNewDocumentMailText(document: Document) {
+  const text = `
+ 	${"Nuevo documento"}
+  ${JSON.stringify(document, null, 2)}
+  `;
 
-	`;
+  return text;
+}
+
+export function buildNewDocumentMailHTML(document: Document) {
+  const mjmlBody = `
+ 	${title("Nuevo documento")}
+  ${bodyDocumentMail(document)}
+  `;
   const email = generateBaseMail(mjmlBody);
   return email;
 }
