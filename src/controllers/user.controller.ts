@@ -65,6 +65,8 @@ import {
   buildConfirmationHtmlMail,
   buildConfirmationLink,
   buildConfirmationTextMail,
+  buildNewDocumentMailHTML,
+  buildNewDocumentMailText,
   buildNewUserMail,
 } from "../utils/mail-content.utils";
 import { convertAnyToDocument, parseAnyToUser } from "../utils/parse.utils";
@@ -737,6 +739,7 @@ export class UserController {
     const documentSchemas = require(USER_DOCUMENT_EXTRA_FIELDS_SCHEMA!);
     const { role, username } = getPayloadFromResponse(response);
     const dao = this.dao;
+    const mailAPI = this.mailAPI
     const upload = multipleFiles(undefined, undefined);
     const userControllerExtension = this.userControllerExtension;
     upload(request, response, async function (err: any) {
@@ -770,7 +773,7 @@ export class UserController {
       try {
         setFileName(request, document);
         delete document.id;
-        await new DocumentDao().save(document);
+        const savedDoc = await new DocumentDao().save(document);
         const user: any = await dao.one(usernameToAdd);
         if (isNullOrUndefined(user.extra_fields)) {
           user.extra_fields = {};
@@ -784,7 +787,26 @@ export class UserController {
           user.extra_fields["documents"] = [];
         }
         user.extra_fields["documents"].push(typedDocument);
-        await dao.update(user);
+        const updatedUser = await dao.update(user);
+        if (updatedUser.createdAt) {
+          const today = new Date();
+          const nextCreateDay = new Date(updatedUser.createdAt);
+          nextCreateDay.setDate(nextCreateDay.getDate() + 1);
+          nextCreateDay.setHours(0, 0, 0, 0);
+          if (today > nextCreateDay) {
+            mailAPI
+              .sendMail(
+                COMPANY_NAME!,
+                adminEmail,
+                "Nuevo documento para el usuario " + updatedUser.username,
+                buildNewDocumentMailText(savedDoc),
+                buildNewDocumentMailHTML(savedDoc)
+              )
+              .catch(() => {
+                console.error("Email was not send");
+              });
+          }
+        }
         userControllerExtension.postProcessAddDocument(username, typedDocument);
         return logAndRespond200(response, user, []);
       } catch (error) {
