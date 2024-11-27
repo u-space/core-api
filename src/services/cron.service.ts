@@ -26,7 +26,7 @@ export class CronService {
     console.log("<>    CRON SERVICE     <>");
 
     const documentCron = schedule("5 0 * * *", function () {
-      processExpiredDocuments();
+      // processExpiredDocuments();
       processNextToExpireDocuments();
     });
 
