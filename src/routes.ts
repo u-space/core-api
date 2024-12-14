@@ -187,7 +187,7 @@ const user = [
     route: "/user/password/:id",
     controller: UserController,
     action: "updateUserPassword",
-    middlewares: [checkJwt, isAdminOrPilotUser],
+    middlewares: [checkJwt],
   },
   {
     method: "post",
