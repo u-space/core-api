@@ -6,6 +6,7 @@
 
 import App from "./app";
 export let app: App;
+process.env.TZ = 'America/Montevideo';
 
 process.on("uncaughtException", function (exception) {
   console.log(exception);

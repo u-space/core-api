@@ -70,7 +70,7 @@
   "scripts": {
     "nodeenv:test": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 NODE_ENV=test LOGS_ENABLED=false  nodemon --exec 'ts-node' src/main.ts",
     "start": "ts-node src/index.ts",
-    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 NODE_ENV=dev LOGS_ENABLED=true nodemon --exec 'ts-node' src/main.ts",
+    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 NODE_ENV=dev LOGS_ENABLED=true TZ=America/Montevideo nodemon --exec 'ts-node' src/main.ts",
     "production": "cross-env NODE_ENV=production  nodemon --exec 'ts-node' src/main.ts",
     "heroku": "cross-env NODE_ENV=cloud ts-node src/index.ts",
     "generate": "ts-node swaggerFiles/generator.ts",
