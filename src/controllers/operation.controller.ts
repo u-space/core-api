@@ -1609,9 +1609,11 @@ async function sendNotificationsToOperationSubscribers(
     const mobileMessage = `AVISO DE VUELO NO TRIPULADO ${vehicleRegId} Operación prevista ${formatOperationPeriod(
       operation,
       subscriber.timeZone
-    )}. RUTA: ${operation.name
-      }. Detalles de la operación: https://easy.cielum.eu:4000/map?operation=${operation.gufi
-      }`;
+    )}. RUTA: ${
+      operation.name
+    }. Detalles de la operación: https://utm.dinacia.gub.uy/map?operation=${
+      operation.gufi
+    }`;
     if (subscriber.smsMobile) {
       smsApi.sendSms(subscriber.smsMobile, mobileMessage);
     }
@@ -1736,7 +1738,7 @@ async function sendNewOperationNotificationEmail(
       </div>
     </div>
     <p style="text-align:center">Para ver más información sobre dicha operación puede utilizar el siguiente link:</p>
-    <p style="text-align:center">https://easy.cielum.eu:4000/map?operation=${operation.gufi}
+    <p style="text-align:center">https://utm.dinacia.gub.uy/map?operation=${operation.gufi}
     </p>
     </div>
     `,
