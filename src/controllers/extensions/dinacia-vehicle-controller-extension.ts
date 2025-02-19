@@ -6,7 +6,6 @@
 
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { IVehicleControllerExtension } from "./extensions-interfaces";
-import { DefaultVehicleControllerExtension } from "./default-vehicle-controller-extension";
 import { UserDao } from "../../daos/user.dao";
 import { Role } from "../../entities/user";
 import MailAPIFactory from "../../apis/mail/mail-api-factory";
