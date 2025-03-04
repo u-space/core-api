@@ -148,11 +148,10 @@ export const addPaginationParamsToQuery = (
     }
   }
   if (filterBy && filter && filter !== "") {
-    if (filterBy === "operator" && alias === 'vehicle_reg') { // this is a patch for the vehicle_reg table, will no work if change the alias outisde the query
+    if (filterBy === "operator" && alias === "vehicle_reg") {
+      // this is a patch for the vehicle_reg table, will no work if change the alias outisde the query
       query
-        .andWhere(
-          `operator.username ILIKE :filter`
-        )
+        .andWhere(`operator.username ILIKE :filter`)
         .setParameters({ filter: `%${filter}%` });
     } else if (filterBy === "uvin" || filterBy === "id") {
       query
@@ -162,18 +161,13 @@ export const addPaginationParamsToQuery = (
         .setParameters({ filter: `%${filter}%` });
     } else if (filterBy === "remotesensorvalid") {
       query
-        .andWhere(
-          `${alias ? alias + "." + filterBy : filterBy} = :filter`
-        )
+        .andWhere(`${alias ? alias + "." + filterBy : filterBy} = :filter`)
         .setParameters({ filter: `${filter}` });
     } else {
       query
         .andWhere(`${alias ? alias + "." + filterBy : filterBy} ILIKE :filter`)
         .setParameters({ filter: `%${filter}%` });
     }
-  } else {
-    console.log('piripiiii')
-    console.log(query.getSql())
   }
 };
 
