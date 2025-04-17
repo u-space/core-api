@@ -5,5 +5,9 @@
  */
 
 export default interface IWhatsappApi {
-  sendMessage(to: string, message: string): Promise<void>;
+  sendTemplate(
+    to: string,
+    contentSid: string,
+    variables: Record<string, string>
+  ): Promise<any>;
 }

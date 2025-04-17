@@ -17,13 +17,22 @@ export default class WhatsappApiTwilioImp implements IWhatsappApi {
     this.from = from;
   }
 
-  async sendMessage(to: string, message: string): Promise<any> {
+  async sendTemplate(
+    to: string,
+    contentSid: string,
+    variables: Record<string, string>
+  ): Promise<any> {
     const twilioResponse = await this.client.messages.create({
-      body: message,
       from: `whatsapp:${this.from}`,
       to: `whatsapp:${to}`,
+      contentSid: contentSid,
+      contentVariables: JSON.stringify(variables),
     });
-    whatsappSentLogger.info("Whatsapp Sent", { twilioResponse });
+    whatsappSentLogger.info("Whatsapp Template Sent", {
+      sid: twilioResponse.sid,
+      to: twilioResponse.to,
+      status: twilioResponse.status,
+    });
     return twilioResponse;
   }
 }

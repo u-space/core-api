@@ -49,6 +49,7 @@ import {
   TWILIO_AUTH_TOKEN,
   TWILIO_FROM_SMS_NUMBER,
   TWILIO_FROM_WHATSAPP_NUMBER,
+  TWILIO_CONTENT_TEMPLATE_SID_aviso_vuelo_no_tripulado,
   adminEmail,
 } from "../utils/config.utils";
 import { operationMailHtml } from "../utils/mail-content.utils";
@@ -1606,19 +1607,23 @@ async function sendNotificationsToOperationSubscribers(
         fromTo
       );
     }
+    const operationDetails = `https://utm.dinacia.gub.uy/map?operation=${operation.gufi}`;
     const mobileMessage = `AVISO DE VUELO NO TRIPULADO ${vehicleRegId} Operación prevista ${formatOperationPeriod(
       operation,
       subscriber.timeZone
-    )}. RUTA: ${
-      operation.name
-    }. Detalles de la operación: https://utm.dinacia.gub.uy/map?operation=${
-      operation.gufi
-    }`;
+    )}. RUTA: ${operation.name}. Detalles de la operación: ${operationDetails}`;
     if (subscriber.smsMobile) {
       smsApi.sendSms(subscriber.smsMobile, mobileMessage);
     }
     if (subscriber.whatsappMobile) {
-      whatsappApi.sendMessage(subscriber.whatsappMobile, mobileMessage);
+      whatsappApi.sendTemplate(
+        subscriber.whatsappMobile,
+        TWILIO_CONTENT_TEMPLATE_SID_aviso_vuelo_no_tripulado!,
+        {
+          "1": operation.name,
+          "2": operationDetails,
+        }
+      );
     }
   }
 }

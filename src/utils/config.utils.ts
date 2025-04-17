@@ -127,6 +127,8 @@ export const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 export const TWILIO_FROM_SMS_NUMBER = process.env.TWILIO_FROM_SMS_NUMBER;
 export const TWILIO_FROM_WHATSAPP_NUMBER =
   process.env.TWILIO_FROM_WHATSAPP_NUMBER;
+export const TWILIO_CONTENT_TEMPLATE_SID_aviso_vuelo_no_tripulado =
+  process.env.TWILIO_CONTENT_TEMPLATE_SID_aviso_vuelo_no_tripulado;
 
 export const STRATEGIC_DECONFLICT_MODE_DISABLED: boolean =
   process.env.STRATEGIC_DECONFLICT_MODE === "DISABLED";

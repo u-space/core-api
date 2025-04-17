@@ -7,6 +7,10 @@
 import IWhatsappApi from "./iwhatsapp-api";
 
 export default class WhatsappApiMock implements IWhatsappApi {
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  async sendMessage(to: string, message: string): Promise<void> {}
+  async sendTemplate(
+    to: string,
+    contentSid: string,
+    variables: Record<string, string>
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+  ): Promise<any> {}
 }
