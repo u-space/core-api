@@ -461,6 +461,9 @@ export class VehicleController {
       dataReceived
     );
 
+    // when we create a vehicle, we always set remoteSensorValid=true
+    vehicleToAdd.remoteSensorValid = true;
+
     // when we add a new vehicle, we put the owner as operator by default
     if (
       vehicleToAdd.operators!.filter(
