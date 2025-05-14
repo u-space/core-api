@@ -83,13 +83,14 @@ export async function processExpiredDocuments() {
           document.referenced_entity_type === ReferencedEntityType.VEHICLE &&
           document.referenced_entity_id
         ) {
-          const vehicle = await vehicleDao.one(document.referenced_entity_id);
+          // I commented this code because I think we are going to activate shortly
+          /*const vehicle = await vehicleDao.one(document.referenced_entity_id);
           if (document.tag === "remote_sensor_id") {
             vehicle.remoteSensorValid = false;
           } else {
             vehicle.authorized = VehicleAuthorizeStatus.NOT_AUTHORIZED;
           }
-          await vehicleDao.updateOnlyReceivedProperties(vehicle);
+          await vehicleDao.updateOnlyReceivedProperties(vehicle);*/
         }
       }
     } catch (e) {
