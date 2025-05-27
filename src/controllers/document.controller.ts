@@ -77,7 +77,8 @@ export class DocumentRestController {
         requestDocument.extra_fields,
         requestDocument.notifications,
         requestDocument.referenced_entity_id,
-        requestDocument.referenced_entity_type
+        requestDocument.referenced_entity_type,
+        requestDocument.deleted
       );
 
       const savedDoc = await saveDocument(doc);

@@ -1116,7 +1116,8 @@ function getTypedDocument(document: any): Document {
     document["extra_fields"],
     document["notifications"],
     document["referenced_entity_id"],
-    document["referenced_entity_type"]
+    document["referenced_entity_type"],
+    document["deleted"]
   );
   return doc;
 }

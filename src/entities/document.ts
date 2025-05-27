@@ -46,6 +46,9 @@ export class Document {
   @Column({ type: "bool", nullable: false, default: false })
   valid: boolean;
 
+  @Column({ type: "bool", nullable: false, default: false })
+  deleted: boolean;
+
   @Column("simple-json", { nullable: true, default: {} })
   extra_fields?: object;
 
@@ -83,7 +86,8 @@ export class Document {
     extra_fields: ObjectLiteral,
     notifications: any,
     referenced_entity_id: string,
-    referenced_entity_type: string
+    referenced_entity_type: string,
+    deleted: boolean
   ) {
     this.name = name;
     this.tag = tag;
@@ -94,6 +98,7 @@ export class Document {
     this.notifications = notifications ? notifications : {};
     this.referenced_entity_id = referenced_entity_id;
     this.referenced_entity_type = referenced_entity_type;
+    this.deleted = deleted;
   }
 
   //TODO EMI pasar a extra fields
