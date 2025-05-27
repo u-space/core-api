@@ -163,6 +163,12 @@ export const addPaginationParamsToQuery = (
       query
         .andWhere(`${alias ? alias + "." + filterBy : filterBy} = :filter`)
         .setParameters({ filter: `${filter}` });
+    } else if (filterBy.startsWith("extraFields")) {
+      const filterByExtraField = filterBy.replace("extraFields.", "");
+      const columnName = 'extra_fields_json'
+      query
+        .andWhere(`${alias ? alias + "." + columnName : columnName} ->> '${filterByExtraField}' ILIKE :filter`)
+        .setParameters({ filter: `%${filter}%` });
     } else {
       query
         .andWhere(`${alias ? alias + "." + filterBy : filterBy} ILIKE :filter`)
