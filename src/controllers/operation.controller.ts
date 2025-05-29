@@ -1620,8 +1620,10 @@ async function sendNotificationsToOperationSubscribers(
         subscriber.whatsappMobile,
         TWILIO_CONTENT_TEMPLATE_SID_aviso_vuelo_no_tripulado!,
         {
-          "1": operation.name,
-          "2": operationDetails,
+          "1": vehicleRegId,
+          "2": formatOperationPeriod(operation, subscriber.timeZone),
+          "3": operation.name,
+          "4": operationDetails,
         }
       );
     }
