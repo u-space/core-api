@@ -727,6 +727,13 @@ const document = [
     action: "removeOrphanFiles",
     middlewares: [checkJwt, isAdminUser],
   },
+   {
+    method: "delete",
+    route: "/document/:id",
+    controller: DocumentRestController,
+    action: "softDeleteDocument",
+    middlewares: [checkJwt, isAdminUser],
+  },
   {
     method: "get",
     route: "/uploads/:id",

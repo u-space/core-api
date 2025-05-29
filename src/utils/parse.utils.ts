@@ -398,7 +398,7 @@ export function convertAnyToDocument(obj: any, documentSchemas: any): Document {
     obj["notifications"],
     obj["referenced_entity_id"],
     obj["referenced_entity_type"],
-    obj["deleted"]
+    obj["deletedAt"]
   );
   return result;
 }

@@ -535,19 +535,19 @@ export class VehicleDao {
       let document: Document;
       try {
         document = await new DocumentDao().one(documentId);
+        documents.push(document);
       } catch (error: any) {
-        if (error instanceof NotFoundError) {
-          throw new CorruptedDataBaseError(
-            `The vehicle has a document that does not exist (uvin=${vehicle.uvin}, documentId=${documentId})`,
-            error as unknown as Error
-          );
-        }
-        throw new DataBaseError(
-          `Error trying to get a document (id=${documentId})`,
-          error
-        );
+        // if (error instanceof NotFoundError) {
+        //   throw new CorruptedDataBaseError(
+        //     `The vehicle has a document that does not exist (uvin=${vehicle.uvin}, documentId=${documentId})`,
+        //     error as unknown as Error
+        //   );
+        // }
+        // throw new DataBaseError(
+        //   `Error trying to get a document (id=${documentId})`,
+        //   error
+        // );
       }
-      documents.push(document);
     }
     vehicle.extra_fields["documents"] = documents;
     GeneralUtils.setDocumentsDownloadFileUrl(vehicle);

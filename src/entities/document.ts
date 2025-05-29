@@ -10,6 +10,7 @@ import {
   Column,
   ObjectLiteral,
   CreateDateColumn,
+  DeleteDateColumn,
 } from "typeorm";
 import {
   USER_DOCUMENT_EXTRA_FIELDS_SCHEMA,
@@ -46,8 +47,8 @@ export class Document {
   @Column({ type: "bool", nullable: false, default: false })
   valid: boolean;
 
-  @Column({ type: "bool", nullable: false, default: false })
-  deleted: boolean;
+  @DeleteDateColumn({ type: "timestamp without time zone", nullable: true })
+  deletedAt?: string;
 
   @Column("simple-json", { nullable: true, default: {} })
   extra_fields?: object;
@@ -87,7 +88,7 @@ export class Document {
     notifications: any,
     referenced_entity_id: string,
     referenced_entity_type: string,
-    deleted: boolean
+    deletedAt?: string
   ) {
     this.name = name;
     this.tag = tag;
@@ -98,7 +99,7 @@ export class Document {
     this.notifications = notifications ? notifications : {};
     this.referenced_entity_id = referenced_entity_id;
     this.referenced_entity_type = referenced_entity_type;
-    this.deleted = deleted;
+    this.deletedAt = deletedAt;
   }
 
   //TODO EMI pasar a extra fields

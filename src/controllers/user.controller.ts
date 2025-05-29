@@ -1117,7 +1117,7 @@ function getTypedDocument(document: any): Document {
     document["notifications"],
     document["referenced_entity_id"],
     document["referenced_entity_type"],
-    document["deleted"]
+    document["deletedAt"]
   );
   return doc;
 }

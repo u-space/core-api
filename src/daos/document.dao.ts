@@ -128,4 +128,11 @@ export class DocumentDao {
     const userToRemove: any = await this.repository.findOne(id);
     await this.repository.remove(userToRemove);
   }
+
+  async softDelete(id: string) {
+    const documentToRemove: any = await this.repository.findOne(id);
+    console.log("softDelete: " + id);
+
+    await this.repository.softDelete(id);
+  }
 }

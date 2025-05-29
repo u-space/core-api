@@ -78,7 +78,7 @@ export class DocumentRestController {
         requestDocument.notifications,
         requestDocument.referenced_entity_id,
         requestDocument.referenced_entity_type,
-        requestDocument.deleted
+        requestDocument.deletedAt
       );
 
       const savedDoc = await saveDocument(doc);
@@ -99,6 +99,35 @@ export class DocumentRestController {
 
   async invalidateDocument(request: Request, response: Response) {
     this.patchValidateAndInvalidate(request, response, false);
+  }
+
+  async softDeleteDocument(request: Request, response: Response) {
+    try {
+      const { role } = getPayloadFromResponse(response);
+      if (role != Role.ADMIN)  {
+        return logAndRespond400(response, 403, null);
+      }
+      const documentId = request.params.id;
+      let document: Document;
+      try {
+        document = await this.dao.one(documentId);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          return logAndRespond400(
+            response,
+            404,
+            `There is no document with the id received (id=${documentId})`
+          );
+        }
+        return logAndRespond500(response, 500, error);
+      }
+
+      this.dao.softDelete(documentId);
+   
+      return logAndRespond200(response, document, []);
+    } catch (error) {
+      return logAndRespond500(response, 500, error);
+    }
   }
 
   async sendObservation(request: Request, response: Response) {

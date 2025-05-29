@@ -141,14 +141,14 @@ export class UserDao {
   }
 
   async save(user: User) {
-    if (
-      user.extra_fields !== null &&
-      user.extra_fields !== undefined &&
-      user.extra_fields !== ""
-    ) {
-      // before serialize the extra fields, we have to remove the documents and keep only the ids
-      GeneralUtils.removeDocumentsAndKeepIds(user.extra_fields);
-    }
+    // if (
+    //   user.extra_fields !== null &&
+    //   user.extra_fields !== undefined &&
+    //   user.extra_fields !== ""
+    // ) {
+    //   // before serialize the extra fields, we have to remove the documents and keep only the ids
+    //   GeneralUtils.removeDocumentsAndKeepIds(user.extra_fields);
+    // }
     if (user.settings === null || user.settings === undefined)
       user.settings = "EN";
     user.extra_fields_json = user.extra_fields;
@@ -295,19 +295,21 @@ export class UserDao {
       let document: Document;
       try {
         document = await new DocumentDao().one(documentId);
+        documents.push(document);
       } catch (error: any) {
-        if (error instanceof NotFoundError) {
-          throw new CorruptedDataBaseError(
-            `The user has a document that does not exist (username=${user.username}, documentId=${documentId})`,
-            error as unknown as Error
-          );
-        }
-        throw new DataBaseError(
-          `Error trying to get a document (id=${documentId})`,
-          error
-        );
+        // if (error instanceof NotFoundError) {
+        //   throw new CorruptedDataBaseError(
+        //     `The user has a document that does not exist (username=${user.username}, documentId=${documentId})`,
+        //     error as unknown as Error
+        //   );
+        // }
+        // throw new DataBaseError(
+        //   `Error trying to get a document (id=${documentId})`,
+        //   error
+        // );
+        console.log(
+          `The user has a document that does not exist (username=${user.username}, documentId=${documentId})`)
       }
-      documents.push(document);
     }
     user.extra_fields["documents"] = documents;
     GeneralUtils.setDocumentsDownloadFileUrl(user);
