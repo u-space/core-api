@@ -466,7 +466,16 @@ export class OperationController {
             // console.log(
             //   "fraOperationCheckResult.validflightRequests.length > 0"
             // );
-          } else {
+          } if (fraOperationCheckResult.failVehicleCheck) {
+            const unsatifacedCoordinations = [];
+            // if there are no unsatifaced coordinations but 
+            // the vehicle is not available for the operation
+            unsatifacedCoordinations.push("Need coordination fail vehicle check for operation in SOCA");
+            if (unsatifacedCoordinations.length > 0) {
+              return res400(res, 400, unsatifacedCoordinations.join(","));
+            }
+          }
+          else {
             const unsatifacedCoordinations = [];
             if (
               fraOperationCheckResult.needAltitude &&

@@ -22,6 +22,7 @@ export interface IFlightRequestOperationChecks {
   hasBvlos: boolean;
   hasCoordination: any[];
   validflightRequests: any[];
+  failVehicleCheck: boolean;
 }
 
 export class FraService {
