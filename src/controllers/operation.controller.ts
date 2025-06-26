@@ -32,7 +32,7 @@ import { PositionDao } from "../daos/position.dao";
 import { OperationVolume } from "../entities/operation-volume";
 import { PriorityStatus } from "../entities/priority-elements";
 import { Severity } from "../entities/severety";
-import { VehicleReg } from "../entities/vehicle-reg";
+import { VehicleReg, vehicleType } from "../entities/vehicle-reg";
 import { generateFeatureFromExpress } from "../services/express-operation.service";
 import {
   COMPANY_NAME,
@@ -268,7 +268,13 @@ export class OperationController {
   async one(request: Request, response: Response) {
     // console.log(` ---> request.params.gufi:${request.params.id}`)
     try {
-      const { role, username } = getPayloadFromResponse(response);
+      const payloadResponse = getPayloadFromResponse(response);
+      if (payloadResponse == undefined) {
+        const privateOperation = await this.dao.one(request.params.id)
+        const publicOperation = removePrivateDataOperation(privateOperation)
+        return logAndRespond200(response, publicOperation, []);
+      }
+      const { role, username } = payloadResponse;
       if (role == Role.ADMIN ||
         role == Role.MONITOR ||
         role == Role.COA ||
@@ -283,6 +289,7 @@ export class OperationController {
         return logAndRespond200(response, v, []);
       }
     } catch (error) {
+      console.log(` -_-_-_-_-_-_-_-> ${JSON.stringify(error)}`);
       return res400(response, 404, null);
     }
   }
@@ -456,11 +463,6 @@ export class OperationController {
           // check if the operation can be created, if need FR and if has FR
           const fraOperationCheckResult =
             await fraService.checkOperationConditions(operationToSave, token);
-
-          // console.log(
-          //   "fraOperationCheckResult",
-          //   JSON.stringify(fraOperationCheckResult, null, 2)
-          // );
 
           if (fraOperationCheckResult.validflightRequests.length > 0) {
             // console.log(
@@ -1441,30 +1443,8 @@ async function getOperationsForNoAuthenticatedUser(
   );
 
   // Extract operations public data
-  const operationsPublicData = operations.map((operation) => {
-    const uas_registrations = !operation.uas_registrations
-      ? []
-      : operation.uas_registrations.map((uas) => {
-        return {
-          uvin: uas.uvin,
-          vehicleName: "", //uas.vehicleName,
-          manufacturer: "private info", //uas.manufacturer,
-          model: "private info", //model: uas.model,
-          registrationNumber: uas.extra_fields_json
-            ? (uas.extra_fields_json as any).plate
-            : "",
-        };
-      });
-    return {
-      gufi: operation.gufi,
-      name: operation.name,
-      state: operation.state,
-      operation_volumes: operation.operation_volumes,
-      uas_registrations: uas_registrations,
-      operators: [],
-      contact: "private", //operation.contact,
-      contact_phone: "private", //operation.contact_phone,
-    };
+  const operationsPublicData = operations.map((operation: Operation) => {
+    return removePrivateDataOperation(operation);
   });
 
   // Return operations
@@ -1473,6 +1453,51 @@ async function getOperationsForNoAuthenticatedUser(
     { count: operations.length, ops: operationsPublicData },
     []
   );
+}
+
+function removePrivateDataOperation(operation: Operation): Operation {
+  const uas_registrations: VehicleReg[] = !operation.uas_registrations
+    ? []
+    : operation.uas_registrations.map((uas: VehicleReg) => {
+      return {
+        uvin: uas.uvin,
+        vehicleName: "", //uas.vehicleName,
+        manufacturer: "private info", //uas.manufacturer,
+        model: "private info", //model: uas.model,
+        registrationNumber: uas.extra_fields_json
+          ? (uas.extra_fields_json as any).plate
+          : "",
+        "org-uuid": "private info",
+        "nNumber": 'private info',
+        "class": vehicleType.OTHER,
+        "vehicleTypeId": 'private info',
+
+      };
+    });
+  return {
+    gufi: operation.gufi,
+    name: operation.name,
+    state: operation.state,
+    operation_volumes: operation.operation_volumes,
+    uas_registrations: uas_registrations,
+    // operators: [],
+    contact: "private", //operation.contact,
+    contact_phone: "private",
+    owner: operation.owner,
+    flight_comments: operation.flight_comments,
+    creator: {
+      username: "private",
+      firstName: "private",
+      lastName: "private",
+      email: "private",
+      canOperate: false,
+      role: Role.PILOT,
+      verified: false
+    },
+    contingency_plans: [], //operation.contingency_plans,
+    begin: 'private',
+    end: 'private',
+  };
 }
 
 function validateVolumesOrdinals(volumes: any[]) {

@@ -71,7 +71,9 @@ const doRoutes = (
       route: `/${route}/:id`,
       controller: Dao,
       action: "one",
-      middlewares: [checkJwt],
+      middlewares: checkJwtButDoNotFailInGetAll
+        ? [checkJwtButDoNotFail]
+        : [checkJwt],
     },
     {
       method: "post",
@@ -727,7 +729,7 @@ const document = [
     action: "removeOrphanFiles",
     middlewares: [checkJwt, isAdminUser],
   },
-   {
+  {
     method: "delete",
     route: "/document/:id",
     controller: DocumentRestController,
