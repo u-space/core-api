@@ -464,21 +464,24 @@ export class OperationController {
           const fraOperationCheckResult =
             await fraService.checkOperationConditions(operationToSave, token);
 
+          console.log("fraOperationCheckResult", JSON.stringify(fraOperationCheckResult, null, 2));
+
           if (fraOperationCheckResult.validflightRequests.length > 0) {
-            // console.log(
-            //   "fraOperationCheckResult.validflightRequests.length > 0"
-            // );
-          } if (fraOperationCheckResult.failVehicleCheck) {
-            const unsatifacedCoordinations = [];
+            console.log(
+              "fraOperationCheckResult.validflightRequests.length > 0"
+            );
+          }
+          const unsatifacedCoordinations = [];
+          if (fraOperationCheckResult.failVehicleCheck) {
             // if there are no unsatifaced coordinations but 
             // the vehicle is not available for the operation
             unsatifacedCoordinations.push("Need coordination fail vehicle check for operation in SOCA");
-            if (unsatifacedCoordinations.length > 0) {
-              return res400(res, 400, unsatifacedCoordinations.join(","));
-            }
+            // if (unsatifacedCoordinations.length > 0) {
+            //   return res400(res, 400, unsatifacedCoordinations.join(","));
+            // }
           }
-          else {
-            const unsatifacedCoordinations = [];
+          if (fraOperationCheckResult.validflightRequests.length == 0) {
+            // const unsatifacedCoordinations = [];
             if (
               fraOperationCheckResult.needAltitude &&
               !fraOperationCheckResult.hasAlitude
@@ -512,10 +515,11 @@ export class OperationController {
               );
             });
 
-            if (unsatifacedCoordinations.length > 0) {
-              return res400(res, 400, unsatifacedCoordinations.join(","));
-            }
           }
+          if (unsatifacedCoordinations.length > 0) {
+            return res400(res, 400, unsatifacedCoordinations.join(","));
+          }
+
         }
         if (isCreating && TRY_TO_ACTIVATE_NEW_OPERATIONS) {
           operation = await this.dao.saveOverridingState(operationToSave);
