@@ -20,6 +20,7 @@ import { getLocalTime } from "./date.utils";
 import GeneralUtils from "./general.utils";
 
 
+
 function simpleTranslate(str: string | undefined) {
   if (str == undefined) return ''
   if (str === "vehicle") return "Vehículo";
@@ -248,6 +249,19 @@ function bodyVehicleMail(vehicle: VehicleReg) {
   return vehicleBody;
 }
 
+function documentLink(document: Document) {
+  const referenced_entity_type = document.referenced_entity_type
+  const referenced_entity_id = document.referenced_entity_id || ''
+  if (referenced_entity_type === 'user') {
+    return `${frontEndUrl}users?id=${encodeURIComponent(referenced_entity_id)}`
+  } else if (referenced_entity_type === 'vehicle') {
+    return `${frontEndUrl}vehicles?id=${referenced_entity_id}`
+  }
+  else {
+    return ``
+  }
+}
+
 function bodyDocumentMail(document: Document) {
   const labelsAndFields = [];
   labelsAndFields.push(["Nombre", `${document.name}`]);
@@ -256,6 +270,7 @@ function bodyDocumentMail(document: Document) {
   labelsAndFields.push(["Observaciones", `${document.observations}`]);
   labelsAndFields.push(["Referencia a ", `${simpleTranslate(document.referenced_entity_type)}`]);
   labelsAndFields.push(["Id referenciado", `${document.referenced_entity_id}`]);
+  labelsAndFields.push(["link", `${documentLink(document)}`]);
   labelsAndFields.push(["Válido hasta", `${document.valid_until}`]);
   labelsAndFields.push(["Válido", `${document.valid ? "Si" : "No"}`]);
 
