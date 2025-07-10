@@ -6,26 +6,99 @@
 
 import {
   Between,
+  EntityColumnNotFound,
   getRepository,
+  ILike,
   InsertResult,
   LessThan,
   MoreThan,
+  QueryFailedError,
 } from "typeorm";
 import { Document } from "../entities/document";
-import { DataBaseError, NotFoundError } from "./db-errors";
+import { DataBaseError, InvalidDataError, NotFoundError } from "./db-errors";
 import { TypeOrmErrorType } from "./type-orm-error-type";
 
 export class DocumentDao {
   private repository = getRepository(Document);
 
-  async all(): Promise<Document[]> {
+  async all(status?: string,
+    orderProp?: string,
+    orderValue?: string,
+    take?: number,
+    skip?: number,
+    filterProp?: string,
+    filterValue?: string,
+    deleted?: boolean
+  ): Promise<{ documents: Document[]; count: number }> {
     try {
-      const documents = await this.repository.find({});
+
+      const filter: any = {};
+      filter.where = [];
+      if (filterProp && filterValue) {
+        const multiFilter = filterProp.split(",");
+        if (multiFilter.length > 0) {
+          filter.where = [];
+          for (const prop of multiFilter) {
+            if (prop === 'id') {
+              filter.where.push({ [prop]: filterValue });
+            } else {
+              filter.where.push({ [prop]: ILike("%" + filterValue + "%") });
+            }
+          }
+        } else {
+          if (filterProp === 'id') {
+            filter.where[filterProp] = filterValue;
+          } else {
+            filter.where[filterProp] = ILike("%" + filterValue + "%");
+          }
+        }
+
+      }
+      if (orderProp && orderValue) {
+        filter.order = {};
+        filter.order[orderProp] = orderValue;
+      }
+      if (deleted) {
+        filter.withDeleted = true;
+      }
+      filter.take = status ? 10000 : take || 10; // Do not paginate if we want to filter by status, otherwise the count is going to be reaaally off
+      filter.skip = status ? 0 : skip || 0;
+      let dbResult: [Document[], number];
+      // const documents = await this.repository.find({});
+      try {
+        console.log("DocumentDao::all filter", JSON.stringify(filter, null, 2));
+        dbResult = await this.repository.findAndCount(filter);
+      } catch (error: any) {
+        if (error instanceof EntityColumnNotFound) {
+          throw new InvalidDataError(
+            `filterProp is not valid (filterProp=${filterProp})`,
+            error
+          );
+        } else if (error instanceof QueryFailedError) {
+          if (
+            (error as QueryFailedError).message.startsWith(
+              "operator does not exist"
+            )
+          ) {
+            throw new InvalidDataError(
+              `filterProp is not valid (filterProp=${filterProp})`,
+              error
+            );
+          }
+        }
+        throw new DataBaseError(
+          "Error trying to get the users from the db",
+          error
+        );
+      }
+
+      const [documents, count] = dbResult;
+
       documents.forEach((doc) => {
         doc.extra_fields = doc.extra_fields_json;
         delete doc.extra_fields_json;
       });
-      return documents;
+      return { documents: documents, count };
     } catch (error: any) {
       throw new DataBaseError(
         "There was an error trying to execute Document.all()",

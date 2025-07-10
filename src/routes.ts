@@ -743,7 +743,7 @@ const document = [
     action: "getUpload",
     middlewares: [],
   },
-  ...doRoutes("document", DocumentRestController),
+  ...doRoutes("document", DocumentRestController, false),
 ];
 
 const migrations = [

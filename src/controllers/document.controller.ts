@@ -44,14 +44,29 @@ export class DocumentRestController {
 
   async all(request: Request, response: Response) {
     try {
-      const list = await this.dao.all();
-      const withExists = list.map((doc) => {
+      const { status, take, skip, filterBy, filter, orderBy, order, deleted } =
+        request.query;
+      const parsedTake = parseInt(take as string);
+      const parsedSkip = parseInt(skip as string);
+      const parsedDeleted = deleted === "true";
+
+      const { documents, count } = await this.dao.all(
+        status as string,
+        orderBy as string,
+        order as string,
+        parsedTake,
+        parsedSkip,
+        filterBy as string,
+        filter as string,
+        parsedDeleted
+      );
+      const withExists = documents.map((doc) => {
         const newDoc = { ...doc, exits: extisFile(doc.getFileName()) };
         return newDoc;
       });
-      console.log("list", JSON.stringify(withExists, null, 2));
-      return logAndRespond200(response, list, []);
+      return logAndRespond200(response, { documents: withExists, count }, []);
     } catch (error) {
+      console.log(error);
       return logAndRespond400(response, 400, null);
     }
   }
@@ -104,7 +119,7 @@ export class DocumentRestController {
   async softDeleteDocument(request: Request, response: Response) {
     try {
       const { role } = getPayloadFromResponse(response);
-      if (role != Role.ADMIN)  {
+      if (role != Role.ADMIN) {
         return logAndRespond400(response, 403, null);
       }
       const documentId = request.params.id;
@@ -123,7 +138,7 @@ export class DocumentRestController {
       }
 
       this.dao.softDelete(documentId);
-   
+
       return logAndRespond200(response, document, []);
     } catch (error) {
       return logAndRespond500(response, 500, error);
@@ -317,7 +332,7 @@ export const getDocumentById = async (documentID: string) => {
 
 export const getOrphanFiles = async () => {
   const dao = new DocumentDao();
-  const documents = await dao.all();
+  const { documents } = await dao.all();
   const pathFiles = listDocumentFiles();
   const orphanFiles: any = [];
   pathFiles.forEach((file) => {
