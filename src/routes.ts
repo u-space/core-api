@@ -734,7 +734,7 @@ const document = [
     route: "/document/:id",
     controller: DocumentRestController,
     action: "softDeleteDocument",
-    middlewares: [checkJwt, isAdminUser],
+    middlewares: [checkJwt],
   },
   {
     method: "get",

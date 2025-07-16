@@ -118,14 +118,17 @@ export class DocumentRestController {
 
   async softDeleteDocument(request: Request, response: Response) {
     try {
-      const { role } = getPayloadFromResponse(response);
-      if (role != Role.ADMIN) {
-        return logAndRespond400(response, 403, null);
-      }
+      const { role, username } = getPayloadFromResponse(response);
       const documentId = request.params.id;
       let document: Document;
       try {
         document = await this.dao.one(documentId);
+        if (role != Role.ADMIN) {
+          const isOwner = await isDocumentEntityOwner(document, username);
+          if (!isOwner) {
+            return logAndRespond400(response, 403, `${username} is not the owner of the document`);
+          }
+        }
       } catch (error) {
         if (error instanceof NotFoundError) {
           return logAndRespond400(
@@ -364,5 +367,19 @@ export const getReferencedEntity = async (document: Document) => {
     const userDao = new UserDao();
     const user = await userDao.one(document.referenced_entity_id);
     return user;
-  } else return null;
+  } else {
+    return null;
+  }
 };
+
+export const isDocumentEntityOwner = async (document: Document, username: string): Promise<boolean> => {
+  const vehicleOrUser = await getReferencedEntity(document);
+  if (vehicleOrUser && vehicleOrUser instanceof VehicleReg) {
+    const vehicle = vehicleOrUser;
+    return vehicle.owner?.username === username;
+  } else if (vehicleOrUser && vehicleOrUser instanceof User) {
+    const user = vehicleOrUser;
+    return user.username === username;
+  }
+  return false;
+}
