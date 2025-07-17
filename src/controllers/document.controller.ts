@@ -140,7 +140,15 @@ export class DocumentRestController {
         return logAndRespond500(response, 500, error);
       }
 
-      this.dao.softDelete(documentId);
+      await this.dao.softDelete(documentId);
+
+      const referenced_entity = await getReferencedEntity(document);
+      if (referenced_entity) {
+        referenced_entity.extra_fields.documents = referenced_entity?.extra_fields?.documents?.filter(
+          (id: string) => id !== documentId
+        )
+        await updateReferencedEntity(referenced_entity);
+      }
 
       return logAndRespond200(response, document, []);
     } catch (error) {
@@ -382,4 +390,15 @@ export const isDocumentEntityOwner = async (document: Document, username: string
     return user.username === username;
   }
   return false;
+}
+
+
+export const updateReferencedEntity = async (referencedEntity: User | VehicleReg) => {
+  if (referencedEntity instanceof VehicleReg) {
+    const vehicleDao = new VehicleDao();
+    await vehicleDao.updateOnlyReceivedProperties(referencedEntity);
+  } else if (referencedEntity instanceof User) {
+    const userDao = new UserDao();
+    await userDao.update(referencedEntity);
+  }
 }
