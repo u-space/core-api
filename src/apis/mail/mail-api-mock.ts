@@ -4,13 +4,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { writeFileSync } from "fs";
 import IMailAPI from "./imail-api";
 
 export default class MailAPIMock implements IMailAPI {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  verifyServer() {}
+  verifyServer() { }
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  sendTestMail() {}
+  sendTestMail() { }
   async sendMail(
     companyName: string,
     to: string[],
@@ -19,6 +20,9 @@ export default class MailAPIMock implements IMailAPI {
     html: string,
     showUASPrefixInFrom?: boolean
   ): Promise<any> {
+    console.log(`send mail to: ${to}, subject: ${subject}`);
+    const filename = `./mails/mail-${subject}-${Date.now()}.html`;
+    writeFileSync(filename, html);
     return Promise.resolve();
   }
 }

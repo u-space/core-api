@@ -4,32 +4,33 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import cookieParser from "cookie-parser";
+import express, { NextFunction, Request, Response } from "express";
 import "reflect-metadata";
+import serveIndex from 'serve-index';
 import {
   cert,
   CRONJOB_ENABLED,
   HTTP_PORT,
   INSTANCE,
   key,
+  MOCK_MAIL_API,
   MODULES_CENTRAL,
   MODULES_SURVEILLANCE,
   MODULES_TRACKERS,
   MQTT_ENABLED,
   NODE_ENV,
   PORT,
-  uploadFolder,
+  uploadFolder
 } from "./utils/config.utils";
-import express, { NextFunction, Request, Response } from "express";
-import * as path from "path";
-import cookieParser from "cookie-parser";
 
 // const path = require('path');
-import { Connection } from "typeorm";
 import cors from "cors";
+import { Connection } from "typeorm";
 
-import { Server } from "http";
-import { Server as HttpsServer, createServer } from "https";
 import * as fs from "fs";
+import { Server } from "http";
+import { createServer, Server as HttpsServer } from "https";
 import Io from "socket.io";
 
 import { Routes } from "./routes";
@@ -39,9 +40,9 @@ import { authMiddleware } from "./middleware/socket-io-auth.middleware";
 
 import { CronService } from "./services/cron.service";
 
-import { logger } from "./utils/logger/main.logger";
-import { logAndRespond400 } from "./controllers/utils";
 import { MQTT } from "./apis/mqtt/mqtt";
+import { logAndRespond400 } from "./controllers/utils";
+import { logger } from "./utils/logger/main.logger";
 
 import swaggerUi from "swagger-ui-express";
 import { RidService } from "./apis/rid-server/rid-service";
@@ -169,23 +170,26 @@ class App {
 
     console.log(`Path to save upload files::${uploadFolder}`);
     this.app.use("/uploads", express.static(uploadFolder));
+    this.app.use("/uploads", (req: Request, res: Response, next: NextFunction) => {
+      // Si llegamos aquí, es porque express.static no encontró el archivo
+      res.status(404).json({
+        error: "El archivo no existe",
+        message: `No se encontró el recurso solicitado: ${req.path}`,
+        status: 404
+      });
+    });
+    if (MOCK_MAIL_API) {
+      this.app.use('/mails', express.static('./mails'), serveIndex('./mails', { 'icons': true }))
+    }
 
-    // this.app.use(morgan('dev'))
-
-    // this.app.use(function (req, res, next) {
-    //     console.log(`body: ${JSON.stringify(req.body)}`)
-    //     console.log(`query: ${JSON.stringify(req.query)}`)
-    //     console.log(`params: ${JSON.stringify(req.params)}`)
-    //     next()
-    // })
     Routes.forEach((route) => {
       this.app[route.method](
         route.route,
         route.middlewares
           ? route.middlewares
           : (req: Request, res: Response, next: NextFunction) => {
-              return next();
-            },
+            return next();
+          },
         (req: Request, res: Response, next: NextFunction) => {
           // TODO: We have to investigate how can we remove this "any"
           const result = new (route.controller as any)()[route.action](
