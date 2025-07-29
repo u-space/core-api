@@ -1276,9 +1276,8 @@ export class OperationController {
   ) => {
     console.log(' ************************************************ ')
     const responsePayload = getPayloadFromResponse(response);
-    console.log(`responsePayload:${JSON.stringify(responsePayload, null, 2)}`);
 
-    if (!responsePayload) {
+    if (!responsePayload || (!filterByOwner && responsePayload.role == Role.PILOT)) {
       return getOperationsForNoAuthenticatedUser(response, this.dao);
     }
     const { username, role } = responsePayload;
